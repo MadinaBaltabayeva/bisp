@@ -1,0 +1,29 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { TopNavbar } from "./top-navbar";
+import { BottomTabBar } from "./bottom-tab-bar";
+import { AuthModal } from "@/components/auth/auth-modal";
+
+export function AppShell({ children }: { children: React.ReactNode }) {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalView, setAuthModalView] = useState<"login" | "signup">("login");
+
+  const handleOpenAuthModal = useCallback((view: "login" | "signup") => {
+    setAuthModalView(view);
+    setAuthModalOpen(true);
+  }, []);
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <TopNavbar onOpenAuthModal={handleOpenAuthModal} />
+      <main className="flex-1 pb-16 md:pb-0">{children}</main>
+      <BottomTabBar />
+      <AuthModal
+        open={authModalOpen}
+        onOpenChange={setAuthModalOpen}
+        initialView={authModalView}
+      />
+    </div>
+  );
+}
