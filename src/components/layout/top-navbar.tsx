@@ -102,7 +102,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem asChild>
-                    <Link href="/profile">
+                    <Link href={`/profiles/${session.user.id}`}>
                       <User className="size-4" />
                       My Profile
                     </Link>

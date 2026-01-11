@@ -8,12 +8,10 @@ export const profileSchema = z.object({
   bio: z
     .string()
     .max(500, "Bio must be at most 500 characters")
-    .optional()
     .default(""),
   location: z
     .string()
     .max(100, "Location must be at most 100 characters")
-    .optional()
     .default(""),
 });
 
@@ -29,4 +27,5 @@ export const onboardingSchema = z.object({
 });
 
 export type ProfileFormValues = z.infer<typeof profileSchema>;
+export type ProfileFormInput = z.input<typeof profileSchema>;
 export type OnboardingFormValues = z.infer<typeof onboardingSchema>;
