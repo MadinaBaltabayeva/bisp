@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -37,8 +38,13 @@ interface TopNavbarProps {
 }
 
 export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
-  const { data: session, isPending } = authClient.useSession();
+  const { data: session } = authClient.useSession();
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -73,7 +79,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
 
         {/* Right side: auth state */}
         <div className="flex items-center gap-2">
-          {isPending ? (
+          {!mounted ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : session ? (
             <DropdownMenu>

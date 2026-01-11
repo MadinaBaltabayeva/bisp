@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "sonner";
 import { AppShell } from "@/components/layout/app-shell";
 import "./globals.css";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} font-sans antialiased`}>
         <AppShell>{children}</AppShell>
+        <Toaster richColors position="top-center" />
       </body>
     </html>
   );
