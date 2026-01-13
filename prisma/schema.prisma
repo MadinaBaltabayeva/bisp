@@ -30,6 +30,7 @@ model User {
 
   sessions Session[]
   accounts Account[]
+  listings Listing[]
 }
 
 model Session {
@@ -80,4 +81,43 @@ model Category {
   description String   @default("")
   sortOrder   Int      @default(0)
   createdAt   DateTime @default(now())
+
+  listings Listing[]
+}
+
+model Listing {
+  id               String    @id @default(cuid())
+  title            String
+  description      String
+  condition        String    @default("good") // new, like_new, good, fair, poor
+  priceHourly      Float?
+  priceDaily       Float?
+  priceWeekly      Float?
+  priceMonthly     Float?
+  location         String    @default("")
+  region           String    @default("")
+  latitude         Float?
+  longitude        Float?
+  status           String    @default("active") // active, under_review, hidden, draft
+  aiVerified       Boolean   @default(false)
+  moderationResult String?   // JSON string
+  tags             String    @default("") // comma-separated
+  ownerId          String
+  categoryId       String
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  owner    User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  category Category       @relation(fields: [categoryId], references: [id])
+  images   ListingImage[]
+}
+
+model ListingImage {
+  id        String  @id @default(cuid())
+  url       String
+  isCover   Boolean @default(false)
+  sortOrder Int     @default(0)
+  listingId String
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
