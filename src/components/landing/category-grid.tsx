@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   Wrench,
   Laptop,
@@ -40,21 +41,23 @@ export function CategoryGrid() {
           const IconComponent = ICON_MAP[category.icon] || Home;
 
           return (
-            <Card key={category.slug} className="transition-all hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5">
-              <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
-                <div className="flex size-12 items-center justify-center rounded-xl bg-primary-50">
-                  <IconComponent className="size-6 text-primary-600" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900">
-                    {category.name}
-                  </h3>
-                  <p className="mt-1 text-xs text-gray-500 line-clamp-2">
-                    {category.description}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Link key={category.slug} href={`/browse?category=${category.slug}`}>
+              <Card className="h-full transition-all hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5">
+                <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
+                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary-50">
+                    <IconComponent className="size-6 text-primary-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">
+                      {category.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+                      {category.description}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           );
         })}
       </div>
