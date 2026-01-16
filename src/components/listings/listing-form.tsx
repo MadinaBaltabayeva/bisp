@@ -426,7 +426,10 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                           min="0"
                           placeholder="0.00"
                           className="pl-7"
-                          {...field}
+                          name={field.name}
+                          ref={field.ref}
+                          onBlur={field.onBlur}
+                          disabled={field.disabled}
                           value={field.value != null ? String(field.value) : ""}
                           onChange={(e) =>
                             field.onChange(
@@ -460,7 +463,10 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                           min="0"
                           placeholder="0.00"
                           className="pl-7"
-                          {...field}
+                          name={field.name}
+                          ref={field.ref}
+                          onBlur={field.onBlur}
+                          disabled={field.disabled}
                           value={field.value != null ? String(field.value) : ""}
                           onChange={(e) =>
                             field.onChange(
@@ -494,7 +500,10 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                           min="0"
                           placeholder="0.00"
                           className="pl-7"
-                          {...field}
+                          name={field.name}
+                          ref={field.ref}
+                          onBlur={field.onBlur}
+                          disabled={field.disabled}
                           value={field.value != null ? String(field.value) : ""}
                           onChange={(e) =>
                             field.onChange(
@@ -528,7 +537,10 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                           min="0"
                           placeholder="0.00"
                           className="pl-7"
-                          {...field}
+                          name={field.name}
+                          ref={field.ref}
+                          onBlur={field.onBlur}
+                          disabled={field.disabled}
                           value={field.value != null ? String(field.value) : ""}
                           onChange={(e) =>
                             field.onChange(
