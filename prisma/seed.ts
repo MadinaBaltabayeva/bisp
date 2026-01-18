@@ -1,6 +1,7 @@
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { CATEGORIES } from "../src/features/seed/categories";
+import { SEED_LISTINGS } from "../src/features/seed/listings";
 import { auth } from "../src/lib/auth";
 
 const adapter = new PrismaBetterSqlite3({ url: "file:./prisma/dev.db" });
@@ -168,10 +169,70 @@ async function main() {
 
   console.log("\nAdmin account: admin@renthub.com / password123");
 
+  // Seed listings (delete and recreate for idempotency)
+  await prisma.listingImage.deleteMany();
+  await prisma.listing.deleteMany();
+
+  let listingsCreated = 0;
+  let imagesCreated = 0;
+
+  for (const seedListing of SEED_LISTINGS) {
+    const owner = await prisma.user.findUnique({
+      where: { email: seedListing.ownerEmail },
+    });
+    if (!owner) {
+      console.warn(`Skipping listing "${seedListing.title}" - owner ${seedListing.ownerEmail} not found`);
+      continue;
+    }
+
+    const category = await prisma.category.findUnique({
+      where: { slug: seedListing.categorySlug },
+    });
+    if (!category) {
+      console.warn(`Skipping listing "${seedListing.title}" - category ${seedListing.categorySlug} not found`);
+      continue;
+    }
+
+    await prisma.listing.create({
+      data: {
+        title: seedListing.title,
+        description: seedListing.description,
+        condition: seedListing.condition,
+        priceHourly: seedListing.priceHourly,
+        priceDaily: seedListing.priceDaily,
+        priceWeekly: seedListing.priceWeekly,
+        priceMonthly: seedListing.priceMonthly,
+        location: seedListing.location,
+        region: seedListing.region,
+        latitude: seedListing.latitude,
+        longitude: seedListing.longitude,
+        status: "active",
+        aiVerified: true,
+        tags: "",
+        ownerId: owner.id,
+        categoryId: category.id,
+        images: {
+          create: seedListing.imageUrls.map((url, index) => ({
+            url,
+            isCover: index === 0,
+            sortOrder: index,
+          })),
+        },
+      },
+    });
+
+    listingsCreated++;
+    imagesCreated += seedListing.imageUrls.length;
+  }
+
+  console.log(`\nSeeded ${listingsCreated} listings with ${imagesCreated} images`);
+
   // Print summary
   const totalCategories = await prisma.category.count();
   const totalUsers = await prisma.user.count();
-  console.log(`\nSeed complete! ${totalCategories} categories, ${totalUsers} users in database.`);
+  const totalListings = await prisma.listing.count();
+  const totalImages = await prisma.listingImage.count();
+  console.log(`\nSeed complete! ${totalCategories} categories, ${totalUsers} users, ${totalListings} listings, ${totalImages} images in database.`);
 }
 
 main()
