@@ -31,6 +31,15 @@ model User {
   sessions Session[]
   accounts Account[]
   listings Listing[]
+
+  // Phase 3: Rental lifecycle relations
+  rentalsAsRenter  Rental[]        @relation("RentalsAsRenter")
+  rentalsAsOwner   Rental[]        @relation("RentalsAsOwner")
+  conversationsAs1 Conversation[]  @relation("ConversationsAsUser1")
+  conversationsAs2 Conversation[]  @relation("ConversationsAsUser2")
+  messages         Message[]
+  reviewsGiven     Review[]        @relation("ReviewsGiven")
+  reviewsReceived  Review[]        @relation("ReviewsReceived")
 }
 
 model Session {
@@ -110,6 +119,10 @@ model Listing {
   owner    User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   category Category       @relation(fields: [categoryId], references: [id])
   images   ListingImage[]
+
+  // Phase 3: Rental lifecycle relations
+  rentals       Rental[]
+  conversations Conversation[]
 }
 
 model ListingImage {
@@ -120,4 +133,77 @@ model ListingImage {
   listingId String
 
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+// === Phase 3: Rental Lifecycle Tables ===
+
+model Rental {
+  id              String   @id @default(cuid())
+  startDate       DateTime
+  endDate         DateTime
+  status          String   @default("requested") // requested, approved, active, returned, completed, declined
+  message         String   @default("")
+  securityDeposit Float    @default(0)
+  totalPrice      Float    @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  listingId String
+  renterId  String
+  ownerId   String
+
+  listing      Listing        @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  renter       User           @relation("RentalsAsRenter", fields: [renterId], references: [id], onDelete: Cascade)
+  owner        User           @relation("RentalsAsOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  reviews      Review[]
+  conversation Conversation?
+}
+
+model Conversation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listingId String
+  rentalId  String?  @unique
+  user1Id   String
+  user2Id   String
+
+  listing  Listing   @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  rental   Rental?   @relation(fields: [rentalId], references: [id], onDelete: SetNull)
+  user1    User      @relation("ConversationsAsUser1", fields: [user1Id], references: [id], onDelete: Cascade)
+  user2    User      @relation("ConversationsAsUser2", fields: [user2Id], references: [id], onDelete: Cascade)
+  messages Message[]
+
+  @@unique([listingId, user1Id, user2Id])
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  read      Boolean  @default(false)
+
+  senderId       String
+  conversationId String
+
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String   @default("")
+  createdAt DateTime @default(now())
+
+  rentalId   String
+  reviewerId String
+  revieweeId String
+
+  rental   Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  reviewer User   @relation("ReviewsGiven", fields: [reviewerId], references: [id], onDelete: Cascade)
+  reviewee User   @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
+
+  @@unique([rentalId, reviewerId])
 }
