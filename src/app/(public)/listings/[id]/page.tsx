@@ -16,6 +16,7 @@ import { getListingById } from "@/features/listings/queries";
 import { getSession } from "@/features/auth/queries";
 import { PhotoCarousel } from "@/components/listings/photo-carousel";
 import { PriceDisplay } from "@/components/listings/price-display";
+import { RentalRequestForm } from "@/components/rentals/rental-request-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -255,9 +256,11 @@ function PriceCard({
             </Link>
           </Button>
         ) : (
-          <Button className="w-full" size="lg" disabled>
-            Request to Rent
-          </Button>
+          <RentalRequestForm
+            listingId={listing.id}
+            priceDaily={listing.priceDaily}
+            priceWeekly={listing.priceWeekly}
+          />
         )}
       </CardContent>
       <CardFooter className="justify-center">
