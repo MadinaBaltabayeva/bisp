@@ -17,6 +17,7 @@ import { getSession } from "@/features/auth/queries";
 import { PhotoCarousel } from "@/components/listings/photo-carousel";
 import { PriceDisplay } from "@/components/listings/price-display";
 import { RentalRequestForm } from "@/components/rentals/rental-request-form";
+import { MessageOwnerButton } from "@/components/messages/message-owner-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -256,11 +257,14 @@ function PriceCard({
             </Link>
           </Button>
         ) : (
-          <RentalRequestForm
-            listingId={listing.id}
-            priceDaily={listing.priceDaily}
-            priceWeekly={listing.priceWeekly}
-          />
+          <div className="space-y-3">
+            <RentalRequestForm
+              listingId={listing.id}
+              priceDaily={listing.priceDaily}
+              priceWeekly={listing.priceWeekly}
+            />
+            <MessageOwnerButton listingId={listing.id} />
+          </div>
         )}
       </CardContent>
       <CardFooter className="justify-center">
