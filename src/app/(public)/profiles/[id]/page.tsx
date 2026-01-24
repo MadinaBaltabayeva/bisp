@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { getUserProfile, getSession } from "@/features/auth/queries";
+import { getReviewsForUser } from "@/features/reviews/queries";
+import { getUserListings } from "@/features/listings/queries";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileSections } from "@/components/profile/profile-sections";
 
@@ -18,19 +20,28 @@ export async function generateMetadata({ params }: ProfilePageProps) {
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { id } = await params;
-  const user = await getUserProfile(id);
+  const [user, session, reviews, listings] = await Promise.all([
+    getUserProfile(id),
+    getSession(),
+    getReviewsForUser(id),
+    getUserListings(id),
+  ]);
 
   if (!user) {
     notFound();
   }
 
-  const session = await getSession();
   const isOwnProfile = session?.user.id === user.id;
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
-      <ProfileSections user={user} isOwnProfile={isOwnProfile} />
+      <ProfileSections
+        user={user}
+        isOwnProfile={isOwnProfile}
+        reviews={reviews}
+        listings={listings}
+      />
     </div>
   );
 }

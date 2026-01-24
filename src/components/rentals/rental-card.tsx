@@ -4,7 +4,7 @@ import { useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Loader2, Check, X, RotateCcw, CheckCircle } from "lucide-react";
+import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 
 import {
@@ -14,8 +14,10 @@ import {
   completeRental,
 } from "@/features/rentals/actions";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
+import { ReviewForm } from "@/components/reviews/review-form";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface RentalCardProps {
   rental: {
@@ -35,9 +37,10 @@ interface RentalCardProps {
     owner?: { id: string; name: string; image: string | null };
   };
   role: "renter" | "owner";
+  hasReviewedByUser?: boolean;
 }
 
-export function RentalCard({ rental, role }: RentalCardProps) {
+export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps) {
   const [isPending, startTransition] = useTransition();
 
   const otherParty = role === "owner" ? rental.renter : rental.owner;
@@ -219,6 +222,32 @@ export function RentalCard({ rental, role }: RentalCardProps) {
                 )}
                 Complete Rental
               </Button>
+            )}
+          </div>
+        )}
+
+        {/* Review section for completed rentals */}
+        {rental.status === "completed" && (
+          <div className="border-t px-4 py-2 flex items-center justify-between">
+            {hasReviewedByUser ? (
+              <Badge variant="secondary" className="gap-1">
+                <CheckCheck className="size-3" />
+                Reviewed
+              </Badge>
+            ) : (
+              <ReviewForm
+                rentalId={rental.id}
+                revieweeId={
+                  role === "renter"
+                    ? (rental.owner?.id ?? "")
+                    : (rental.renter?.id ?? "")
+                }
+                revieweeName={
+                  role === "renter"
+                    ? (rental.owner?.name ?? "User")
+                    : (rental.renter?.name ?? "User")
+                }
+              />
             )}
           </div>
         )}

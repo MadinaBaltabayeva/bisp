@@ -14,6 +14,8 @@ import {
 
 import { getListingById } from "@/features/listings/queries";
 import { getSession } from "@/features/auth/queries";
+import { getReviewsForListing } from "@/features/reviews/queries";
+import { ReviewCard } from "@/components/reviews/review-card";
 import { PhotoCarousel } from "@/components/listings/photo-carousel";
 import { PriceDisplay } from "@/components/listings/price-display";
 import { RentalRequestForm } from "@/components/rentals/rental-request-form";
@@ -57,9 +59,10 @@ const CONDITION_LABELS: Record<string, string> = {
 
 export default async function ListingDetailPage({ params }: PageProps) {
   const { id } = await params;
-  const [listing, session] = await Promise.all([
+  const [listing, session, listingReviews] = await Promise.all([
     getListingById(id),
     getSession(),
+    getReviewsForListing(id),
   ]);
 
   if (!listing || listing.status === "hidden") {
@@ -206,6 +209,29 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Owner Reviews section */}
+          <div className="mt-8 border-t pt-8">
+            <h2 className="text-lg font-semibold text-gray-900">
+              Owner Reviews
+              {listingReviews.length > 0 && (
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({listingReviews.length})
+                </span>
+              )}
+            </h2>
+            {listingReviews.length > 0 ? (
+              <div className="mt-2 divide-y">
+                {listingReviews.map((review) => (
+                  <ReviewCard key={review.id} review={review} />
+                ))}
+              </div>
+            ) : (
+              <p className="mt-4 text-sm text-muted-foreground">
+                No reviews yet
+              </p>
+            )}
           </div>
         </div>
 

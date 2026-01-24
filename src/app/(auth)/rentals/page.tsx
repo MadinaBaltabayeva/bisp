@@ -7,6 +7,7 @@ import {
   activateApprovedRentals,
   getPendingActionCount,
 } from "@/features/rentals/queries";
+import { hasReviewed } from "@/features/reviews/queries";
 import { RentalCard } from "@/components/rentals/rental-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -60,6 +61,17 @@ export default async function MyRentalsPage() {
     getPendingActionCount(session.user.id),
   ]);
 
+  // Check which completed rentals the user has already reviewed
+  const allRentals = [...renterRentals, ...ownerRentals];
+  const completedRentals = allRentals.filter((r) => r.status === "completed");
+  const reviewStatuses = await Promise.all(
+    completedRentals.map((r) => hasReviewed(r.id, session.user.id))
+  );
+  const reviewedMap = new Map<string, boolean>();
+  completedRentals.forEach((r, i) => {
+    reviewedMap.set(r.id, reviewStatuses[i]);
+  });
+
   const renterGroups = groupRentals(
     renterRentals as RentalItem[],
     "renter"
@@ -104,6 +116,7 @@ export default async function MyRentalsPage() {
               groups={renterGroups}
               role="renter"
               rentals={renterRentals as RentalItem[]}
+              reviewedMap={reviewedMap}
             />
           )}
         </TabsContent>
@@ -119,6 +132,7 @@ export default async function MyRentalsPage() {
               groups={ownerGroups}
               role="owner"
               rentals={ownerRentals as RentalItem[]}
+              reviewedMap={reviewedMap}
             />
           )}
         </TabsContent>
@@ -130,10 +144,12 @@ export default async function MyRentalsPage() {
 function RentalGroups({
   groups,
   role,
+  reviewedMap,
 }: {
   groups: ReturnType<typeof groupRentals>;
   role: "renter" | "owner";
   rentals: RentalItem[];
+  reviewedMap: Map<string, boolean>;
 }) {
   return (
     <div className="space-y-8">
@@ -170,7 +186,12 @@ function RentalGroups({
           </h2>
           <div className="space-y-3">
             {groups.completed.map((rental) => (
-              <RentalCard key={rental.id} rental={rental} role={role} />
+              <RentalCard
+                key={rental.id}
+                rental={rental}
+                role={role}
+                hasReviewedByUser={reviewedMap.get(rental.id) ?? false}
+              />
             ))}
           </div>
         </section>

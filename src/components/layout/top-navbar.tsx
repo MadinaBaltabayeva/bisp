@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "./logo";
+import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -41,6 +42,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const badgeCounts = useBadgeCounts();
 
   useEffect(() => {
     setMounted(true);
@@ -65,16 +67,28 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
-            >
-              <link.icon className="size-4" />
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) => {
+            const badgeCount =
+              link.href === "/rentals"
+                ? badgeCounts.rentals
+                : link.href === "/messages"
+                  ? badgeCounts.messages
+                  : 0;
+
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
+              >
+                <span className="relative">
+                  <link.icon className="size-4" />
+                  <NavBadgeIndicator count={badgeCount} />
+                </span>
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Right side: auth state */}
