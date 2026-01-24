@@ -2,6 +2,12 @@ import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { CATEGORIES } from "../src/features/seed/categories";
 import { SEED_LISTINGS } from "../src/features/seed/listings";
+import {
+  SEED_RENTALS,
+  SEED_CONVERSATIONS,
+  SEED_MESSAGES,
+  SEED_REVIEWS,
+} from "../src/features/seed/rentals";
 import { auth } from "../src/lib/auth";
 
 const adapter = new PrismaBetterSqlite3({ url: "file:./prisma/dev.db" });
@@ -227,12 +233,190 @@ async function main() {
 
   console.log(`\nSeeded ${listingsCreated} listings with ${imagesCreated} images`);
 
+  // === Seed rentals, conversations, messages, and reviews ===
+  try {
+    // Get all users and listings for ID resolution
+    const allUsers = await prisma.user.findMany({ select: { id: true, email: true } });
+    const allListings = await prisma.listing.findMany({
+      select: { id: true, ownerId: true, priceDaily: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    const userByEmail = new Map(allUsers.map((u) => [u.email, u]));
+
+    // Clean up existing rental lifecycle data for idempotency
+    await prisma.review.deleteMany();
+    await prisma.message.deleteMany();
+    await prisma.conversation.deleteMany();
+    await prisma.rental.deleteMany();
+
+    // Seed rentals
+    const createdRentals: { id: string }[] = [];
+    let rentalsCreated = 0;
+
+    for (const seedRental of SEED_RENTALS) {
+      const listing = allListings[seedRental.listingIndex];
+      const renter = userByEmail.get(seedRental.renterEmail);
+
+      if (!listing || !renter) {
+        console.warn(`Skipping rental: listing index ${seedRental.listingIndex} or renter ${seedRental.renterEmail} not found`);
+        createdRentals.push({ id: "" });
+        continue;
+      }
+
+      const days = Math.ceil(
+        (seedRental.endDate.getTime() - seedRental.startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      const dailyRate = listing.priceDaily ?? 0;
+      const totalPrice = days * dailyRate;
+      const securityDeposit = totalPrice * 0.2;
+
+      const rental = await prisma.rental.create({
+        data: {
+          startDate: seedRental.startDate,
+          endDate: seedRental.endDate,
+          status: seedRental.status,
+          message: seedRental.message,
+          totalPrice,
+          securityDeposit,
+          listingId: listing.id,
+          renterId: renter.id,
+          ownerId: listing.ownerId,
+        },
+      });
+
+      createdRentals.push(rental);
+      rentalsCreated++;
+    }
+
+    console.log(`Seeded ${rentalsCreated} rentals`);
+
+    // Seed conversations
+    const createdConversations: { id: string }[] = [];
+    let conversationsCreated = 0;
+
+    for (const seedConv of SEED_CONVERSATIONS) {
+      const listing = allListings[seedConv.listingIndex];
+      const user1 = userByEmail.get(seedConv.user1Email);
+      const user2 = userByEmail.get(seedConv.user2Email);
+
+      if (!listing || !user1 || !user2) {
+        console.warn(`Skipping conversation: missing listing or user`);
+        createdConversations.push({ id: "" });
+        continue;
+      }
+
+      const rentalId =
+        seedConv.rentalIndex !== undefined && createdRentals[seedConv.rentalIndex]?.id
+          ? createdRentals[seedConv.rentalIndex].id
+          : null;
+
+      const conversation = await prisma.conversation.create({
+        data: {
+          listingId: listing.id,
+          user1Id: user1.id,
+          user2Id: user2.id,
+          rentalId: rentalId || undefined,
+        },
+      });
+
+      createdConversations.push(conversation);
+      conversationsCreated++;
+    }
+
+    console.log(`Seeded ${conversationsCreated} conversations`);
+
+    // Seed messages
+    let messagesCreated = 0;
+
+    for (const seedMsg of SEED_MESSAGES) {
+      const conversation = createdConversations[seedMsg.conversationIndex];
+      const sender = userByEmail.get(seedMsg.senderEmail);
+
+      if (!conversation?.id || !sender) {
+        continue;
+      }
+
+      const baseTime = new Date();
+      baseTime.setHours(baseTime.getHours() - 48); // Start messages 2 days ago
+      const msgTime = new Date(baseTime.getTime() + seedMsg.minutesOffset * 60000);
+
+      await prisma.message.create({
+        data: {
+          content: seedMsg.content,
+          read: seedMsg.read,
+          senderId: sender.id,
+          conversationId: conversation.id,
+          createdAt: msgTime,
+        },
+      });
+
+      messagesCreated++;
+    }
+
+    console.log(`Seeded ${messagesCreated} messages`);
+
+    // Seed reviews
+    let reviewsCreated = 0;
+
+    for (const seedReview of SEED_REVIEWS) {
+      const rental = createdRentals[seedReview.rentalIndex];
+      const reviewer = userByEmail.get(seedReview.reviewerEmail);
+      const reviewee = userByEmail.get(seedReview.revieweeEmail);
+
+      if (!rental?.id || !reviewer || !reviewee) {
+        continue;
+      }
+
+      await prisma.review.create({
+        data: {
+          rating: seedReview.rating,
+          comment: seedReview.comment,
+          rentalId: rental.id,
+          reviewerId: reviewer.id,
+          revieweeId: reviewee.id,
+        },
+      });
+
+      reviewsCreated++;
+    }
+
+    console.log(`Seeded ${reviewsCreated} reviews`);
+
+    // Recalculate averageRating and reviewCount for all reviewed users
+    const reviewedUserIds = [...new Set(SEED_REVIEWS.map((r) => userByEmail.get(r.revieweeEmail)?.id).filter(Boolean))] as string[];
+
+    for (const userId of reviewedUserIds) {
+      const aggregate = await prisma.review.aggregate({
+        where: { revieweeId: userId },
+        _avg: { rating: true },
+        _count: { rating: true },
+      });
+
+      await prisma.user.update({
+        where: { id: userId },
+        data: {
+          averageRating: Math.round((aggregate._avg.rating ?? 0) * 10) / 10,
+          reviewCount: aggregate._count.rating,
+        },
+      });
+    }
+
+    console.log(`Recalculated ratings for ${reviewedUserIds.length} users`);
+  } catch (error) {
+    console.error("Error seeding rental lifecycle data:", error);
+  }
+
   // Print summary
   const totalCategories = await prisma.category.count();
   const totalUsers = await prisma.user.count();
   const totalListings = await prisma.listing.count();
   const totalImages = await prisma.listingImage.count();
-  console.log(`\nSeed complete! ${totalCategories} categories, ${totalUsers} users, ${totalListings} listings, ${totalImages} images in database.`);
+  const totalRentals = await prisma.rental.count();
+  const totalConversations = await prisma.conversation.count();
+  const totalMessages = await prisma.message.count();
+  const totalReviews = await prisma.review.count();
+  console.log(`\nSeed complete! ${totalCategories} categories, ${totalUsers} users, ${totalListings} listings, ${totalImages} images, ${totalRentals} rentals, ${totalConversations} conversations, ${totalMessages} messages, ${totalReviews} reviews in database.`);
 }
 
 main()
