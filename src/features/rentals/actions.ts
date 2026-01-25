@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { rentalRequestSchema } from "@/lib/validations/rental";
 import { getSession } from "@/features/auth/queries";
+import { checkNotSuspended } from "@/features/admin/queries";
 
 /**
  * Create a new rental request.
@@ -14,6 +15,9 @@ export async function createRentalRequest(data: unknown) {
   if (!session) {
     return { error: "You must be logged in to request a rental." };
   }
+
+  const suspended = await checkNotSuspended();
+  if (suspended.error) return { error: suspended.error };
 
   const result = rentalRequestSchema.safeParse(data);
   if (!result.success) {

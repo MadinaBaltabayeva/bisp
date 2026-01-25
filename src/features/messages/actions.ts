@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { messageSchema } from "@/lib/validations/message";
 import { getSession } from "@/features/auth/queries";
+import { checkNotSuspended } from "@/features/admin/queries";
 
 /**
  * Get or create a conversation between the current user and the listing owner.
@@ -71,6 +72,9 @@ export async function sendMessage(data: unknown) {
   if (!session) {
     return { error: "You must be logged in to send messages." };
   }
+
+  const suspended = await checkNotSuspended();
+  if (suspended.error) return { error: suspended.error };
 
   const result = messageSchema.safeParse(data);
   if (!result.success) {

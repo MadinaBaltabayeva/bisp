@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { listingSchema } from "@/lib/validations/listing";
 import { getSession } from "@/features/auth/queries";
 import { moderateListing, suggestCategoryAndTags } from "./ai";
+import { checkNotSuspended } from "@/features/admin/queries";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
@@ -20,6 +21,9 @@ export async function createListing(formData: FormData) {
   if (!session) {
     return { error: "You must be logged in to create a listing." };
   }
+
+  const suspended = await checkNotSuspended();
+  if (suspended.error) return { error: suspended.error };
 
   const raw = {
     title: formData.get("title") as string,
@@ -130,6 +134,9 @@ export async function updateListing(listingId: string, formData: FormData) {
   if (!session) {
     return { error: "You must be logged in to update a listing." };
   }
+
+  const suspended = await checkNotSuspended();
+  if (suspended.error) return { error: suspended.error };
 
   const existing = await prisma.listing.findUnique({
     where: { id: listingId },

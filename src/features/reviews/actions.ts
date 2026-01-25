@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { reviewSchema } from "@/lib/validations/review";
 import { getSession } from "@/features/auth/queries";
+import { checkNotSuspended } from "@/features/admin/queries";
 
 /**
  * Create a review for a completed rental.
@@ -14,6 +15,9 @@ export async function createReview(data: unknown) {
   if (!session) {
     return { error: "You must be logged in to leave a review." };
   }
+
+  const suspended = await checkNotSuspended();
+  if (suspended.error) return { error: suspended.error };
 
   const result = reviewSchema.safeParse(data);
   if (!result.success) {

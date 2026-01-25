@@ -28,6 +28,8 @@ export async function getUserProfile(id: string) {
       location: true,
       averageRating: true,
       reviewCount: true,
+      isSuspended: true,
+      idVerified: true,
       createdAt: true,
       role: true,
     },
