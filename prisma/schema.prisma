@@ -27,6 +27,8 @@ model User {
   location      String    @default("")
   averageRating Float     @default(0)
   reviewCount   Int       @default(0)
+  isSuspended   Boolean   @default(false)
+  idVerified    Boolean   @default(false)
 
   sessions Session[]
   accounts Account[]
