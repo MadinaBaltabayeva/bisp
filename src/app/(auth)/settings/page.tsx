@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUserProfile } from "@/features/auth/queries";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
+import { VerificationSection } from "@/components/profile/verification-section";
 
 export const metadata = {
   title: "Settings - RentHub",
@@ -22,6 +23,13 @@ export default async function SettingsPage() {
         </p>
       </div>
       <ProfileEditForm user={user} />
+
+      <div className="mt-10 border-t pt-8">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          Identity Verification
+        </h2>
+        <VerificationSection isVerified={user.idVerified} />
+      </div>
     </div>
   );
 }

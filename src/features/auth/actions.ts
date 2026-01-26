@@ -101,3 +101,38 @@ export async function updateProfilePhoto(formData: FormData) {
     return { error: "Failed to upload photo. Please try again." };
   }
 }
+
+/**
+ * Complete the simulated ID verification process.
+ * Sets idVerified=true for the current user.
+ */
+export async function completeVerification() {
+  const session = await getSession();
+  if (!session) {
+    return { error: "You must be logged in to verify your identity." };
+  }
+
+  // Check if already verified
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { idVerified: true },
+  });
+
+  if (user?.idVerified) {
+    return { error: "Already verified" };
+  }
+
+  try {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { idVerified: true },
+    });
+
+    revalidatePath(`/profiles/${session.user.id}`);
+    revalidatePath("/settings");
+
+    return { success: true };
+  } catch {
+    return { error: "Failed to complete verification. Please try again." };
+  }
+}
