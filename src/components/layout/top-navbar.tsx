@@ -11,6 +11,7 @@ import {
   LogOut,
   User,
   Settings,
+  Shield,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "./logo";
@@ -89,6 +90,15 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
               </Link>
             );
           })}
+          {mounted && session?.user?.role === "admin" && (
+            <Link
+              href="/admin/dashboard"
+              className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
+            >
+              <Shield className="size-4" />
+              Admin
+            </Link>
+          )}
         </nav>
 
         {/* Right side: auth state */}
