@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { MapPin, ShieldCheck } from "lucide-react";
+import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
 
 interface ListingCardProps {
   listing: {
@@ -14,6 +15,7 @@ interface ListingCardProps {
     aiVerified: boolean;
     images: Array<{ id: string; url: string; isCover: boolean }>;
     category: { id: string; name: string; slug: string };
+    owner?: { idVerified: boolean };
   };
 }
 
@@ -64,9 +66,12 @@ export function ListingCard({ listing }: ListingCardProps) {
       </div>
 
       <div className="mt-2 space-y-1">
-        <h3 className="truncate font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-          {listing.title}
-        </h3>
+        <div className="flex items-center gap-1.5">
+          <h3 className="truncate font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+            {listing.title}
+          </h3>
+          {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
+        </div>
         <p className="text-sm text-muted-foreground">{listing.category.name}</p>
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
           <MapPin className="size-3.5 shrink-0" />

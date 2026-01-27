@@ -24,6 +24,7 @@ async function getPopularListings() {
           id: true,
           name: true,
           image: true,
+          idVerified: true,
         },
       },
     },

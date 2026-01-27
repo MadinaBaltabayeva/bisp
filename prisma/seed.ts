@@ -407,6 +407,25 @@ async function main() {
     console.error("Error seeding rental lifecycle data:", error);
   }
 
+  // Mark select demo users and admin as ID-verified
+  const verifiedEmails = [
+    "sarah.chen@example.com",
+    "marcus.johnson@example.com",
+    "elena.rodriguez@example.com",
+    "admin@renthub.com",
+  ];
+  for (const email of verifiedEmails) {
+    try {
+      await prisma.user.update({
+        where: { email },
+        data: { idVerified: true },
+      });
+    } catch {
+      // user might not exist yet
+    }
+  }
+  console.log(`Marked ${verifiedEmails.length} users as ID-verified`);
+
   // Print summary
   const totalCategories = await prisma.category.count();
   const totalUsers = await prisma.user.count();

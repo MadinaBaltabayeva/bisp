@@ -3,6 +3,7 @@ import { MapPin, Star, Calendar, Pencil } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { VerificationBadge } from "@/components/profile/verification-badge";
 
 interface ProfileHeaderProps {
   user: {
@@ -13,6 +14,7 @@ interface ProfileHeaderProps {
     averageRating: number;
     reviewCount: number;
     createdAt: Date;
+    idVerified: boolean;
   };
   isOwnProfile: boolean;
 }
@@ -40,6 +42,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
         <div className="flex flex-1 flex-col items-center gap-2 sm:items-start">
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+            {user.idVerified && <VerificationBadge />}
             {isOwnProfile && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/settings">

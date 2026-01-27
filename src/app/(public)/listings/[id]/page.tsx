@@ -10,6 +10,7 @@ import {
   Calendar,
   Star,
   Pencil,
+  XCircle,
 } from "lucide-react";
 
 import { getListingById } from "@/features/listings/queries";
@@ -22,6 +23,7 @@ import { RentalRequestForm } from "@/components/rentals/rental-request-form";
 import { MessageOwnerButton } from "@/components/messages/message-owner-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { VerificationBadge } from "@/components/profile/verification-badge";
 import {
   Card,
   CardContent,
@@ -70,7 +72,24 @@ export default async function ListingDetailPage({ params }: PageProps) {
   }
 
   const isOwner = session?.user?.id === listing.ownerId;
+  const isRejected = listing.status === "rejected";
   const isUnderReview = listing.status === "under_review";
+
+  // Non-owners should not see rejected listings
+  if (isRejected && !isOwner) {
+    notFound();
+  }
+
+  // Parse rejection reason from moderationResult JSON
+  let rejectionReason: string | null = null;
+  if (isRejected && listing.moderationResult) {
+    try {
+      const modResult = JSON.parse(listing.moderationResult as string);
+      rejectionReason = modResult.rejectionReason || modResult.reason || null;
+    } catch {
+      // ignore parse errors
+    }
+  }
   const tags = listing.tags
     ? listing.tags
         .split(",")
@@ -89,6 +108,21 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {/* Rejected banner (owner only) */}
+      {isRejected && isOwner && (
+        <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <div className="flex items-center gap-2 font-medium">
+            <XCircle className="size-4 shrink-0" />
+            This listing has been rejected
+          </div>
+          {rejectionReason && (
+            <p className="mt-1 ml-6 text-red-700">
+              Reason: {rejectionReason}
+            </p>
+          )}
+        </div>
+      )}
+
       {/* Under review banner */}
       {isUnderReview && (
         <div className="mb-6 flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
@@ -188,12 +222,15 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 )}
               </div>
               <div>
-                <Link
-                  href={`/profiles/${listing.owner.id}`}
-                  className="font-medium text-gray-900 hover:text-primary transition-colors hover:underline"
-                >
-                  {listing.owner.name}
-                </Link>
+                <div className="flex items-center gap-1.5">
+                  <Link
+                    href={`/profiles/${listing.owner.id}`}
+                    className="font-medium text-gray-900 hover:text-primary transition-colors hover:underline"
+                  >
+                    {listing.owner.name}
+                  </Link>
+                  {listing.owner.idVerified && <VerificationBadge />}
+                </div>
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="size-3.5" />

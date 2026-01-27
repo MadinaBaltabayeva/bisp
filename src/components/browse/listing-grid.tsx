@@ -14,6 +14,7 @@ interface Listing {
   aiVerified: boolean;
   images: Array<{ id: string; url: string; isCover: boolean }>;
   category: { id: string; name: string; slug: string };
+  owner?: { idVerified: boolean };
 }
 
 interface ListingGridProps {
