@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { PackageSearch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ListingCard } from "@/components/listings/listing-card";

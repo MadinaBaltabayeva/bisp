@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { MessageCircle } from "lucide-react";
 
 import { cn } from "@/lib/utils";

@@ -2,7 +2,7 @@
 
 import { useTransition } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck } from "lucide-react";
 import { toast } from "sonner";

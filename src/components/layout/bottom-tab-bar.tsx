@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
 import { House, Search, PlusCircle, Calendar, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";

@@ -1,6 +1,7 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useState, type FormEvent } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";

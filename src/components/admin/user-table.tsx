@@ -1,7 +1,8 @@
 "use client";
 
 import { useCallback, useEffect, useState, useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { format } from "date-fns";
 import { Loader2, Ban, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";

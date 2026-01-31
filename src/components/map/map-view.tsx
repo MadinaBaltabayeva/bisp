@@ -11,7 +11,7 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 
 // Fix default marker icon for Leaflet in bundled environments
 const defaultIcon = L.icon({

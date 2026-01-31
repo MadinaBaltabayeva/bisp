@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
 

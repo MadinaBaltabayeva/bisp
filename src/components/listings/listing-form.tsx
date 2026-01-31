@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Trash2 } from "lucide-react";
@@ -96,6 +96,13 @@ const CONDITIONS = [
   { value: "poor", label: "Poor" },
 ];
 
+const RATE_TYPES = [
+  { key: "priceHourly" as const, label: "Hourly" },
+  { key: "priceDaily" as const, label: "Daily" },
+  { key: "priceWeekly" as const, label: "Weekly" },
+  { key: "priceMonthly" as const, label: "Monthly" },
+];
+
 export function ListingForm({ mode, listing, categories }: ListingFormProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -114,6 +121,15 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
     tags: string[];
   } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+
+  // Pricing rate type (single selection)
+  const [selectedRate, setSelectedRate] = useState<string | null>(() => {
+    if (listing?.priceHourly != null) return "priceHourly";
+    if (listing?.priceDaily != null) return "priceDaily";
+    if (listing?.priceWeekly != null) return "priceWeekly";
+    if (listing?.priceMonthly != null) return "priceMonthly";
+    return null;
+  });
 
   // Tags state
   const [tags, setTags] = useState<string[]>(
@@ -404,160 +420,89 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
             <div>
               <h3 className="text-lg font-semibold">Pricing</h3>
               <p className="text-sm text-muted-foreground">
-                Set the rates that apply (at least one required)
+                How do you want to rent this item? Select at least one.
               </p>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="priceHourly"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Hourly</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-7"
-                          name={field.name}
-                          ref={field.ref}
-                          onBlur={field.onBlur}
-                          disabled={field.disabled}
-                          value={field.value != null ? String(field.value) : ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="priceDaily"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Daily</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-7"
-                          name={field.name}
-                          ref={field.ref}
-                          onBlur={field.onBlur}
-                          disabled={field.disabled}
-                          value={field.value != null ? String(field.value) : ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="priceWeekly"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Weekly</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-7"
-                          name={field.name}
-                          ref={field.ref}
-                          onBlur={field.onBlur}
-                          disabled={field.disabled}
-                          value={field.value != null ? String(field.value) : ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="priceMonthly"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Monthly</FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                          $
-                        </span>
-                        <Input
-                          type="number"
-                          step="0.01"
-                          min="0"
-                          placeholder="0.00"
-                          className="pl-7"
-                          name={field.name}
-                          ref={field.ref}
-                          onBlur={field.onBlur}
-                          disabled={field.disabled}
-                          value={field.value != null ? String(field.value) : ""}
-                          onChange={(e) =>
-                            field.onChange(
-                              e.target.value === ""
-                                ? undefined
-                                : e.target.value
-                            )
-                          }
-                        />
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="flex flex-wrap gap-2">
+              {RATE_TYPES.map((rate) => (
+                <button
+                  key={rate.key}
+                  type="button"
+                  onClick={() => {
+                    if (selectedRate === rate.key) {
+                      // Deselect current
+                      setSelectedRate(null);
+                      form.setValue(rate.key, undefined, { shouldValidate: true });
+                    } else {
+                      // Clear previous rate value without triggering validation yet
+                      if (selectedRate) {
+                        form.setValue(selectedRate as typeof rate.key, undefined);
+                      }
+                      setSelectedRate(rate.key);
+                      // Clear validation errors since user is actively selecting
+                      form.clearErrors("priceDaily");
+                    }
+                  }}
+                  className={`rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+                    selectedRate === rate.key
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
+                  }`}
+                >
+                  {rate.label}
+                </button>
+              ))}
             </div>
-            {/* Show pricing refinement error */}
+
+            {selectedRate && (
+              <div className="max-w-xs">
+                {RATE_TYPES.filter((rate) => rate.key === selectedRate).map(
+                  (rate) => (
+                    <FormField
+                      key={rate.key}
+                      control={form.control}
+                      name={rate.key}
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>{rate.label} rate</FormLabel>
+                          <FormControl>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                                $
+                              </span>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                placeholder="0.00"
+                                className="pl-7"
+                                name={field.name}
+                                ref={field.ref}
+                                onBlur={field.onBlur}
+                                disabled={field.disabled}
+                                value={
+                                  field.value != null ? String(field.value) : ""
+                                }
+                                onChange={(e) =>
+                                  field.onChange(
+                                    e.target.value === ""
+                                      ? undefined
+                                      : e.target.value
+                                  )
+                                }
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )
+                )}
+              </div>
+            )}
+
             {form.formState.errors.priceDaily?.message ===
               "At least one pricing rate is required" && (
               <p className="text-sm text-destructive">
