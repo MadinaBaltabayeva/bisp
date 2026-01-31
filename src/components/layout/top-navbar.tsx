@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   Search,
   PlusCircle,
@@ -15,6 +14,7 @@ import {
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "./logo";
+import { LanguageSwitcher } from "./language-switcher";
 import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -101,8 +101,9 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
           )}
         </nav>
 
-        {/* Right side: auth state */}
+        {/* Right side: language + auth state */}
         <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           {!mounted ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : session ? (
