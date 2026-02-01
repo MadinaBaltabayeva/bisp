@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { format, differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 import { CalendarIcon, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations, useFormatter } from "next-intl";
 
 import {
   rentalRequestSchema,
@@ -44,9 +45,12 @@ export function RentalRequestForm({
   priceDaily,
   priceWeekly: _priceWeekly,
 }: RentalRequestFormProps) {
+  const t = useTranslations("Rentals.requestForm");
+  const tCard = useTranslations("Rentals.card");
   const [open, setOpen] = useState(false);
   const [dateRange, setDateRange] = useState<DateRange | undefined>();
   const [isPending, startTransition] = useTransition();
+  const format = useFormatter();
 
   const form = useForm<RentalRequestInput, unknown, RentalRequestValues>({
     resolver: zodResolver(rentalRequestSchema),
@@ -80,7 +84,7 @@ export function RentalRequestForm({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Rental request submitted! The owner will review it.");
+        toast.success(t("success"));
         setOpen(false);
         setDateRange(undefined);
         form.reset();
@@ -95,21 +99,21 @@ export function RentalRequestForm({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button className="w-full" size="lg">
-          Request to Rent
+          {t("requestToRent")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Request to Rent</DialogTitle>
+          <DialogTitle>{t("dialogTitle")}</DialogTitle>
           <DialogDescription>
-            Select your rental dates and submit a request to the owner.
+            {t("dialogDescription")}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           {/* Date Range Picker */}
           <div className="space-y-2">
-            <label className="text-sm font-medium">Rental Dates</label>
+            <label className="text-sm font-medium">{t("rentalDates")}</label>
             <Popover>
               <PopoverTrigger asChild>
                 <Button
@@ -123,14 +127,14 @@ export function RentalRequestForm({
                   {dateRange?.from ? (
                     dateRange.to ? (
                       <>
-                        {format(dateRange.from, "MMM d, yyyy")} -{" "}
-                        {format(dateRange.to, "MMM d, yyyy")}
+                        {format.dateTime(dateRange.from, { month: "short", day: "numeric", year: "numeric" })} -{" "}
+                        {format.dateTime(dateRange.to, { month: "short", day: "numeric", year: "numeric" })}
                       </>
                     ) : (
-                      format(dateRange.from, "MMM d, yyyy")
+                      format.dateTime(dateRange.from, { month: "short", day: "numeric", year: "numeric" })
                     )
                   ) : (
-                    "Select dates"
+                    t("selectDates")
                   )}
                 </Button>
               </PopoverTrigger>
@@ -161,16 +165,16 @@ export function RentalRequestForm({
             <div className="rounded-lg border bg-muted/50 p-3 space-y-1">
               <div className="flex justify-between text-sm">
                 <span>
-                  {days} {days === 1 ? "day" : "days"} x ${dailyRate.toFixed(2)}/day
+                  {tCard("daysCount", { count: days })} x ${dailyRate.toFixed(2)}{tCard("perDay")}
                 </span>
                 <span className="font-medium">${totalPrice.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-sm text-muted-foreground">
-                <span>Estimated security deposit (simulated)</span>
+                <span>{tCard("estimatedDeposit")}</span>
                 <span>${securityDeposit.toFixed(2)}</span>
               </div>
               <div className="border-t pt-1 mt-1 flex justify-between text-sm font-semibold">
-                <span>Total</span>
+                <span>{tCard("total")}</span>
                 <span>${totalPrice.toFixed(2)}</span>
               </div>
             </div>
@@ -179,13 +183,13 @@ export function RentalRequestForm({
           {/* Message */}
           <div className="space-y-2">
             <label className="text-sm font-medium">
-              Message to Owner{" "}
+              {t("messageToOwner")}{" "}
               <span className="text-muted-foreground font-normal">
-                (optional)
+                ({t("messageOptional")})
               </span>
             </label>
             <Textarea
-              placeholder="Tell the owner about your intended use..."
+              placeholder={t("messagePlaceholder")}
               maxLength={500}
               {...form.register("message")}
             />
@@ -201,10 +205,10 @@ export function RentalRequestForm({
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  Submitting...
+                  {t("submitting")}
                 </>
               ) : (
-                "Submit Request"
+                t("submit")
               )}
             </Button>
           </DialogFooter>

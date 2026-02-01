@@ -1,4 +1,7 @@
 import { Package } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
 import { getSession } from "@/features/auth/queries";
 import {
@@ -11,9 +14,21 @@ import { hasReviewed } from "@/features/reviews/queries";
 import { RentalCard } from "@/components/rentals/rental-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export const metadata = {
-  title: "My Rentals",
-};
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return {
+    title: t("rentals.title"),
+    description: t("rentals.description"),
+  };
+}
 
 type RentalItem = Awaited<ReturnType<typeof getRentalsAsRenter>>[number] &
   Awaited<ReturnType<typeof getRentalsAsOwner>>[number];
@@ -48,8 +63,16 @@ function groupRentals(rentals: RentalItem[], role: "renter" | "owner") {
   return { needsAttention, active, completed };
 }
 
-export default async function MyRentalsPage() {
-  const session = await getSession();
+export default async function MyRentalsPage({ params }: PageProps) {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  setRequestLocale(locale);
+
+  const [session, t] = await Promise.all([
+    getSession(),
+    getTranslations("Rentals"),
+  ]);
+
   if (!session) return null;
 
   // Auto-activate approved rentals past start date
@@ -83,19 +106,19 @@ export default async function MyRentalsPage() {
 
   const renterLabel =
     pendingCounts.asRenter > 0
-      ? `As Renter (${pendingCounts.asRenter})`
-      : "As Renter";
+      ? t("tabs.asRenterCount", { count: pendingCounts.asRenter })
+      : t("tabs.asRenter");
   const ownerLabel =
     pendingCounts.asOwner > 0
-      ? `As Owner (${pendingCounts.asOwner})`
-      : "As Owner";
+      ? t("tabs.asOwnerCount", { count: pendingCounts.asOwner })
+      : t("tabs.asOwner");
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">My Rentals</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Track your rental activity
+          {t("subtitle")}
         </p>
       </div>
 
@@ -109,7 +132,7 @@ export default async function MyRentalsPage() {
         <TabsContent value="renter" className="mt-6">
           {renterRentals.length === 0 ? (
             <EmptyState
-              message="You haven't rented anything yet. Browse listings to find items to rent."
+              message={t("empty.asRenter")}
             />
           ) : (
             <RentalGroups
@@ -117,6 +140,11 @@ export default async function MyRentalsPage() {
               role="renter"
               rentals={renterRentals as RentalItem[]}
               reviewedMap={reviewedMap}
+              sectionLabels={{
+                needsAttention: t("sections.needsAttention"),
+                active: t("sections.active"),
+                completed: t("sections.completed"),
+              }}
             />
           )}
         </TabsContent>
@@ -125,7 +153,7 @@ export default async function MyRentalsPage() {
         <TabsContent value="owner" className="mt-6">
           {ownerRentals.length === 0 ? (
             <EmptyState
-              message="No rental requests for your listings yet."
+              message={t("empty.asOwner")}
             />
           ) : (
             <RentalGroups
@@ -133,6 +161,11 @@ export default async function MyRentalsPage() {
               role="owner"
               rentals={ownerRentals as RentalItem[]}
               reviewedMap={reviewedMap}
+              sectionLabels={{
+                needsAttention: t("sections.needsAttention"),
+                active: t("sections.active"),
+                completed: t("sections.completed"),
+              }}
             />
           )}
         </TabsContent>
@@ -145,18 +178,24 @@ function RentalGroups({
   groups,
   role,
   reviewedMap,
+  sectionLabels,
 }: {
   groups: ReturnType<typeof groupRentals>;
   role: "renter" | "owner";
   rentals: RentalItem[];
   reviewedMap: Map<string, boolean>;
+  sectionLabels: {
+    needsAttention: string;
+    active: string;
+    completed: string;
+  };
 }) {
   return (
     <div className="space-y-8">
       {groups.needsAttention.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-amber-600">
-            Needs Attention
+            {sectionLabels.needsAttention}
           </h2>
           <div className="space-y-3">
             {groups.needsAttention.map((rental) => (
@@ -169,7 +208,7 @@ function RentalGroups({
       {groups.active.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-green-600">
-            Active
+            {sectionLabels.active}
           </h2>
           <div className="space-y-3">
             {groups.active.map((rental) => (
@@ -182,7 +221,7 @@ function RentalGroups({
       {groups.completed.length > 0 && (
         <section>
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            Completed
+            {sectionLabels.completed}
           </h2>
           <div className="space-y-3">
             {groups.completed.map((rental) => (

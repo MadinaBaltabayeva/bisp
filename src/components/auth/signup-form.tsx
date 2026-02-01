@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -40,6 +41,7 @@ interface SignupFormProps {
 }
 
 export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
+  const t = useTranslations("Auth");
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignupFormValues>({
@@ -63,7 +65,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
 
       if (error) {
         form.setError("root", {
-          message: error.message || "Failed to create account. Please try again.",
+          message: error.message || t("login.genericError"),
         });
         return;
       }
@@ -71,7 +73,7 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
       // User is auto-signed-in after signup -- transition to onboarding
       onSuccess();
     } catch {
-      form.setError("root", { message: "Something went wrong. Please try again." });
+      form.setError("root", { message: t("login.genericError") });
     } finally {
       setIsLoading(false);
     }
@@ -91,10 +93,10 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Name</FormLabel>
+              <FormLabel>{t("signup.name")}</FormLabel>
               <FormControl>
                 <Input
-                  placeholder="Your name"
+                  placeholder={t("signup.namePlaceholder")}
                   autoComplete="name"
                   {...field}
                 />
@@ -109,11 +111,11 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("signup.email")}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("signup.emailPlaceholder")}
                   autoComplete="email"
                   {...field}
                 />
@@ -128,11 +130,11 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t("signup.password")}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="At least 8 characters"
+                  placeholder={t("signup.passwordPlaceholder")}
                   autoComplete="new-password"
                   {...field}
                 />
@@ -147,11 +149,11 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
           name="confirmPassword"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Confirm Password</FormLabel>
+              <FormLabel>{t("signup.confirmPassword")}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Repeat your password"
+                  placeholder={t("signup.confirmPasswordPlaceholder")}
                   autoComplete="new-password"
                   {...field}
                 />
@@ -163,17 +165,17 @@ export function SignupForm({ onSwitchToLogin, onSuccess }: SignupFormProps) {
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="size-4 animate-spin" />}
-          Create Account
+          {t("signup.submit")}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Already have an account?{" "}
+          {t("signup.hasAccount")}{" "}
           <button
             type="button"
             onClick={onSwitchToLogin}
             className="font-medium text-primary-600 hover:text-primary-700 hover:underline"
           >
-            Log in
+            {t("signup.loginLink")}
           </button>
         </p>
       </form>

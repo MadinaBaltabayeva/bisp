@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Sparkles, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 
@@ -18,6 +19,7 @@ export function AISuggestions({
   onCategorySelect,
   onTagsChange,
 }: AISuggestionsProps) {
+  const t = useTranslations("Listings.ai");
   const [tagInput, setTagInput] = useState("");
   const [categoryApplied, setCategoryApplied] = useState(false);
 
@@ -25,9 +27,7 @@ export function AISuggestions({
     return (
       <div className="flex items-center gap-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
         <Sparkles className="size-4 animate-pulse text-primary" />
-        <span className="text-sm text-muted-foreground">
-          AI analyzing your photo...
-        </span>
+        <span className="text-sm text-muted-foreground">{t("analyzing")}</span>
         <div className="ml-auto flex gap-1">
           <div className="h-5 w-16 animate-pulse rounded bg-muted" />
           <div className="h-5 w-12 animate-pulse rounded bg-muted" />
@@ -70,7 +70,7 @@ export function AISuggestions({
     <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
       <div className="flex items-center gap-2">
         <Sparkles className="size-4 text-primary" />
-        <span className="text-sm font-medium">AI Suggested</span>
+        <span className="text-sm font-medium">{t("suggested")}</span>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -84,12 +84,12 @@ export function AISuggestions({
                 : "border-muted bg-background text-foreground hover:border-primary/30 hover:bg-primary/5"
             }`}
           >
-            Category:{" "}
+            {t("category")}{" "}
             <span className="capitalize">
               {suggestion.category.replace(/-/g, " ")}
             </span>
             {categoryApplied && (
-              <span className="text-[10px] text-primary/70">Applied</span>
+              <span className="text-[10px] text-primary/70">{t("applied")}</span>
             )}
           </button>
         )}
@@ -109,7 +109,7 @@ export function AISuggestions({
 
         <Input
           type="text"
-          placeholder="Add tag..."
+          placeholder={t("addTag")}
           value={tagInput}
           onChange={(e) => setTagInput(e.target.value)}
           onKeyDown={addTag}

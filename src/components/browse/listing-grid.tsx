@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { PackageSearch } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -34,6 +37,7 @@ function SkeletonCard() {
 }
 
 export function ListingGrid({ listings, loading }: ListingGridProps) {
+  const t = useTranslations("Browse");
   if (loading) {
     return (
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -49,16 +53,16 @@ export function ListingGrid({ listings, loading }: ListingGridProps) {
       <div className="flex flex-col items-center justify-center py-16 text-center">
         <PackageSearch className="mb-4 size-12 text-muted-foreground" />
         <h3 className="text-lg font-semibold text-gray-900">
-          No listings found
+          {t("noResults")}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground">
-          Try adjusting your filters or search terms
+          {t("noResultsHint")}
         </p>
         <Link
           href="/browse"
           className="mt-4 text-sm font-medium text-primary-600 hover:underline"
         >
-          Clear all filters
+          {t("filters.reset")}
         </Link>
       </div>
     );

@@ -1,3 +1,7 @@
+"use client";
+
+import { useTranslations, useFormatter } from "next-intl";
+
 interface PriceDisplayProps {
   priceHourly: number | null;
   priceDaily: number | null;
@@ -7,12 +11,7 @@ interface PriceDisplayProps {
 
 interface RateInfo {
   amount: number;
-  label: string;
-  suffix: string;
-}
-
-function formatAmount(amount: number): string {
-  return amount % 1 === 0 ? `$${amount}` : `$${amount.toFixed(2)}`;
+  suffixKey: "perHour" | "perDay" | "perWeek" | "perMonth";
 }
 
 export function PriceDisplay({
@@ -21,23 +20,37 @@ export function PriceDisplay({
   priceWeekly,
   priceMonthly,
 }: PriceDisplayProps) {
+  const t = useTranslations("Listings.detail");
+  const format = useFormatter();
+
+  function formatAmount(amount: number): string {
+    return format.number(amount, { style: "currency", currency: "USD" });
+  }
+
+  const SUFFIX_MAP: Record<string, string> = {
+    perHour: "/hr",
+    perDay: "/day",
+    perWeek: "/wk",
+    perMonth: "/mo",
+  };
+
   const rates: RateInfo[] = [];
 
   if (priceHourly != null) {
-    rates.push({ amount: priceHourly, label: "per hour", suffix: "/hr" });
+    rates.push({ amount: priceHourly, suffixKey: "perHour" });
   }
   if (priceDaily != null) {
-    rates.push({ amount: priceDaily, label: "per day", suffix: "/day" });
+    rates.push({ amount: priceDaily, suffixKey: "perDay" });
   }
   if (priceWeekly != null) {
-    rates.push({ amount: priceWeekly, label: "per week", suffix: "/wk" });
+    rates.push({ amount: priceWeekly, suffixKey: "perWeek" });
   }
   if (priceMonthly != null) {
-    rates.push({ amount: priceMonthly, label: "per month", suffix: "/mo" });
+    rates.push({ amount: priceMonthly, suffixKey: "perMonth" });
   }
 
   if (rates.length === 0) {
-    return <p className="text-muted-foreground">Contact for pricing</p>;
+    return <p className="text-muted-foreground">{t("contactForPricing")}</p>;
   }
 
   // Primary rate: the one with the lowest amount
@@ -49,14 +62,14 @@ export function PriceDisplay({
     <div>
       <div className="flex items-baseline gap-1">
         <span className="text-3xl font-bold">{formatAmount(primary.amount)}</span>
-        <span className="text-lg text-muted-foreground">{primary.suffix}</span>
+        <span className="text-lg text-muted-foreground">{SUFFIX_MAP[primary.suffixKey]}</span>
       </div>
       {otherRates.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-3 text-sm text-muted-foreground">
           {otherRates.map((rate) => (
-            <span key={rate.suffix}>
+            <span key={rate.suffixKey}>
               {formatAmount(rate.amount)}
-              {rate.suffix}
+              {SUFFIX_MAP[rate.suffixKey]}
             </span>
           ))}
         </div>

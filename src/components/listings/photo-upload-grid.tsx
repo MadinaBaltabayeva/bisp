@@ -2,6 +2,7 @@
 
 import { useRef, useState, useCallback } from "react";
 import { Plus, X, Loader2, ImageIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { getAISuggestions } from "@/features/listings/actions";
 
 interface ExistingImage {
@@ -27,10 +28,6 @@ const ACCEPTED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_WIDTH = 1920;
 const JPEG_QUALITY = 0.8;
 
-/**
- * Resize an image file using Canvas API.
- * Returns a new File resized to max 1920px width at 80% JPEG quality.
- */
 async function resizeImage(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -49,22 +46,13 @@ async function resizeImage(file: File): Promise<File> {
       canvas.width = width;
       canvas.height = height;
       const ctx = canvas.getContext("2d");
-      if (!ctx) {
-        resolve(file);
-        return;
-      }
+      if (!ctx) { resolve(file); return; }
 
       ctx.drawImage(img, 0, 0, width, height);
       canvas.toBlob(
         (blob) => {
-          if (!blob) {
-            resolve(file);
-            return;
-          }
-          const resized = new File([blob], file.name, {
-            type: "image/jpeg",
-            lastModified: Date.now(),
-          });
+          if (!blob) { resolve(file); return; }
+          const resized = new File([blob], file.name, { type: "image/jpeg", lastModified: Date.now() });
           resolve(resized);
         },
         "image/jpeg",
@@ -89,6 +77,7 @@ export function PhotoUploadGrid({
   onDeletedImageIds,
   onAISuggest,
 }: PhotoUploadGridProps) {
+  const t = useTranslations("Listings.form");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [aiLoading, setAiLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -101,9 +90,7 @@ export function PhotoUploadGrid({
 
   const getPreviewUrl = useCallback(
     (file: File) => {
-      if (previewUrls.has(file)) {
-        return previewUrls.get(file)!;
-      }
+      if (previewUrls.has(file)) return previewUrls.get(file)!;
       const url = URL.createObjectURL(file);
       setPreviewUrls((prev) => new Map(prev).set(file, url));
       return url;
@@ -112,7 +99,6 @@ export function PhotoUploadGrid({
   );
 
   function handleSlotClick(slotIndex: number) {
-    // If we have a selected index and this slot is different, swap
     if (selectedIndex !== null && selectedIndex !== slotIndex) {
       const allItems = [
         ...existingImages.map((img) => ({ type: "existing" as const, img })),
@@ -120,7 +106,6 @@ export function PhotoUploadGrid({
       ];
 
       if (slotIndex < allItems.length && selectedIndex < allItems.length) {
-        // Swap the two items
         const temp = allItems[selectedIndex];
         allItems[selectedIndex] = allItems[slotIndex];
         allItems[slotIndex] = temp;
@@ -132,7 +117,6 @@ export function PhotoUploadGrid({
           .filter((item) => item.type === "new")
           .map((item) => (item as { type: "new"; photo: File }).photo);
 
-        // For simplicity, reorder within their respective arrays
         if (onExistingImagesChange) onExistingImagesChange(newExisting);
         onChange(newPhotos);
       }
@@ -140,14 +124,12 @@ export function PhotoUploadGrid({
       return;
     }
 
-    // If clicking an empty slot, open file input
     if (slotIndex >= totalImages) {
       fileInputRef.current?.click();
       setSelectedIndex(null);
       return;
     }
 
-    // Select this slot for reordering
     setSelectedIndex(slotIndex);
   }
 
@@ -155,28 +137,19 @@ export function PhotoUploadGrid({
     const files = Array.from(e.target.files || []);
     if (files.length === 0) return;
 
-    const validFiles = files.filter(
-      (f) => ACCEPTED_TYPES.includes(f.type) && f.size > 0
-    );
-
+    const validFiles = files.filter((f) => ACCEPTED_TYPES.includes(f.type) && f.size > 0);
     const remaining = MAX_SLOTS - totalImages;
     const toAdd = validFiles.slice(0, remaining);
 
-    // Resize each file
     const resized: File[] = [];
     for (const file of toAdd) {
-      try {
-        const r = await resizeImage(file);
-        resized.push(r);
-      } catch {
-        resized.push(file);
-      }
+      try { const r = await resizeImage(file); resized.push(r); }
+      catch { resized.push(file); }
     }
 
     const newPhotos = [...photos, ...resized];
     onChange(newPhotos);
 
-    // Trigger AI suggestions on first photo upload
     if (!hasFetchedAI.current && onAISuggest && resized.length > 0) {
       hasFetchedAI.current = true;
       setAiLoading(true);
@@ -184,9 +157,7 @@ export function PhotoUploadGrid({
         const formData = new FormData();
         formData.append("photo", resized[0]);
         const result = await getAISuggestions(formData);
-        if (result && !("error" in result)) {
-          onAISuggest(result);
-        }
+        if (result && !("error" in result)) onAISuggest(result);
       } catch {
         // AI suggestions are non-critical
       } finally {
@@ -194,10 +165,7 @@ export function PhotoUploadGrid({
       }
     }
 
-    // Reset file input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
   }
 
   function removeExistingImage(index: number) {
@@ -205,7 +173,6 @@ export function PhotoUploadGrid({
     const newDeletedIds = [...deletedIds, image.id];
     setDeletedIds(newDeletedIds);
     onDeletedImageIds?.(newDeletedIds);
-
     const newImages = existingImages.filter((_, i) => i !== index);
     onExistingImagesChange?.(newImages);
     setSelectedIndex(null);
@@ -216,11 +183,7 @@ export function PhotoUploadGrid({
     const url = previewUrls.get(file);
     if (url) {
       URL.revokeObjectURL(url);
-      setPreviewUrls((prev) => {
-        const next = new Map(prev);
-        next.delete(file);
-        return next;
-      });
+      setPreviewUrls((prev) => { const next = new Map(prev); next.delete(file); return next; });
     }
     const newPhotos = photos.filter((_, i) => i !== photoIndex);
     onChange(newPhotos);
@@ -230,45 +193,27 @@ export function PhotoUploadGrid({
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium">
-        Photos{" "}
-        <span className="text-muted-foreground font-normal">
-          ({totalImages}/{MAX_SLOTS})
-        </span>
+        {t("photos")}{" "}
+        <span className="text-muted-foreground font-normal">({totalImages}/{MAX_SLOTS})</span>
       </label>
 
       <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
-        {/* Existing images */}
         {existingImages.map((image, index) => (
           <div
             key={`existing-${image.id}`}
             onClick={() => handleSlotClick(index)}
             className={`relative aspect-square cursor-pointer overflow-hidden rounded-lg border-2 ${
-              index === 0 && existingImages.length > 0
-                ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2"
-                : ""
-            } ${
-              selectedIndex === index
-                ? "border-primary ring-2 ring-primary/30"
-                : "border-muted"
-            }`}
+              index === 0 && existingImages.length > 0 ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2" : ""
+            } ${selectedIndex === index ? "border-primary ring-2 ring-primary/30" : "border-muted"}`}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={image.url}
-              alt={`Photo ${index + 1}`}
-              className="h-full w-full object-cover"
-            />
+            <img src={image.url} alt={`Photo ${index + 1}`} className="h-full w-full object-cover" />
             {index === 0 && (
-              <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                Cover
-              </span>
+              <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">{t("cover")}</span>
             )}
             <button
               type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                removeExistingImage(index);
-              }}
+              onClick={(e) => { e.stopPropagation(); removeExistingImage(index); }}
               className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
             >
               <X className="size-3.5" />
@@ -276,35 +221,21 @@ export function PhotoUploadGrid({
           </div>
         ))}
 
-        {/* New photos */}
         {photos.map((file, photoIndex) => {
           const globalIndex = existingImages.length + photoIndex;
-          const isCoverSlot =
-            globalIndex === 0 && existingImages.length === 0;
+          const isCoverSlot = globalIndex === 0 && existingImages.length === 0;
           return (
             <div
               key={`new-${photoIndex}-${file.name}`}
               onClick={() => handleSlotClick(globalIndex)}
               className={`relative aspect-square cursor-pointer overflow-hidden rounded-lg border-2 ${
-                isCoverSlot
-                  ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2"
-                  : ""
-              } ${
-                selectedIndex === globalIndex
-                  ? "border-primary ring-2 ring-primary/30"
-                  : "border-muted"
-              }`}
+                isCoverSlot ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2" : ""
+              } ${selectedIndex === globalIndex ? "border-primary ring-2 ring-primary/30" : "border-muted"}`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={getPreviewUrl(file)}
-                alt={`Photo ${globalIndex + 1}`}
-                className="h-full w-full object-cover"
-              />
+              <img src={getPreviewUrl(file)} alt={`Photo ${globalIndex + 1}`} className="h-full w-full object-cover" />
               {isCoverSlot && (
-                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                  Cover
-                </span>
+                <span className="absolute bottom-1 left-1 rounded bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">{t("cover")}</span>
               )}
               {isCoverSlot && aiLoading && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/30">
@@ -313,10 +244,7 @@ export function PhotoUploadGrid({
               )}
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  removeNewPhoto(photoIndex);
-                }}
+                onClick={(e) => { e.stopPropagation(); removeNewPhoto(photoIndex); }}
                 className="absolute right-1 top-1 flex size-6 items-center justify-center rounded-full bg-black/60 text-white hover:bg-black/80"
               >
                 <X className="size-3.5" />
@@ -325,7 +253,6 @@ export function PhotoUploadGrid({
           );
         })}
 
-        {/* Empty slots */}
         {Array.from({ length: emptySlots }).map((_, i) => {
           const slotIndex = totalImages + i;
           const isCoverSlot = slotIndex === 0;
@@ -334,17 +261,13 @@ export function PhotoUploadGrid({
               key={`empty-${i}`}
               onClick={() => handleSlotClick(slotIndex)}
               className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-lg border-2 border-dashed border-muted-foreground/30 transition-colors hover:border-primary/50 hover:bg-muted/50 ${
-                isCoverSlot
-                  ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2"
-                  : ""
+                isCoverSlot ? "col-span-2 row-span-2 sm:col-span-2 sm:row-span-2" : ""
               }`}
             >
               {isCoverSlot ? (
                 <>
                   <ImageIcon className="size-8 text-muted-foreground/50" />
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Cover Photo
-                  </span>
+                  <span className="text-xs font-medium text-muted-foreground">{t("coverPhoto")}</span>
                 </>
               ) : (
                 <Plus className="size-5 text-muted-foreground/50" />
@@ -354,19 +277,8 @@ export function PhotoUploadGrid({
         })}
       </div>
 
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        multiple
-        className="hidden"
-        onChange={handleFileChange}
-      />
-
-      <p className="text-xs text-muted-foreground">
-        Click a slot to add photos. Click two photos to swap their positions.
-        First photo becomes the cover image.
-      </p>
+      <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" multiple className="hidden" onChange={handleFileChange} />
+      <p className="text-xs text-muted-foreground">{t("photosInstruction")}</p>
     </div>
   );
 }

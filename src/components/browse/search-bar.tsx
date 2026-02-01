@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useState, type FormEvent } from "react";
 import { Search, X } from "lucide-react";
@@ -8,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export function SearchBar() {
+  const t = useTranslations("Browse");
   const searchParams = useSearchParams();
   const router = useRouter();
   const [value, setValue] = useState(searchParams.get("q") ?? "");
@@ -35,7 +37,7 @@ export function SearchBar() {
       <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="text"
-        placeholder="Search listings..."
+        placeholder={t("searchPlaceholder")}
         value={value}
         onChange={(e) => setValue(e.target.value)}
         className="pl-10 pr-10"

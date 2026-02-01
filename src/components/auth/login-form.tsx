@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -31,6 +32,7 @@ interface LoginFormProps {
 }
 
 export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
+  const t = useTranslations("Auth");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
@@ -51,14 +53,14 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
       });
 
       if (error) {
-        form.setError("root", { message: error.message || "Invalid email or password" });
+        form.setError("root", { message: error.message || t("login.invalidCredentials") });
         return;
       }
 
       router.refresh();
       onSuccess();
     } catch {
-      form.setError("root", { message: "Something went wrong. Please try again." });
+      form.setError("root", { message: t("login.genericError") });
     } finally {
       setIsLoading(false);
     }
@@ -78,11 +80,11 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t("login.email")}</FormLabel>
               <FormControl>
                 <Input
                   type="email"
-                  placeholder="you@example.com"
+                  placeholder={t("login.emailPlaceholder")}
                   autoComplete="email"
                   {...field}
                 />
@@ -97,11 +99,11 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t("login.password")}</FormLabel>
               <FormControl>
                 <Input
                   type="password"
-                  placeholder="Enter your password"
+                  placeholder={t("login.passwordPlaceholder")}
                   autoComplete="current-password"
                   {...field}
                 />
@@ -113,17 +115,17 @@ export function LoginForm({ onSwitchToSignup, onSuccess }: LoginFormProps) {
 
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading && <Loader2 className="size-4 animate-spin" />}
-          Log In
+          {t("login.submit")}
         </Button>
 
         <p className="text-center text-sm text-muted-foreground">
-          Don&apos;t have an account?{" "}
+          {t("login.noAccount")}{" "}
           <button
             type="button"
             onClick={onSwitchToSignup}
             className="font-medium text-primary-600 hover:text-primary-700 hover:underline"
           >
-            Sign up
+            {t("login.signUpLink")}
           </button>
         </p>
       </form>

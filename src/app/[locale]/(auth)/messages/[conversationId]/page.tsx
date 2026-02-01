@@ -1,6 +1,8 @@
 import { redirect, notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
 import { getSession } from "@/features/auth/queries";
 import {
@@ -11,16 +13,22 @@ import { ChatView } from "@/components/messages/chat-view";
 import { Button } from "@/components/ui/button";
 
 interface PageProps {
-  params: Promise<{ conversationId: string }>;
+  params: Promise<{ conversationId: string; locale: string }>;
 }
 
 export default async function ConversationPage({ params }: PageProps) {
-  const session = await getSession();
+  const { conversationId, locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  setRequestLocale(locale);
+
+  const [session, t] = await Promise.all([
+    getSession(),
+    getTranslations("Messages"),
+  ]);
+
   if (!session) {
     redirect("/");
   }
-
-  const { conversationId } = await params;
 
   const [conversation, messages] = await Promise.all([
     getConversationById(conversationId, session.user.id),
@@ -40,7 +48,7 @@ export default async function ConversationPage({ params }: PageProps) {
             <ArrowLeft className="size-5" />
           </Link>
         </Button>
-        <span className="text-sm font-medium">Back to messages</span>
+        <span className="text-sm font-medium">{t("backToMessages")}</span>
       </div>
 
       <div className="flex-1 overflow-hidden">

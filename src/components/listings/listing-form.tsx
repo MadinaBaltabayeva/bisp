@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import {
   listingSchema,
@@ -88,22 +89,25 @@ interface ListingFormProps {
   categories: CategoryOption[];
 }
 
-const CONDITIONS = [
-  { value: "new", label: "New" },
-  { value: "like_new", label: "Like New" },
-  { value: "good", label: "Good" },
-  { value: "fair", label: "Fair" },
-  { value: "poor", label: "Poor" },
-];
+const CONDITION_KEYS = [
+  { value: "new", labelKey: "new" },
+  { value: "like_new", labelKey: "likeNew" },
+  { value: "good", labelKey: "good" },
+  { value: "fair", labelKey: "fair" },
+  { value: "poor", labelKey: "poor" },
+] as const;
 
 const RATE_TYPES = [
-  { key: "priceHourly" as const, label: "Hourly" },
-  { key: "priceDaily" as const, label: "Daily" },
-  { key: "priceWeekly" as const, label: "Weekly" },
-  { key: "priceMonthly" as const, label: "Monthly" },
-];
+  { key: "priceHourly" as const, labelKey: "rateHourly" },
+  { key: "priceDaily" as const, labelKey: "rateDaily" },
+  { key: "priceWeekly" as const, labelKey: "rateWeekly" },
+  { key: "priceMonthly" as const, labelKey: "rateMonthly" },
+] as const;
 
 export function ListingForm({ mode, listing, categories }: ListingFormProps) {
+  const t = useTranslations("Listings.form");
+  const tc = useTranslations("Conditions");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -163,7 +167,6 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
     setAiSuggestion(suggestion);
     setAiLoading(false);
 
-    // Auto-apply tags from AI suggestion
     if (suggestion.tags.length > 0) {
       setTags((prev) => {
         const combined = [...new Set([...prev, ...suggestion.tags])];
@@ -194,61 +197,34 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
       formData.append("categoryId", values.categoryId);
       formData.append("condition", values.condition);
 
-      if (values.priceHourly != null) {
-        formData.append("priceHourly", String(values.priceHourly));
-      }
-      if (values.priceDaily != null) {
-        formData.append("priceDaily", String(values.priceDaily));
-      }
-      if (values.priceWeekly != null) {
-        formData.append("priceWeekly", String(values.priceWeekly));
-      }
-      if (values.priceMonthly != null) {
-        formData.append("priceMonthly", String(values.priceMonthly));
-      }
+      if (values.priceHourly != null) formData.append("priceHourly", String(values.priceHourly));
+      if (values.priceDaily != null) formData.append("priceDaily", String(values.priceDaily));
+      if (values.priceWeekly != null) formData.append("priceWeekly", String(values.priceWeekly));
+      if (values.priceMonthly != null) formData.append("priceMonthly", String(values.priceMonthly));
 
       formData.append("location", values.location);
       if (values.region) formData.append("region", values.region);
-      if (values.latitude != null)
-        formData.append("latitude", String(values.latitude));
-      if (values.longitude != null)
-        formData.append("longitude", String(values.longitude));
+      if (values.latitude != null) formData.append("latitude", String(values.latitude));
+      if (values.longitude != null) formData.append("longitude", String(values.longitude));
 
-      // Append tags as comma-separated string
-      if (tags.length > 0) {
-        formData.append("tags", tags.join(","));
-      }
-
-      // Append photos
-      for (const photo of photos) {
-        formData.append("photos", photo);
-      }
-
-      // Append deleted image IDs (for edit mode)
-      for (const id of deletedImageIds) {
-        formData.append("deleteImageIds", id);
-      }
+      if (tags.length > 0) formData.append("tags", tags.join(","));
+      for (const photo of photos) formData.append("photos", photo);
+      for (const id of deletedImageIds) formData.append("deleteImageIds", id);
 
       try {
         if (mode === "create") {
           const result = await createListing(formData);
-          if ("error" in result) {
-            toast.error(result.error);
-            return;
-          }
-          toast.success("Listing created successfully!");
+          if ("error" in result) { toast.error(result.error); return; }
+          toast.success(t("createSuccess"));
           router.push(`/listings/${result.listingId}`);
         } else if (listing) {
           const result = await updateListing(listing.id, formData);
-          if ("error" in result) {
-            toast.error(result.error);
-            return;
-          }
-          toast.success("Listing updated successfully!");
+          if ("error" in result) { toast.error(result.error); return; }
+          toast.success(t("updateSuccess"));
           router.push(`/listings/${listing.id}`);
         }
       } catch {
-        toast.error("Something went wrong. Please try again.");
+        toast.error(t("genericError"));
       }
     });
   }
@@ -258,14 +234,11 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
     setIsDeleting(true);
     try {
       const result = await deleteListing(listing.id);
-      if ("error" in result) {
-        toast.error(result.error);
-        return;
-      }
-      toast.success("Listing deleted successfully!");
+      if ("error" in result) { toast.error(result.error); return; }
+      toast.success(t("deleteSuccess"));
       router.push("/");
     } catch {
-      toast.error("Failed to delete listing.");
+      toast.error(t("deleteFailed"));
     } finally {
       setIsDeleting(false);
     }
@@ -299,19 +272,16 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Basic Information</h3>
+            <h3 className="text-lg font-semibold">{t("basicInfo")}</h3>
 
             <FormField
               control={form.control}
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>{t("title")}</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="e.g. DeWalt 20V Power Drill"
-                      {...field}
-                    />
+                    <Input placeholder={t("titlePlaceholder")} {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -323,26 +293,17 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>{t("description")}</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Describe your item, its condition, what's included..."
+                      placeholder={t("descriptionPlaceholder")}
                       className="min-h-[120px] resize-y"
                       {...field}
                     />
                   </FormControl>
                   <div className="flex items-center justify-between">
-                    <FormDescription>
-                      Include details about condition, accessories, and usage
-                      instructions.
-                    </FormDescription>
-                    <span
-                      className={`text-xs ${
-                        descValue.length > 2000
-                          ? "text-destructive"
-                          : "text-muted-foreground"
-                      }`}
-                    >
+                    <FormDescription>{t("descriptionHint")}</FormDescription>
+                    <span className={`text-xs ${descValue.length > 2000 ? "text-destructive" : "text-muted-foreground"}`}>
                       {descValue.length}/2000
                     </span>
                   </div>
@@ -354,7 +315,7 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
 
           {/* Category & Condition */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Category & Condition</h3>
+            <h3 className="text-lg font-semibold">{t("categoryAndCondition")}</h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -362,14 +323,11 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                 name="categoryId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <FormLabel>{t("category")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select a category" />
+                          <SelectValue placeholder={t("categoryPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -390,20 +348,17 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                 name="condition"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Condition</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <FormLabel>{t("condition")}</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl>
                         <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select condition" />
+                          <SelectValue placeholder={t("conditionPlaceholder")} />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {CONDITIONS.map((c) => (
+                        {CONDITION_KEYS.map((c) => (
                           <SelectItem key={c.value} value={c.value}>
-                            {c.label}
+                            {tc(c.labelKey)}
                           </SelectItem>
                         ))}
                       </SelectContent>
@@ -418,10 +373,8 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
           {/* Pricing */}
           <div className="space-y-4">
             <div>
-              <h3 className="text-lg font-semibold">Pricing</h3>
-              <p className="text-sm text-muted-foreground">
-                How do you want to rent this item? Select at least one.
-              </p>
+              <h3 className="text-lg font-semibold">{t("pricing")}</h3>
+              <p className="text-sm text-muted-foreground">{t("pricingHint")}</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
@@ -431,16 +384,11 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                   type="button"
                   onClick={() => {
                     if (selectedRate === rate.key) {
-                      // Deselect current
                       setSelectedRate(null);
                       form.setValue(rate.key, undefined, { shouldValidate: true });
                     } else {
-                      // Clear previous rate value without triggering validation yet
-                      if (selectedRate) {
-                        form.setValue(selectedRate as typeof rate.key, undefined);
-                      }
+                      if (selectedRate) form.setValue(selectedRate as typeof rate.key, undefined);
                       setSelectedRate(rate.key);
-                      // Clear validation errors since user is actively selecting
                       form.clearErrors("priceDaily");
                     }
                   }}
@@ -450,70 +398,55 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                       : "border-border bg-background text-muted-foreground hover:border-primary/50 hover:text-foreground"
                   }`}
                 >
-                  {rate.label}
+                  {t(rate.labelKey)}
                 </button>
               ))}
             </div>
 
             {selectedRate && (
               <div className="max-w-xs">
-                {RATE_TYPES.filter((rate) => rate.key === selectedRate).map(
-                  (rate) => (
-                    <FormField
-                      key={rate.key}
-                      control={form.control}
-                      name={rate.key}
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{rate.label} rate</FormLabel>
-                          <FormControl>
-                            <div className="relative">
-                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
-                                $
-                              </span>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="0.00"
-                                className="pl-7"
-                                name={field.name}
-                                ref={field.ref}
-                                onBlur={field.onBlur}
-                                disabled={field.disabled}
-                                value={
-                                  field.value != null ? String(field.value) : ""
-                                }
-                                onChange={(e) =>
-                                  field.onChange(
-                                    e.target.value === ""
-                                      ? undefined
-                                      : e.target.value
-                                  )
-                                }
-                              />
-                            </div>
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  )
-                )}
+                {RATE_TYPES.filter((rate) => rate.key === selectedRate).map((rate) => (
+                  <FormField
+                    key={rate.key}
+                    control={form.control}
+                    name={rate.key}
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>{t("rateLabel", { rate: t(rate.labelKey) })}</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">$</span>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              min="0"
+                              placeholder="0.00"
+                              className="pl-7"
+                              name={field.name}
+                              ref={field.ref}
+                              onBlur={field.onBlur}
+                              disabled={field.disabled}
+                              value={field.value != null ? String(field.value) : ""}
+                              onChange={(e) => field.onChange(e.target.value === "" ? undefined : e.target.value)}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                ))}
               </div>
             )}
 
-            {form.formState.errors.priceDaily?.message ===
-              "At least one pricing rate is required" && (
-              <p className="text-sm text-destructive">
-                At least one pricing rate is required
-              </p>
+            {form.formState.errors.priceDaily?.message === "At least one pricing rate is required" && (
+              <p className="text-sm text-destructive">{t("pricingRequired")}</p>
             )}
           </div>
 
           {/* Location */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Location</h3>
+            <h3 className="text-lg font-semibold">{t("location")}</h3>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <FormField
@@ -521,16 +454,11 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                 name="location"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Location</FormLabel>
+                    <FormLabel>{t("location")}</FormLabel>
                     <FormControl>
-                      <Input
-                        placeholder="e.g. San Francisco, CA"
-                        {...field}
-                      />
+                      <Input placeholder={t("locationPlaceholder")} {...field} />
                     </FormControl>
-                    <FormDescription>
-                      Where the item is available for pickup.
-                    </FormDescription>
+                    <FormDescription>{t("locationHint")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -541,38 +469,33 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                 name="region"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Region (optional)</FormLabel>
+                    <FormLabel>{t("regionOptional")}</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="e.g. Bay Area, California"
+                        placeholder={t("regionPlaceholder")}
                         {...field}
                         value={field.value != null ? String(field.value) : ""}
                       />
                     </FormControl>
-                    <FormDescription>
-                      Broader area to help with search.
-                    </FormDescription>
+                    <FormDescription>{t("regionHint")}</FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
 
-            {/* Hidden lat/lng fields for future map picker */}
             <input type="hidden" {...form.register("latitude")} />
             <input type="hidden" {...form.register("longitude")} />
           </div>
 
           {/* Tags */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Tags</h3>
+            <h3 className="text-lg font-semibold">{t("tags")}</h3>
 
             <div className="space-y-2">
               <label className="text-sm font-medium">
-                Tags{" "}
-                <span className="font-normal text-muted-foreground">
-                  (optional)
-                </span>
+                {t("tags")}{" "}
+                <span className="font-normal text-muted-foreground">({t("tagsOptional")})</span>
               </label>
               <div className="flex flex-wrap gap-1.5">
                 {tags.map((tag, i) => (
@@ -583,19 +506,17 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                     {tag}
                     <button
                       type="button"
-                      onClick={() =>
-                        setTags((prev) => prev.filter((_, idx) => idx !== i))
-                      }
+                      onClick={() => setTags((prev) => prev.filter((_, idx) => idx !== i))}
                       className="ml-0.5 rounded-full hover:bg-muted"
                     >
-                      <span className="sr-only">Remove {tag}</span>
+                      <span className="sr-only">{t("removeTag", { tag })}</span>
                       &times;
                     </button>
                   </span>
                 ))}
               </div>
               <Input
-                placeholder="Type a tag and press Enter or comma to add"
+                placeholder={t("tagsPlaceholder")}
                 onKeyDown={(e) => {
                   if (e.key === "Enter" || e.key === ",") {
                     e.preventDefault();
@@ -608,9 +529,7 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                   }
                 }}
               />
-              <p className="text-xs text-muted-foreground">
-                Add up to 10 tags to help others find your listing.
-              </p>
+              <p className="text-xs text-muted-foreground">{t("tagsHint")}</p>
             </div>
           </div>
 
@@ -620,67 +539,55 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
               {isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  {mode === "create" ? "Creating..." : "Saving..."}
+                  {mode === "create" ? t("creating") : t("saving")}
                 </>
               ) : mode === "create" ? (
-                "Create Listing"
+                t("submit")
               ) : (
-                "Save Changes"
+                t("save")
               )}
             </Button>
 
             <Button
               type="button"
               variant="outline"
-              onClick={() =>
-                router.push(
-                  mode === "edit" && listing
-                    ? `/listings/${listing.id}`
-                    : "/"
-                )
-              }
+              onClick={() => router.push(mode === "edit" && listing ? `/listings/${listing.id}` : "/")}
               disabled={isPending || isDeleting}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
 
             {mode === "edit" && listing && (
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button
-                    type="button"
-                    variant="destructive"
-                    className="ml-auto"
-                    disabled={isPending || isDeleting}
-                  >
+                  <Button type="button" variant="destructive" className="ml-auto" disabled={isPending || isDeleting}>
                     {isDeleting ? (
                       <>
                         <Loader2 className="size-4 animate-spin" />
-                        Deleting...
+                        {t("deleting")}
                       </>
                     ) : (
                       <>
                         <Trash2 className="size-4" />
-                        Delete Listing
+                        {t("delete")}
                       </>
                     )}
                   </Button>
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete this listing?</AlertDialogTitle>
+                    <AlertDialogTitle>{t("deleteConfirmTitle")}</AlertDialogTitle>
                     <AlertDialogDescription>
-                      This action cannot be undone. Your listing &quot;
-                      {listing.title}&quot; will be permanently removed.
+                      {t("deleteConfirmDescription", { title: listing.title })}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel>{tCommon("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDelete}
                       className="bg-destructive text-white hover:bg-destructive/90"
                     >
-                      Yes, delete listing
+                      {t("deleteConfirmAction")}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>

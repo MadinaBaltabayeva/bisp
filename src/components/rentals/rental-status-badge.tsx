@@ -1,52 +1,57 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
 const STATUS_CONFIG: Record<
   string,
-  { label: string; className: string; variant: "default" | "secondary" | "destructive" | "outline" }
+  { labelKey: string; className: string; variant: "default" | "secondary" | "destructive" | "outline" }
 > = {
   requested: {
-    label: "Requested",
+    labelKey: "requested",
     className: "",
     variant: "secondary",
   },
   approved: {
-    label: "Approved",
+    labelKey: "approved",
     className: "border-blue-300 bg-blue-50 text-blue-700",
     variant: "outline",
   },
   active: {
-    label: "Active",
+    labelKey: "active",
     className: "bg-green-600 text-white hover:bg-green-700",
     variant: "default",
   },
   returned: {
-    label: "Returned",
+    labelKey: "returned",
     className: "border-amber-300 bg-amber-50 text-amber-700",
     variant: "outline",
   },
   completed: {
-    label: "Completed",
+    labelKey: "completed",
     className: "bg-gray-100 text-gray-600",
     variant: "secondary",
   },
   declined: {
-    label: "Declined",
+    labelKey: "declined",
     className: "",
     variant: "destructive",
   },
 };
 
 export function RentalStatusBadge({ status }: { status: string }) {
+  const t = useTranslations("Rentals.status");
+
   const config = STATUS_CONFIG[status] ?? {
-    label: status,
+    labelKey: status,
     className: "",
     variant: "secondary" as const,
   };
 
   return (
     <Badge variant={config.variant} className={cn(config.className)}>
-      {config.label}
+      {t(config.labelKey as Parameters<typeof t>[0])}
     </Badge>
   );
 }

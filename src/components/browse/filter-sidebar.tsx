@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
@@ -46,6 +47,8 @@ interface FilterSidebarProps {
 }
 
 function FilterContent({ categories, totalResults }: FilterSidebarProps) {
+  const t = useTranslations("Browse");
+  const tCat = useTranslations("Categories");
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -152,16 +155,28 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
     router.replace("/browse");
   }
 
+  // Map category slugs to translation keys
+  const slugToKey: Record<string, string> = {
+    "tools": "tools",
+    "electronics": "electronics",
+    "sports": "sports",
+    "outdoor": "outdoor",
+    "vehicles": "vehicles",
+    "clothing": "clothing",
+    "music": "music",
+    "home-garden": "homeGarden",
+  };
+
   return (
     <div className="space-y-6">
       {/* Results count */}
       <p className="text-sm text-muted-foreground">
-        {totalResults} {totalResults === 1 ? "result" : "results"}
+        {t("resultsCount", { count: totalResults })}
       </p>
 
       {/* Category filter */}
       <div>
-        <h4 className="mb-3 text-sm font-semibold text-gray-900">Category</h4>
+        <h4 className="mb-3 text-sm font-semibold text-gray-900">{t("filters.category")}</h4>
         <div className="space-y-1">
           <button
             onClick={() => updateParam("category", null)}
@@ -171,7 +186,7 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
                 : "text-gray-700 hover:bg-gray-50"
             }`}
           >
-            All Categories
+            {t("filters.allCategories")}
           </button>
           {categories.map((cat) => (
             <button
@@ -188,7 +203,7 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
                   : "text-gray-700 hover:bg-gray-50"
               }`}
             >
-              {cat.name}
+              {tCat((slugToKey[cat.slug] || cat.slug) as Parameters<typeof tCat>[0])}
             </button>
           ))}
         </div>
@@ -197,7 +212,7 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
       {/* Price range */}
       <div>
         <h4 className="mb-3 text-sm font-semibold text-gray-900">
-          Price Range
+          {t("filters.priceRange")}
         </h4>
         <p className="mb-3 text-sm text-muted-foreground">
           ${priceRange[0]} - ${priceRange[1]}
@@ -214,7 +229,7 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
 
       {/* Region filter */}
       <div>
-        <h4 className="mb-3 text-sm font-semibold text-gray-900">Region</h4>
+        <h4 className="mb-3 text-sm font-semibold text-gray-900">{t("filters.location")}</h4>
         <Select
           value={currentRegion || "all"}
           onValueChange={(value) =>
@@ -237,7 +252,7 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
 
       {/* Distance filter */}
       <div>
-        <h4 className="mb-3 text-sm font-semibold text-gray-900">Distance</h4>
+        <h4 className="mb-3 text-sm font-semibold text-gray-900">{t("filters.radius")}</h4>
         {hasLocation ? (
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -285,13 +300,14 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
         onClick={handleClearAll}
         className="w-full text-muted-foreground"
       >
-        Clear all filters
+        {t("filters.reset")}
       </Button>
     </div>
   );
 }
 
 export function FilterSidebar(props: FilterSidebarProps) {
+  const t = useTranslations("Browse");
   const searchParams = useSearchParams();
 
   const activeFilterCount = useMemo(() => {
@@ -316,7 +332,7 @@ export function FilterSidebar(props: FilterSidebarProps) {
           <SheetTrigger asChild>
             <Button variant="outline" size="sm" className="gap-2">
               <SlidersHorizontal className="size-4" />
-              Filters
+              {t("filters.title")}
               {activeFilterCount > 0 && (
                 <Badge
                   variant="secondary"
@@ -329,7 +345,7 @@ export function FilterSidebar(props: FilterSidebarProps) {
           </SheetTrigger>
           <SheetContent side="left" className="overflow-y-auto p-6">
             <SheetHeader className="p-0 pb-4">
-              <SheetTitle>Filters</SheetTitle>
+              <SheetTitle>{t("filters.title")}</SheetTitle>
             </SheetHeader>
             <FilterContent {...props} />
           </SheetContent>

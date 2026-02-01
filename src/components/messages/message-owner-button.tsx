@@ -4,6 +4,7 @@ import { useTransition } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { MessageCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { getOrCreateConversation } from "@/features/messages/actions";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ interface MessageOwnerButtonProps {
 }
 
 export function MessageOwnerButton({ listingId }: MessageOwnerButtonProps) {
+  const t = useTranslations("Listings.detail");
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -43,7 +45,7 @@ export function MessageOwnerButton({ listingId }: MessageOwnerButtonProps) {
       ) : (
         <MessageCircle className="mr-2 size-4" />
       )}
-      Message Owner
+      {t("messageOwner")}
     </Button>
   );
 }

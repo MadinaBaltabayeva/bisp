@@ -257,6 +257,7 @@
     "title": "Buyumlarni koʻrish",
     "searchPlaceholder": "Buyumlarni qidirish...",
     "filters": {
+      "title": "Filtrlar",
       "category": "Kategoriya",
       "priceRange": "Narx oraligʻi",
       "minPrice": "Minimal narx",

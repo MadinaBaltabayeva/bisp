@@ -1,21 +1,38 @@
 import { redirect, notFound } from "next/navigation";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/features/auth/queries";
 import { getListingById } from "@/features/listings/queries";
 import { ListingForm } from "@/components/listings/listing-form";
 
-export const metadata = {
-  title: "Edit Listing - RentHub",
-};
+interface PageProps {
+  params: Promise<{ id: string; locale: string }>;
+}
 
-export default async function EditListingPage({
+export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+}: PageProps): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return {
+    title: t("editListing.title"),
+    description: t("editListing.description"),
+  };
+}
 
-  const session = await getSession();
+export default async function EditListingPage({ params }: PageProps) {
+  const { id, locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  setRequestLocale(locale);
+
+  const [session, t] = await Promise.all([
+    getSession(),
+    getTranslations("Listings.form"),
+  ]);
+
   if (!session) {
     redirect("/");
   }
@@ -60,9 +77,9 @@ export default async function EditListingPage({
   return (
     <div className="mx-auto max-w-2xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Edit Listing</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t("editListingTitle")}</h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Update your listing details and photos.
+          {t("editListingDescription")}
         </p>
       </div>
       <ListingForm

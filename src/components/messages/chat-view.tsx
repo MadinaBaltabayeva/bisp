@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { MessageBubble } from "@/components/messages/message-bubble";
 import { MessageInput } from "@/components/messages/message-input";
@@ -35,6 +36,7 @@ export function ChatView({
   listing,
   initialMessages = [],
 }: ChatViewProps) {
+  const t = useTranslations("Messages");
   const [messages, setMessages] = useState<MessageData[]>(initialMessages);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -114,7 +116,7 @@ export function ChatView({
           <div className="flex h-full flex-col items-center justify-center text-center">
             <MessageCircle className="size-10 text-muted-foreground/40 mb-2" />
             <p className="text-sm text-muted-foreground">
-              Start the conversation!
+              {t("startConversation")}
             </p>
           </div>
         ) : (

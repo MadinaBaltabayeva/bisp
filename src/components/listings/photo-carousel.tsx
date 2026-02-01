@@ -11,6 +11,7 @@ import {
   CarouselNext,
   type CarouselApi,
 } from "@/components/ui/carousel";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface PhotoCarouselProps {
@@ -19,6 +20,7 @@ interface PhotoCarouselProps {
 }
 
 export function PhotoCarousel({ images, title }: PhotoCarouselProps) {
+  const t = useTranslations("Listings.detail");
   const [api, setApi] = React.useState<CarouselApi>();
   const [current, setCurrent] = React.useState(0);
   const [count, setCount] = React.useState(0);
@@ -40,7 +42,7 @@ export function PhotoCarousel({ images, title }: PhotoCarouselProps) {
       <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-gray-100 lg:h-[500px] lg:aspect-auto">
         <div className="flex flex-col items-center gap-2 text-gray-400">
           <ImageIcon className="size-12" />
-          <p className="text-sm">No photos</p>
+          <p className="text-sm">{t("noPhotos")}</p>
         </div>
       </div>
     );

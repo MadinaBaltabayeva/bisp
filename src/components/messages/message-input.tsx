@@ -2,6 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { Send, Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { sendMessage } from "@/features/messages/actions";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ export function MessageInput({
   onMessageSent,
   currentUser,
 }: MessageInputProps) {
+  const t = useTranslations("Messages");
   const [content, setContent] = useState("");
   const [isPending, startTransition] = useTransition();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -85,7 +87,7 @@ export function MessageInput({
         value={content}
         onChange={handleInput}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder={t("typePlaceholder")}
         maxLength={2000}
         rows={1}
         className="min-h-[40px] max-h-[72px] resize-none"

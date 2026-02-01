@@ -1,4 +1,7 @@
+"use client";
+
 import Image from "next/image";
+import { useFormatter } from "next-intl";
 import { cn } from "@/lib/utils";
 
 interface MessageBubbleProps {
@@ -15,29 +18,31 @@ interface MessageBubbleProps {
   isOwnMessage: boolean;
 }
 
-function formatMessageTime(date: Date | string) {
-  const d = new Date(date);
-  const now = new Date();
-  const isToday = d.toDateString() === now.toDateString();
+export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
+  const format = useFormatter();
 
-  if (isToday) {
-    return d.toLocaleTimeString("en-US", {
+  function formatMessageTime(date: Date | string) {
+    const d = new Date(date);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+
+    if (isToday) {
+      return format.dateTime(d, {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    }
+
+    return format.dateTime(d, {
+      month: "short",
+      day: "numeric",
       hour: "numeric",
       minute: "2-digit",
       hour12: true,
     });
   }
 
-  return d.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
-}
-
-export function MessageBubble({ message, isOwnMessage }: MessageBubbleProps) {
   return (
     <div
       className={cn(

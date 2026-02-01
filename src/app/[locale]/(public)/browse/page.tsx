@@ -1,5 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
 import { searchSchema } from "@/lib/validations/listing";
 import { searchListings } from "@/features/listings/queries";
@@ -15,10 +17,14 @@ export const metadata: Metadata = {
 };
 
 interface BrowsePageProps {
+  params: Promise<{ locale: string }>;
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }
 
-export default async function BrowsePage({ searchParams }: BrowsePageProps) {
+export default async function BrowsePage({ params, searchParams }: BrowsePageProps) {
+  const { locale } = await params;
+  setRequestLocale(locale as (typeof routing.locales)[number]);
+  const t = await getTranslations("Browse");
   const rawParams = await searchParams;
 
   // Flatten array params to first value for Zod parsing
@@ -93,8 +99,8 @@ export default async function BrowsePage({ searchParams }: BrowsePageProps) {
         <div className="min-w-0 flex-1">
           <Tabs defaultValue="grid">
             <TabsList className="mb-4">
-              <TabsTrigger value="grid">Grid</TabsTrigger>
-              <TabsTrigger value="map">Map</TabsTrigger>
+              <TabsTrigger value="grid">{t("listView")}</TabsTrigger>
+              <TabsTrigger value="map">{t("mapView")}</TabsTrigger>
             </TabsList>
 
             <TabsContent value="grid">

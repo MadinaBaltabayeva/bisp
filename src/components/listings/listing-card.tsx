@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
 
 interface ListingCardProps {
@@ -19,25 +22,27 @@ interface ListingCardProps {
   };
 }
 
-function formatPrice(listing: ListingCardProps["listing"]): string {
-  if (listing.priceDaily != null) {
-    return `$${listing.priceDaily}/day`;
-  }
-  if (listing.priceHourly != null) {
-    return `$${listing.priceHourly}/hr`;
-  }
-  if (listing.priceWeekly != null) {
-    return `$${listing.priceWeekly}/wk`;
-  }
-  if (listing.priceMonthly != null) {
-    return `$${listing.priceMonthly}/mo`;
-  }
-  return "Contact for price";
-}
-
 export function ListingCard({ listing }: ListingCardProps) {
+  const t = useTranslations("Listings.card");
   const coverImage = listing.images.find((img) => img.isCover) ?? listing.images[0];
-  const priceLabel = formatPrice(listing);
+
+  function formatPrice(): string {
+    if (listing.priceDaily != null) {
+      return `$${listing.priceDaily}${t("perDay")}`;
+    }
+    if (listing.priceHourly != null) {
+      return `$${listing.priceHourly}${t("perHour")}`;
+    }
+    if (listing.priceWeekly != null) {
+      return `$${listing.priceWeekly}${t("perWeek")}`;
+    }
+    if (listing.priceMonthly != null) {
+      return `$${listing.priceMonthly}${t("perMonth")}`;
+    }
+    return t("contactForPrice");
+  }
+
+  const priceLabel = formatPrice();
 
   return (
     <Link href={`/listings/${listing.id}`} className="group block">
@@ -53,13 +58,13 @@ export function ListingCard({ listing }: ListingCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center text-gray-400">
-              No photo
+              {t("noPhoto")}
             </div>
           )}
           {listing.aiVerified && (
             <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-green-600/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
               <ShieldCheck className="size-3" />
-              AI Verified
+              {t("aiVerified")}
             </div>
           )}
         </div>
@@ -78,7 +83,7 @@ export function ListingCard({ listing }: ListingCardProps) {
           <span className="truncate">{listing.location}</span>
         </div>
         <p className="font-semibold text-primary-600">
-          From {priceLabel}
+          {t("from", { price: priceLabel })}
         </p>
       </div>
     </Link>

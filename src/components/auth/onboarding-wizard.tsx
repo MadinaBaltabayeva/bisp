@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +24,8 @@ interface OnboardingWizardProps {
 }
 
 export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
+  const t = useTranslations("Auth");
+  const tCommon = useTranslations("Common");
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -105,10 +108,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>What should we call you?</FormLabel>
+                <FormLabel>{t("onboarding.displayName")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Your display name"
+                    placeholder={t("onboarding.displayNamePlaceholder")}
                     autoComplete="name"
                     {...field}
                   />
@@ -126,10 +129,10 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Where are you located?</FormLabel>
+                <FormLabel>{t("onboarding.location")}</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="City or region (e.g., San Francisco, CA)"
+                    placeholder={t("onboarding.locationPlaceholder")}
                     autoComplete="address-level2"
                     {...field}
                   />
@@ -150,12 +153,12 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               className="flex-1"
             >
               <ArrowLeft className="size-4" />
-              Back
+              {tCommon("back")}
             </Button>
           )}
           {step === 1 ? (
             <Button type="button" onClick={handleNext} className="w-full">
-              Next
+              {tCommon("next")}
               <ArrowRight className="size-4" />
             </Button>
           ) : (
@@ -165,7 +168,7 @@ export function OnboardingWizard({ onComplete }: OnboardingWizardProps) {
               ) : (
                 <Check className="size-4" />
               )}
-              Finish
+              {t("onboarding.complete")}
             </Button>
           )}
         </div>

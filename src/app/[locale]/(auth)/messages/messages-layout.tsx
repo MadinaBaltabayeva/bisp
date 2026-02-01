@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { MessageCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { ConversationList } from "@/components/messages/conversation-list";
 import { ChatView } from "@/components/messages/chat-view";
@@ -39,6 +40,7 @@ export function MessagesLayout({
   currentUserId,
   currentUser,
 }: MessagesLayoutProps) {
+  const t = useTranslations("Messages");
   const [activeConversationId, setActiveConversationId] = useState<
     string | null
   >(null);
@@ -79,10 +81,10 @@ export function MessagesLayout({
           <div className="flex flex-1 flex-col items-center justify-center text-center">
             <MessageCircle className="size-14 text-muted-foreground/30 mb-3" />
             <h3 className="text-lg font-medium text-muted-foreground">
-              Select a conversation
+              {t("selectConversation")}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground/70">
-              Choose a conversation from the list to start chatting.
+              {t("selectConversationHint")}
             </p>
           </div>
         )}

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "@/i18n/navigation";
 import { MessageCircle } from "lucide-react";
+import { useTranslations, useFormatter } from "next-intl";
 
 import { cn } from "@/lib/utils";
 
@@ -35,41 +36,43 @@ interface ConversationListProps {
   currentUserId: string;
 }
 
-function timeAgo(date: Date | string) {
-  const d = new Date(date);
-  const now = new Date();
-  const diffMs = now.getTime() - d.getTime();
-  const diffMins = Math.floor(diffMs / 60000);
-
-  if (diffMins < 1) return "now";
-  if (diffMins < 60) return `${diffMins}m`;
-
-  const diffHours = Math.floor(diffMins / 60);
-  if (diffHours < 24) return `${diffHours}h`;
-
-  const diffDays = Math.floor(diffHours / 24);
-  if (diffDays < 7) return `${diffDays}d`;
-
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-}
-
 export function ConversationList({
   conversations,
   activeConversationId,
   onSelect,
   currentUserId,
 }: ConversationListProps) {
+  const t = useTranslations("Messages");
+  const format = useFormatter();
   const router = useRouter();
+
+  function timeAgo(date: Date | string) {
+    const d = new Date(date);
+    const now = new Date();
+    const diffMs = now.getTime() - d.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+
+    if (diffMins < 1) return format.relativeTime(d, now);
+    if (diffMins < 60) return format.relativeTime(d, now);
+
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return format.relativeTime(d, now);
+
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return format.relativeTime(d, now);
+
+    return format.dateTime(d, { month: "short", day: "numeric" });
+  }
 
   if (conversations.length === 0) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-6 text-center">
         <MessageCircle className="size-12 text-muted-foreground/40 mb-3" />
         <h3 className="font-medium text-muted-foreground">
-          No conversations yet
+          {t("noConversations")}
         </h3>
         <p className="mt-1 text-sm text-muted-foreground/70">
-          Start a conversation by messaging a listing owner.
+          {t("noConversationsHint")}
         </p>
       </div>
     );
@@ -91,7 +94,7 @@ export function ConversationList({
           ? conv.lastMessage.content.length > 60
             ? conv.lastMessage.content.slice(0, 60) + "..."
             : conv.lastMessage.content
-          : "No messages yet";
+          : t("noMessagesYet");
         const isOwnMessage = conv.lastMessage?.senderId === currentUserId;
 
         return (
@@ -149,7 +152,7 @@ export function ConversationList({
                       : "text-muted-foreground"
                   )}
                 >
-                  {isOwnMessage ? `You: ${preview}` : preview}
+                  {isOwnMessage ? `${t("you")}: ${preview}` : preview}
                 </p>
                 {conv.unreadCount > 0 && (
                   <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">

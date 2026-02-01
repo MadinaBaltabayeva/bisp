@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   Search,
@@ -29,17 +30,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const NAV_LINKS = [
-  { href: "/", label: "Browse", icon: Search },
-  { href: "/listings/new", label: "List an Item", icon: PlusCircle },
-  { href: "/rentals", label: "My Rentals", icon: Calendar },
-  { href: "/messages", label: "Messages", icon: MessageCircle },
-];
+  { href: "/", labelKey: "browse", icon: Search },
+  { href: "/listings/new", labelKey: "listItem", icon: PlusCircle },
+  { href: "/rentals", labelKey: "myRentals", icon: Calendar },
+  { href: "/messages", labelKey: "messages", icon: MessageCircle },
+] as const;
 
 interface TopNavbarProps {
   onOpenAuthModal: (view: "login" | "signup") => void;
 }
 
 export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
+  const t = useTranslations("Navigation");
   const { data: session } = authClient.useSession();
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
@@ -86,7 +88,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                   <link.icon className="size-4" />
                   <NavBadgeIndicator count={badgeCount} />
                 </span>
-                {link.label}
+                {t(link.labelKey)}
               </Link>
             );
           })}
@@ -96,7 +98,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
               className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
             >
               <Shield className="size-4" />
-              Admin
+              {t("admin")}
             </Link>
           )}
         </nav>
@@ -135,20 +137,20 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                   <DropdownMenuItem asChild>
                     <Link href={`/profiles/${session.user.id}`}>
                       <User className="size-4" />
-                      My Profile
+                      {t("myProfile")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
                     <Link href="/settings">
                       <Settings className="size-4" />
-                      Settings
+                      {t("settings")}
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={handleSignOut} variant="destructive">
                   <LogOut className="size-4" />
-                  Log Out
+                  {t("logOut")}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -159,14 +161,14 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                 size="sm"
                 onClick={() => onOpenAuthModal("login")}
               >
-                Log In
+                {t("logIn")}
               </Button>
               <Button
                 size="sm"
                 className="hidden sm:inline-flex"
                 onClick={() => onOpenAuthModal("signup")}
               >
-                Sign Up
+                {t("signUp")}
               </Button>
             </div>
           )}

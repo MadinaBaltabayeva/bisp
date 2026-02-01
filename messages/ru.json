@@ -257,6 +257,7 @@
     "title": "Просмотр товаров",
     "searchPlaceholder": "Поиск товаров...",
     "filters": {
+      "title": "Фильтры",
       "category": "Категория",
       "priceRange": "Диапазон цен",
       "minPrice": "Мин. цена",

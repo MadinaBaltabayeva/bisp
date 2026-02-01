@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
   Wrench,
@@ -24,21 +27,37 @@ const ICON_MAP: Record<string, LucideIcon> = {
   home: Home,
 };
 
+// Map category slugs to translation keys (slugs use kebab-case, translations use camelCase)
+const SLUG_TO_KEY: Record<string, string> = {
+  "tools": "tools",
+  "electronics": "electronics",
+  "sports": "sports",
+  "outdoor": "outdoor",
+  "vehicles": "vehicles",
+  "clothing": "clothing",
+  "music": "music",
+  "home-garden": "homeGarden",
+};
+
 export function CategoryGrid() {
+  const tHome = useTranslations("HomePage");
+  const tCat = useTranslations("Categories");
+
   return (
     <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
         <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-          Browse by Category
+          {tHome("categories.title")}
         </h2>
         <p className="mt-2 text-gray-600">
-          Find what you need from our growing community
+          {tHome("categories.subtitle")}
         </p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
         {CATEGORIES.map((category) => {
           const IconComponent = ICON_MAP[category.icon] || Home;
+          const translationKey = SLUG_TO_KEY[category.slug] || category.slug;
 
           return (
             <Link key={category.slug} href={`/browse?category=${category.slug}`}>
@@ -49,11 +68,8 @@ export function CategoryGrid() {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">
-                      {category.name}
+                      {tCat(translationKey as Parameters<typeof tCat>[0])}
                     </h3>
-                    <p className="mt-1 text-xs text-gray-500 line-clamp-2">
-                      {category.description}
-                    </p>
                   </div>
                 </CardContent>
               </Card>

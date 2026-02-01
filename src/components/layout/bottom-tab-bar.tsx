@@ -1,19 +1,21 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { House, Search, PlusCircle, Calendar, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 
 const TAB_ITEMS = [
-  { href: "/", label: "Home", icon: House },
-  { href: "/#categories", label: "Browse", icon: Search },
-  { href: "/listings/new", label: "List", icon: PlusCircle },
-  { href: "/rentals", label: "Rentals", icon: Calendar },
-  { href: "/messages", label: "Messages", icon: MessageCircle },
-];
+  { href: "/", labelKey: "home", icon: House },
+  { href: "/#categories", labelKey: "browse", icon: Search },
+  { href: "/listings/new", labelKey: "list", icon: PlusCircle },
+  { href: "/rentals", labelKey: "rentals", icon: Calendar },
+  { href: "/messages", labelKey: "messages", icon: MessageCircle },
+] as const;
 
 export function BottomTabBar() {
+  const t = useTranslations("BottomNav");
   const pathname = usePathname();
   const badgeCounts = useBadgeCounts();
 
@@ -53,7 +55,7 @@ export function BottomTabBar() {
                 />
                 <NavBadgeIndicator count={badgeCount} />
               </span>
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}

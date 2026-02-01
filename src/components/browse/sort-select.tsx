@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import {
   Select,
@@ -11,13 +12,14 @@ import {
 } from "@/components/ui/select";
 
 const SORT_OPTIONS = [
-  { value: "date", label: "Newest First" },
-  { value: "price_asc", label: "Price: Low to High" },
-  { value: "price_desc", label: "Price: High to Low" },
-  { value: "relevance", label: "Most Relevant" },
+  { value: "date", labelKey: "sort.newest" },
+  { value: "price_asc", labelKey: "sort.priceAsc" },
+  { value: "price_desc", labelKey: "sort.priceDesc" },
+  { value: "relevance", labelKey: "sort.relevance" },
 ] as const;
 
 export function SortSelect() {
+  const t = useTranslations("Browse");
   const searchParams = useSearchParams();
   const router = useRouter();
   const currentSort = searchParams.get("sort") ?? "date";
@@ -35,12 +37,12 @@ export function SortSelect() {
   return (
     <Select value={currentSort} onValueChange={handleChange}>
       <SelectTrigger className="w-[180px]">
-        <SelectValue placeholder="Sort by" />
+        <SelectValue placeholder={t("sort.label")} />
       </SelectTrigger>
       <SelectContent>
         {SORT_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            {t(option.labelKey)}
           </SelectItem>
         ))}
       </SelectContent>

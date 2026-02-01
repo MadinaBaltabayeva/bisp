@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import {
   Dialog,
   DialogContent,
@@ -20,26 +21,12 @@ interface AuthModalProps {
   initialView?: "login" | "signup";
 }
 
-const VIEW_CONFIG: Record<AuthView, { title: string; description: string }> = {
-  login: {
-    title: "Welcome back",
-    description: "Log in to your RentHub account",
-  },
-  signup: {
-    title: "Create your account",
-    description: "Join RentHub to rent and list items in your community",
-  },
-  onboarding: {
-    title: "Complete your profile",
-    description: "Help your neighbors get to know you",
-  },
-};
-
 export function AuthModal({
   open,
   onOpenChange,
   initialView = "login",
 }: AuthModalProps) {
+  const t = useTranslations("Auth");
   const [view, setView] = useState<AuthView>(initialView);
 
   // Reset view when modal opens with a new initialView
@@ -49,7 +36,27 @@ export function AuthModal({
     }
   }, [open, initialView]);
 
-  const config = VIEW_CONFIG[view];
+  function getTitle() {
+    switch (view) {
+      case "login":
+        return t("login.title");
+      case "signup":
+        return t("signup.title");
+      case "onboarding":
+        return t("onboarding.title");
+    }
+  }
+
+  function getDescription() {
+    switch (view) {
+      case "login":
+        return t("login.description");
+      case "signup":
+        return t("signup.description");
+      case "onboarding":
+        return t("onboarding.description");
+    }
+  }
 
   // Prevent dismissing during onboarding (user should complete it)
   const handleOpenChange = (newOpen: boolean) => {
@@ -64,8 +71,8 @@ export function AuthModal({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>{config.title}</DialogTitle>
-          <DialogDescription>{config.description}</DialogDescription>
+          <DialogTitle>{getTitle()}</DialogTitle>
+          <DialogDescription>{getDescription()}</DialogDescription>
         </DialogHeader>
 
         {view === "login" && (

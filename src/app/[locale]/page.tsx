@@ -1,5 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import { ShoppingBag } from "lucide-react";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 
 import { HeroSection } from "@/components/landing/hero-section";
 import { CategoryGrid } from "@/components/landing/category-grid";
@@ -31,7 +33,14 @@ async function getPopularListings() {
   });
 }
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale as (typeof routing.locales)[number]);
+  const t = await getTranslations("HomePage");
   const listings = await getPopularListings();
 
   return (
@@ -43,14 +52,14 @@ export default async function Home() {
       <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            Popular Items
+            {t("popular.title")}
           </h2>
           {listings.length > 0 && (
             <Link
               href="/browse"
               className="text-sm font-medium text-primary hover:underline"
             >
-              View all
+              {t("popular.viewAll")}
             </Link>
           )}
         </div>
@@ -64,7 +73,7 @@ export default async function Home() {
         ) : (
           <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-gray-300 py-16 text-gray-400">
             <ShoppingBag className="size-10" />
-            <p className="text-sm">Popular items coming soon</p>
+            <p className="text-sm">{t("popular.comingSoon")}</p>
           </div>
         )}
       </section>

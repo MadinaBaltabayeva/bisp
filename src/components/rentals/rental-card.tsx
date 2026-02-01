@@ -3,9 +3,9 @@
 import { useTransition } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { format } from "date-fns";
 import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations, useFormatter } from "next-intl";
 
 import {
   approveRental,
@@ -41,21 +41,23 @@ interface RentalCardProps {
 }
 
 export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps) {
+  const t = useTranslations("Rentals");
   const [isPending, startTransition] = useTransition();
+  const format = useFormatter();
 
   const otherParty = role === "owner" ? rental.renter : rental.owner;
   const coverImage = rental.listing.images[0]?.url;
 
   function handleAction(
     action: (id: string) => Promise<{ success?: boolean; error?: string }>,
-    successMessage: string
+    successKey: string
   ) {
     startTransition(async () => {
       const result = await action(rental.id);
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(successMessage);
+        toast.success(successKey);
       }
     });
   }
@@ -65,8 +67,8 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
   const sameYear = startDate.getFullYear() === endDate.getFullYear();
 
   const dateDisplay = sameYear
-    ? `${format(startDate, "MMM d")} - ${format(endDate, "MMM d, yyyy")}`
-    : `${format(startDate, "MMM d, yyyy")} - ${format(endDate, "MMM d, yyyy")}`;
+    ? `${format.dateTime(startDate, { month: "short", day: "numeric" })} - ${format.dateTime(endDate, { month: "short", day: "numeric", year: "numeric" })}`
+    : `${format.dateTime(startDate, { month: "short", day: "numeric", year: "numeric" })} - ${format.dateTime(endDate, { month: "short", day: "numeric", year: "numeric" })}`;
 
   return (
     <Card className="overflow-hidden">
@@ -87,7 +89,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
               />
             ) : (
               <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                No image
+                {t("card.noImage")}
               </div>
             )}
           </Link>
@@ -123,7 +125,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                   )}
                 </div>
                 <span>
-                  {role === "owner" ? "Renter" : "Owner"}: {otherParty.name}
+                  {role === "owner" ? t("card.renter") : t("card.owner")}: {otherParty.name}
                 </span>
               </div>
             )}
@@ -135,7 +137,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 ${rental.totalPrice.toFixed(2)}
               </span>
               <span className="text-muted-foreground">
-                Deposit: ${rental.securityDeposit.toFixed(2)}
+                {t("card.deposit", { amount: `$${rental.securityDeposit.toFixed(2)}` })}
               </span>
             </div>
 
@@ -157,7 +159,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                   size="sm"
                   className="flex-1 bg-green-600 hover:bg-green-700"
                   onClick={() =>
-                    handleAction(approveRental, "Rental approved!")
+                    handleAction(approveRental, t("card.approved"))
                   }
                   disabled={isPending}
                 >
@@ -166,14 +168,14 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                   ) : (
                     <Check className="mr-1 size-3.5" />
                   )}
-                  Approve
+                  {t("actions.approve")}
                 </Button>
                 <Button
                   size="sm"
                   variant="outline"
                   className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
                   onClick={() =>
-                    handleAction(declineRental, "Rental declined.")
+                    handleAction(declineRental, t("card.declined"))
                   }
                   disabled={isPending}
                 >
@@ -182,7 +184,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                   ) : (
                     <X className="mr-1 size-3.5" />
                   )}
-                  Decline
+                  {t("actions.decline")}
                 </Button>
               </div>
             )}
@@ -193,7 +195,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 variant="outline"
                 className="w-full"
                 onClick={() =>
-                  handleAction(markReturned, "Item marked as returned.")
+                  handleAction(markReturned, t("card.markedReturned"))
                 }
                 disabled={isPending}
               >
@@ -202,7 +204,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 ) : (
                   <RotateCcw className="mr-1 size-3.5" />
                 )}
-                Mark Returned
+                {t("actions.markReturned")}
               </Button>
             )}
 
@@ -211,7 +213,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 size="sm"
                 className="w-full"
                 onClick={() =>
-                  handleAction(completeRental, "Rental completed!")
+                  handleAction(completeRental, t("card.completed"))
                 }
                 disabled={isPending}
               >
@@ -220,7 +222,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 ) : (
                   <CheckCircle className="mr-1 size-3.5" />
                 )}
-                Complete Rental
+                {t("actions.complete")}
               </Button>
             )}
           </div>
@@ -232,7 +234,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
             {hasReviewedByUser ? (
               <Badge variant="secondary" className="gap-1">
                 <CheckCheck className="size-3" />
-                Reviewed
+                {t("card.reviewed")}
               </Badge>
             ) : (
               <ReviewForm
