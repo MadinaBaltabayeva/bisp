@@ -6,6 +6,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslations } from "next-intl";
 
 import { profileSchema, type ProfileFormValues, type ProfileFormInput } from "@/lib/validations/user";
 import { updateProfile, updateProfilePhoto } from "@/features/auth/actions";
@@ -35,6 +36,8 @@ interface ProfileEditFormProps {
 }
 
 export function ProfileEditForm({ user }: ProfileEditFormProps) {
+  const t = useTranslations("Settings");
+  const tCommon = useTranslations("Common");
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [avatarUrl, setAvatarUrl] = useState(user.image);
@@ -66,10 +69,10 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
         toast.error(result.error);
       } else if (result.success && result.imageUrl) {
         setAvatarUrl(result.imageUrl);
-        toast.success("Profile photo updated");
+        toast.success(t("photoUpdated"));
       }
     } catch {
-      toast.error("Failed to upload photo");
+      toast.error(t("photoError"));
     } finally {
       setIsUploadingPhoto(false);
       // Reset file input so the same file can be selected again
@@ -90,7 +93,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
       if (result.error) {
         toast.error(result.error);
       } else if (result.success) {
-        toast.success("Profile updated");
+        toast.success(t("saveSuccess"));
         router.refresh();
       }
     });
@@ -125,7 +128,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             disabled={isUploadingPhoto}
           >
             <Camera className="size-4" />
-            {isUploadingPhoto ? "Uploading..." : "Change Photo"}
+            {isUploadingPhoto ? t("uploading") : t("changePhoto")}
           </Button>
           <input
             ref={fileInputRef}
@@ -135,7 +138,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             onChange={handlePhotoChange}
           />
           <p className="mt-1 text-xs text-muted-foreground">
-            JPEG, PNG, or WebP. Max 5MB.
+            {t("photoHint")}
           </p>
         </div>
       </div>
@@ -148,12 +151,12 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Display Name</FormLabel>
+                <FormLabel>{t("displayName")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="Your display name" {...field} />
+                  <Input placeholder={t("displayNamePlaceholder")} {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is the name other users will see.
+                  {t("displayNameHint")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -165,17 +168,17 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             name="bio"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Bio</FormLabel>
+                <FormLabel>{t("bio")}</FormLabel>
                 <FormControl>
                   <Textarea
-                    placeholder="Tell others a bit about yourself..."
+                    placeholder={t("bioPlaceholder")}
                     className="min-h-[120px] resize-y"
                     {...field}
                   />
                 </FormControl>
                 <div className="flex items-center justify-between">
                   <FormDescription>
-                    A short description about you.
+                    {t("bioHint")}
                   </FormDescription>
                   <span
                     className={`text-xs ${
@@ -197,12 +200,12 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
             name="location"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Location</FormLabel>
+                <FormLabel>{t("location")}</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. San Francisco, CA" {...field} />
+                  <Input placeholder={t("locationPlaceholder")} {...field} />
                 </FormControl>
                 <FormDescription>
-                  Helps other users know where you are based.
+                  {t("locationHint")}
                 </FormDescription>
                 <FormMessage />
               </FormItem>
@@ -214,10 +217,10 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
               {isPending ? (
                 <>
                   <Loader2 className="size-4 animate-spin" />
-                  Saving...
+                  {t("saving")}
                 </>
               ) : (
-                "Save Changes"
+                t("save")
               )}
             </Button>
             <Button
@@ -225,7 +228,7 @@ export function ProfileEditForm({ user }: ProfileEditFormProps) {
               variant="outline"
               onClick={() => router.push(`/profiles/${user.id}`)}
             >
-              Cancel
+              {tCommon("cancel")}
             </Button>
           </div>
         </form>

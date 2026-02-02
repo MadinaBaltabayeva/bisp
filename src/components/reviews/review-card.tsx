@@ -1,5 +1,8 @@
+"use client";
+
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
+import { useTranslations, useFormatter } from "next-intl";
 import { StarRating } from "@/components/reviews/star-rating";
 
 interface ReviewCardProps {
@@ -17,7 +20,10 @@ interface ReviewCardProps {
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
-  const dateStr = new Date(review.createdAt).toLocaleDateString("en-US", {
+  const t = useTranslations("Profile");
+  const format = useFormatter();
+
+  const dateStr = format.dateTime(new Date(review.createdAt), {
     month: "short",
     day: "numeric",
     year: "numeric",
@@ -65,7 +71,7 @@ export function ReviewCard({ review }: ReviewCardProps) {
           </p>
         ) : (
           <p className="mt-1.5 text-sm italic text-muted-foreground">
-            No comment
+            {t("noComment")}
           </p>
         )}
       </div>

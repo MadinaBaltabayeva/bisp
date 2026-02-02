@@ -8,16 +8,18 @@ import {
   ShieldAlert,
   Shield,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-const NAV_ITEMS = [
-  { href: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/users", label: "Users", icon: Users },
-  { href: "/admin/moderation", label: "Moderation", icon: ShieldAlert },
-];
-
 export function AdminSidebar() {
+  const t = useTranslations("Admin.sidebar");
   const pathname = usePathname();
+
+  const NAV_ITEMS = [
+    { href: "/admin/dashboard", labelKey: "dashboard" as const, icon: LayoutDashboard },
+    { href: "/admin/users", labelKey: "users" as const, icon: Users },
+    { href: "/admin/moderation", labelKey: "moderation" as const, icon: ShieldAlert },
+  ];
 
   return (
     <aside className="hidden md:flex w-60 flex-col border-r bg-white min-h-screen">
@@ -28,7 +30,7 @@ export function AdminSidebar() {
           className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="size-4" />
-          Back to RentHub
+          {t("backToRentHub")}
         </Link>
       </div>
 
@@ -48,7 +50,7 @@ export function AdminSidebar() {
               )}
             >
               <item.icon className="size-4" />
-              {item.label}
+              {t(item.labelKey)}
             </Link>
           );
         })}
@@ -58,7 +60,7 @@ export function AdminSidebar() {
       <div className="p-4 border-t">
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Shield className="size-4" />
-          Admin Panel
+          {t("panelLabel")}
         </div>
       </div>
     </aside>

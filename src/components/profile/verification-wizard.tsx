@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Upload, CheckCircle, Loader2, AlertCircle } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { completeVerification } from "@/features/auth/actions";
 
@@ -12,6 +13,8 @@ interface VerificationWizardProps {
 type Step = 1 | 2 | 3;
 
 export function VerificationWizard({ onComplete }: VerificationWizardProps) {
+  const t = useTranslations("Verification");
+  const tCommon = useTranslations("Common");
   const [step, setStep] = useState<Step>(1);
   const [idFile, setIdFile] = useState<File | null>(null);
   const [selfieFile, setSelfieFile] = useState<File | null>(null);
@@ -70,11 +73,11 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
           onComplete();
         }
       } catch {
-        setError("An unexpected error occurred. Please try again.");
+        setError(t("unexpectedError"));
         setProcessing(false);
       }
     }, 2500);
-  }, [onComplete]);
+  }, [onComplete, t]);
 
   const handleRetry = useCallback(() => {
     setError(null);
@@ -92,11 +95,11 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
           onComplete();
         }
       } catch {
-        setError("An unexpected error occurred. Please try again.");
+        setError(t("unexpectedError"));
         setProcessing(false);
       }
     }, 2500);
-  }, [onComplete]);
+  }, [onComplete, t]);
 
   return (
     <div className="space-y-6">
@@ -134,14 +137,15 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
       {step === 1 && (
         <div className="space-y-4">
           <div className="text-center">
-            <h3 className="text-lg font-semibold">Upload Government ID</h3>
+            <h3 className="text-lg font-semibold">{t("steps.uploadTitle")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Upload your government-issued photo ID
+              {t("steps.uploadDescription")}
             </p>
           </div>
 
           <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-6 cursor-pointer hover:border-blue-400 transition-colors">
             {idPreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={idPreview}
                 alt="ID preview"
@@ -151,7 +155,7 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               <>
                 <Upload className="size-10 text-gray-400" />
                 <span className="mt-2 text-sm text-muted-foreground">
-                  Click to select a photo of your ID
+                  {t("steps.uploadPrompt")}
                 </span>
               </>
             )}
@@ -168,7 +172,7 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
             disabled={!idFile}
             onClick={() => setStep(2)}
           >
-            Continue
+            {t("continue")}
           </Button>
         </div>
       )}
@@ -177,14 +181,15 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
       {step === 2 && (
         <div className="space-y-4">
           <div className="text-center">
-            <h3 className="text-lg font-semibold">Upload Selfie</h3>
+            <h3 className="text-lg font-semibold">{t("steps.selfieTitle")}</h3>
             <p className="mt-1 text-sm text-muted-foreground">
-              Take a selfie or upload a photo of yourself
+              {t("steps.selfieDescription")}
             </p>
           </div>
 
           <label className="flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 p-6 cursor-pointer hover:border-blue-400 transition-colors">
             {selfiePreview ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={selfiePreview}
                 alt="Selfie preview"
@@ -194,7 +199,7 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               <>
                 <Upload className="size-10 text-gray-400" />
                 <span className="mt-2 text-sm text-muted-foreground">
-                  Click to select a selfie photo
+                  {t("steps.selfiePrompt")}
                 </span>
               </>
             )}
@@ -212,14 +217,14 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               className="flex-1"
               onClick={() => setStep(1)}
             >
-              Back
+              {tCommon("back")}
             </Button>
             <Button
               className="flex-1"
               disabled={!selfieFile}
               onClick={handleStartProcessing}
             >
-              Continue
+              {t("continue")}
             </Button>
           </div>
         </div>
@@ -233,10 +238,10 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               <Loader2 className="mx-auto size-12 animate-spin text-blue-600" />
               <div>
                 <h3 className="text-lg font-semibold">
-                  Verifying your identity...
+                  {t("processing")}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  This may take a moment
+                  {t("processingHint")}
                 </p>
               </div>
             </>
@@ -247,11 +252,10 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               <CheckCircle className="mx-auto size-12 text-green-600" />
               <div>
                 <h3 className="text-lg font-semibold text-green-700">
-                  Verification complete!
+                  {t("completeTitle")}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">
-                  Your identity has been verified. A badge will now appear on
-                  your profile.
+                  {t("completeDescription")}
                 </p>
               </div>
             </>
@@ -262,12 +266,12 @@ export function VerificationWizard({ onComplete }: VerificationWizardProps) {
               <AlertCircle className="mx-auto size-12 text-red-600" />
               <div>
                 <h3 className="text-lg font-semibold text-red-700">
-                  Verification failed
+                  {t("failedTitle")}
                 </h3>
                 <p className="mt-1 text-sm text-muted-foreground">{error}</p>
               </div>
               <Button onClick={handleRetry} className="w-full">
-                Retry
+                {tCommon("retry")}
               </Button>
             </>
           )}

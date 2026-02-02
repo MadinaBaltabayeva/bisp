@@ -1,42 +1,63 @@
 import { Users, Package, Calendar, ShieldAlert } from "lucide-react";
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { getAdminStats, getActivityFeed } from "@/features/admin/queries";
 import { StatCard } from "@/components/admin/stat-card";
 import { ActivityFeed } from "@/components/admin/activity-feed";
 
-export default async function AdminDashboardPage() {
-  const [stats, feed] = await Promise.all([
+interface PageProps {
+  params: Promise<{ locale: string }>;
+}
+
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  const t = await getTranslations({ locale, namespace: "Metadata" });
+  return {
+    title: t("adminDashboard.title"),
+    description: t("adminDashboard.description"),
+  };
+}
+
+export default async function AdminDashboardPage({ params }: PageProps) {
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
+  setRequestLocale(locale);
+
+  const [stats, feed, t] = await Promise.all([
     getAdminStats(),
     getActivityFeed(),
+    getTranslations("Admin.dashboard"),
   ]);
 
   return (
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-muted-foreground">
-          Platform overview and recent activity
-        </p>
+        <h1 className="text-2xl font-bold">{t("title")}</h1>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
-          title="Total Users"
+          title={t("totalUsers")}
           value={stats.totalUsers}
           icon={Users}
           iconBgColor="bg-blue-100"
           iconColor="text-blue-600"
         />
         <StatCard
-          title="Active Listings"
+          title={t("activeListings")}
           value={stats.totalListings}
           icon={Package}
           iconBgColor="bg-green-100"
           iconColor="text-green-600"
         />
         <StatCard
-          title="Total Rentals"
+          title={t("totalRentals")}
           value={stats.totalRentals}
           icon={Calendar}
           iconBgColor="bg-purple-100"

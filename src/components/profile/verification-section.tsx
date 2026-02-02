@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { BadgeCheck, ShieldAlert } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -19,6 +20,7 @@ interface VerificationSectionProps {
 }
 
 export function VerificationSection({ isVerified }: VerificationSectionProps) {
+  const t = useTranslations("Verification");
   const [dialogOpen, setDialogOpen] = useState(false);
   const router = useRouter();
 
@@ -37,11 +39,10 @@ export function VerificationSection({ isVerified }: VerificationSectionProps) {
           <BadgeCheck className="size-10 shrink-0 text-green-600" />
           <div>
             <h3 className="font-semibold text-green-800">
-              Identity Verified
+              {t("verified")}
             </h3>
             <p className="text-sm text-green-700">
-              Your identity has been verified. A verification badge is
-              displayed on your profile and listings.
+              {t("verifiedDescription")}
             </p>
           </div>
         </CardContent>
@@ -56,15 +57,14 @@ export function VerificationSection({ isVerified }: VerificationSectionProps) {
           <ShieldAlert className="size-10 shrink-0 text-blue-600" />
           <div className="flex-1">
             <h3 className="font-semibold text-gray-900">
-              Verify Your Identity
+              {t("verifyTitle")}
             </h3>
             <p className="text-sm text-muted-foreground">
-              Get a verification badge on your profile and listings. This helps
-              build trust with other users.
+              {t("verifyDescription")}
             </p>
           </div>
           <Button onClick={() => setDialogOpen(true)}>
-            Start Verification
+            {t("startVerification")}
           </Button>
         </CardContent>
       </Card>
@@ -72,9 +72,9 @@ export function VerificationSection({ isVerified }: VerificationSectionProps) {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Identity Verification</DialogTitle>
+            <DialogTitle>{t("dialogTitle")}</DialogTitle>
             <DialogDescription>
-              Complete the steps below to verify your identity.
+              {t("dialogDescription")}
             </DialogDescription>
           </DialogHeader>
           <VerificationWizard onComplete={handleComplete} />

@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { MapPin, Star, Calendar, Pencil } from "lucide-react";
+import { getTranslations, getFormatter } from "next-intl/server";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -19,14 +20,15 @@ interface ProfileHeaderProps {
   isOwnProfile: boolean;
 }
 
-function formatJoinDate(date: Date): string {
-  return `Joined ${date.toLocaleDateString("en-US", {
+export async function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
+  const t = await getTranslations("Profile");
+  const format = await getFormatter();
+
+  const joinDate = format.dateTime(new Date(user.createdAt), {
     month: "long",
     year: "numeric",
-  })}`;
-}
+  });
 
-export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
   return (
     <Card>
       <CardContent className="flex flex-col items-center gap-4 py-8 sm:flex-row sm:items-start sm:gap-6">
@@ -47,7 +49,7 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
               <Button variant="outline" size="sm" asChild>
                 <Link href="/settings">
                   <Pencil className="size-3.5" />
-                  Edit Profile
+                  {t("editProfile")}
                 </Link>
               </Button>
             )}
@@ -70,19 +72,18 @@ export function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
                   {user.averageRating.toFixed(1)}
                 </span>
                 <span>
-                  ({user.reviewCount}{" "}
-                  {user.reviewCount === 1 ? "review" : "reviews"})
+                  ({t("reviewsCount", { count: user.reviewCount })})
                 </span>
               </>
             ) : (
-              <span className="text-muted-foreground">No reviews yet</span>
+              <span className="text-muted-foreground">{t("noReviews")}</span>
             )}
           </div>
 
           {/* Join date */}
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Calendar className="size-4" />
-            <span>{formatJoinDate(user.createdAt)}</span>
+            <span>{t("joined", { date: joinDate })}</span>
           </div>
         </div>
       </CardContent>

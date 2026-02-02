@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Star } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { reviewSchema, type ReviewInput } from "@/lib/validations/review";
 import { createReview } from "@/features/reviews/actions";
@@ -31,6 +32,7 @@ export function ReviewForm({
   revieweeId,
   revieweeName,
 }: ReviewFormProps) {
+  const t = useTranslations("Reviews");
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
@@ -52,7 +54,7 @@ export function ReviewForm({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success("Review submitted!");
+        toast.success(t("submitSuccess"));
         setOpen(false);
         form.reset();
       }
@@ -64,16 +66,16 @@ export function ReviewForm({
       <DialogTrigger asChild>
         <Button size="sm" variant="outline" className="gap-1.5">
           <Star className="size-3.5" />
-          Leave Review
+          {t("leaveReview")}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Review {revieweeName}</DialogTitle>
+          <DialogTitle>{t("reviewTitle", { name: revieweeName })}</DialogTitle>
         </DialogHeader>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Rating</Label>
+            <Label>{t("rating")}</Label>
             <StarRating
               value={ratingValue}
               onChange={(val) => form.setValue("rating", val, { shouldValidate: true })}
@@ -87,10 +89,10 @@ export function ReviewForm({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="comment">Comment (optional)</Label>
+            <Label htmlFor="comment">{t("commentOptional")}</Label>
             <Textarea
               id="comment"
-              placeholder="Share your experience..."
+              placeholder={t("commentPlaceholder")}
               {...form.register("comment")}
               maxLength={1000}
               rows={4}
@@ -103,7 +105,7 @@ export function ReviewForm({
           </div>
 
           <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? "Submitting..." : "Submit Review"}
+            {isPending ? t("submitting") : t("submit")}
           </Button>
         </form>
       </DialogContent>

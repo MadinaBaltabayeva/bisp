@@ -1,6 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { Package, Star, UserCircle } from "lucide-react";
+import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
 import { ReviewCard } from "@/components/reviews/review-card";
 
@@ -56,17 +57,19 @@ function SectionHeading({
   );
 }
 
-export function ProfileSections({
+export async function ProfileSections({
   user,
   isOwnProfile,
   reviews = [],
   listings = [],
 }: ProfileSectionsProps) {
+  const t = await getTranslations("Profile");
+
   return (
     <div className="space-y-8">
       {/* Listings Section */}
       <section>
-        <SectionHeading icon={Package} title="Listings" count={listings.length} />
+        <SectionHeading icon={Package} title={t("listings")} count={listings.length} />
         {listings.length > 0 ? (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {listings.map((listing) => (
@@ -110,7 +113,7 @@ export function ProfileSections({
           <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
             <Package className="mx-auto size-10 text-gray-300" />
             <p className="mt-2 text-sm font-medium text-gray-500">
-              No listings yet
+              {t("noListings")}
             </p>
           </div>
         )}
@@ -118,7 +121,7 @@ export function ProfileSections({
 
       {/* Reviews Section */}
       <section>
-        <SectionHeading icon={Star} title="Reviews" count={reviews.length} />
+        <SectionHeading icon={Star} title={t("reviews")} count={reviews.length} />
         {reviews.length > 0 ? (
           <div className="mt-2 divide-y">
             {reviews.map((review) => (
@@ -129,10 +132,10 @@ export function ProfileSections({
           <div className="mt-4 rounded-lg border border-dashed border-gray-200 bg-gray-50 p-8 text-center">
             <Star className="mx-auto size-10 text-gray-300" />
             <p className="mt-2 text-sm font-medium text-gray-500">
-              No reviews yet
+              {t("noReviews")}
             </p>
             <p className="mt-1 text-xs text-gray-400">
-              Reviews will appear here after completed rentals
+              {t("noReviewsHint")}
             </p>
           </div>
         )}
@@ -140,7 +143,7 @@ export function ProfileSections({
 
       {/* About Section */}
       <section>
-        <SectionHeading icon={UserCircle} title="About" />
+        <SectionHeading icon={UserCircle} title={t("about")} />
         <div className="mt-4">
           {user.bio ? (
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-gray-700">
@@ -151,12 +154,12 @@ export function ProfileSections({
               <UserCircle className="mx-auto size-10 text-gray-300" />
               <p className="mt-2 text-sm font-medium text-gray-500">
                 {isOwnProfile
-                  ? "You haven't written a bio yet"
-                  : "This user hasn't written a bio yet"}
+                  ? t("noBioSelf")
+                  : t("noBioOther")}
               </p>
               {isOwnProfile && (
                 <p className="mt-1 text-xs text-gray-400">
-                  Add a bio from your profile settings
+                  {t("addBioHint")}
                 </p>
               )}
             </div>
