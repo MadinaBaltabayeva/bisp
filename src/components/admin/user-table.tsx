@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useState, useTransition } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations, useFormatter } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { format } from "date-fns";
 import { Loader2, Ban, CheckCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { suspendUser, unsuspendUser } from "@/features/admin/actions";
@@ -53,6 +53,8 @@ export function UserTable({
   initialPage,
   pageSize,
 }: UserTableProps) {
+  const t = useTranslations("Admin.users");
+  const format = useFormatter();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(
@@ -107,8 +109,8 @@ export function UserTable({
         } else {
           toast.success(
             isSuspended
-              ? `${userName} has been unsuspended`
-              : `${userName} has been suspended`
+              ? t("unsuspended", { name: userName })
+              : t("suspendedToast", { name: userName })
           );
           router.refresh();
         }
@@ -126,7 +128,7 @@ export function UserTable({
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <Input
-          placeholder="Search by name or email..."
+          placeholder={t("searchPlaceholder")}
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
           className="sm:max-w-xs"
@@ -136,9 +138,9 @@ export function UserTable({
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All</SelectItem>
-            <SelectItem value="active">Active</SelectItem>
-            <SelectItem value="suspended">Suspended</SelectItem>
+            <SelectItem value="all">{t("all")}</SelectItem>
+            <SelectItem value="active">{t("active")}</SelectItem>
+            <SelectItem value="suspended">{t("suspended")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -148,20 +150,20 @@ export function UserTable({
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Role</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Joined</TableHead>
-              <TableHead>Listings</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>{t("name")}</TableHead>
+              <TableHead>{t("email")}</TableHead>
+              <TableHead>{t("role")}</TableHead>
+              <TableHead>{t("status")}</TableHead>
+              <TableHead>{t("joined")}</TableHead>
+              <TableHead>{t("listings")}</TableHead>
+              <TableHead>{t("actions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {initialUsers.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  No users found.
+                  {t("noUsersFound")}
                 </TableCell>
               </TableRow>
             ) : (
@@ -193,18 +195,18 @@ export function UserTable({
                   </TableCell>
                   <TableCell>
                     {user.isSuspended ? (
-                      <Badge variant="destructive">Suspended</Badge>
+                      <Badge variant="destructive">{t("suspended")}</Badge>
                     ) : (
                       <Badge
                         variant="outline"
                         className="border-green-300 text-green-700 bg-green-50"
                       >
-                        Active
+                        {t("active")}
                       </Badge>
                     )}
                   </TableCell>
                   <TableCell className="text-muted-foreground">
-                    {format(new Date(user.createdAt), "MMM d, yyyy")}
+                    {format.dateTime(new Date(user.createdAt), { year: "numeric", month: "short", day: "numeric" })}
                   </TableCell>
                   <TableCell>{user._count.listings}</TableCell>
                   <TableCell>
@@ -222,7 +224,7 @@ export function UserTable({
                           }
                           disabled={isPending}
                           title={
-                            user.isSuspended ? "Unsuspend" : "Suspend"
+                            user.isSuspended ? t("unsuspend") : t("suspend")
                           }
                         >
                           {isPending ? (
@@ -252,9 +254,7 @@ export function UserTable({
       {totalPages > 1 && (
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            Showing {(currentPage - 1) * pageSize + 1} to{" "}
-            {Math.min(currentPage * pageSize, initialTotal)} of {initialTotal}{" "}
-            users
+            {t("showingRange", { from: (currentPage - 1) * pageSize + 1, to: Math.min(currentPage * pageSize, initialTotal), total: initialTotal })}
           </p>
           <div className="flex items-center gap-2">
             <Button
@@ -264,10 +264,10 @@ export function UserTable({
               disabled={currentPage <= 1}
             >
               <ChevronLeft className="size-4" />
-              Previous
+              {t("previous")}
             </Button>
             <span className="text-sm text-muted-foreground">
-              Page {currentPage} of {totalPages}
+              {t("page", { current: currentPage, total: totalPages })}
             </span>
             <Button
               variant="outline"
@@ -275,7 +275,7 @@ export function UserTable({
               onClick={() => handlePageChange(currentPage + 1)}
               disabled={currentPage >= totalPages}
             >
-              Next
+              {t("next")}
               <ChevronRight className="size-4" />
             </Button>
           </div>

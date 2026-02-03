@@ -64,7 +64,7 @@ export default async function AdminDashboardPage({ params }: PageProps) {
           iconColor="text-purple-600"
         />
         <StatCard
-          title="Flagged Content"
+          title={t("flaggedContent")}
           value={stats.flaggedCount}
           icon={ShieldAlert}
           iconBgColor="bg-orange-100"

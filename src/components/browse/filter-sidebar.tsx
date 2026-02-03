@@ -237,10 +237,10 @@ function FilterContent({ categories, totalResults }: FilterSidebarProps) {
           }
         >
           <SelectTrigger className="w-full">
-            <SelectValue placeholder="All Regions" />
+            <SelectValue placeholder={t("filters.allRegions")} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Regions</SelectItem>
+            <SelectItem value="all">{t("filters.allRegions")}</SelectItem>
             {US_REGIONS.map((region) => (
               <SelectItem key={region} value={region}>
                 {region}

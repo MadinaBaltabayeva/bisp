@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { ShieldCheck } from "lucide-react";
 import { ModerationCard } from "./moderation-card";
@@ -18,6 +19,7 @@ interface ModerationQueueProps {
 }
 
 export function ModerationQueue({ listings }: ModerationQueueProps) {
+  const t = useTranslations("Admin.moderation");
   const router = useRouter();
 
   const handleAction = () => {
@@ -30,9 +32,9 @@ export function ModerationQueue({ listings }: ModerationQueueProps) {
         <div className="flex size-16 items-center justify-center rounded-full bg-green-100 mb-4">
           <ShieldCheck className="size-8 text-green-600" />
         </div>
-        <h3 className="text-lg font-semibold">All clear!</h3>
+        <h3 className="text-lg font-semibold">{t("allClear")}</h3>
         <p className="text-sm text-muted-foreground mt-1">
-          No flagged listings require review at this time.
+          {t("noFlaggedListings")}
         </p>
       </div>
     );

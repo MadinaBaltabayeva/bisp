@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
-import { setRequestLocale } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Toaster } from "sonner";
 import { routing } from "@/i18n/routing";
 import { AppShell } from "@/components/layout/app-shell";
@@ -13,16 +13,22 @@ const inter = Inter({
   subsets: ["latin", "cyrillic"],
 });
 
-export const metadata: Metadata = {
-  title: "RentHub - Rent Anything From Your Neighbors",
-  description:
-    "A peer-to-peer rental marketplace where anyone can list items for rent or browse and rent items from others.",
-};
-
 type Props = {
   children: React.ReactNode;
   params: Promise<{ locale: string }>;
 };
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({
+    locale: locale as (typeof routing.locales)[number],
+    namespace: "Metadata",
+  });
+  return {
+    title: t("home.title"),
+    description: t("home.description"),
+  };
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { rejectListing } from "@/features/admin/actions";
@@ -27,13 +28,14 @@ export function RejectDialog({
   listingTitle,
   onRejected,
 }: RejectDialogProps) {
+  const t = useTranslations("Admin.moderation");
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const handleSubmit = () => {
     if (reason.trim().length < 10) {
-      toast.error("Rejection reason must be at least 10 characters");
+      toast.error(t("reasonTooShort"));
       return;
     }
 
@@ -42,7 +44,7 @@ export function RejectDialog({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`"${listingTitle}" has been rejected`);
+        toast.success(t("rejectedToast", { title: listingTitle }));
         setOpen(false);
         setReason("");
         onRejected();
@@ -55,28 +57,27 @@ export function RejectDialog({
       <DialogTrigger asChild>
         <Button variant="outline" size="sm" className="text-destructive border-destructive/30 hover:bg-destructive/10">
           <XCircle className="size-4" />
-          Reject
+          {t("reject")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reject Listing</DialogTitle>
+          <DialogTitle>{t("rejectListing")}</DialogTitle>
           <DialogDescription>
-            Provide a reason for rejecting &quot;{listingTitle}&quot;. This will
-            be recorded in the moderation log.
+            {t("rejectDescription", { title: listingTitle })}
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
           <Textarea
-            placeholder="Enter rejection reason (minimum 10 characters)..."
+            placeholder={t("reasonMinLength")}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={4}
             disabled={isPending}
           />
           <p className="text-xs text-muted-foreground">
-            {reason.length}/10 characters minimum
+            {t("reasonCounter", { count: reason.length })}
           </p>
         </div>
 
@@ -86,7 +87,7 @@ export function RejectDialog({
             onClick={() => setOpen(false)}
             disabled={isPending}
           >
-            Cancel
+            {t("cancel")}
           </Button>
           <Button
             variant="destructive"
@@ -96,10 +97,10 @@ export function RejectDialog({
             {isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Rejecting...
+                {t("rejecting")}
               </>
             ) : (
-              "Reject Listing"
+              t("rejectListing")
             )}
           </Button>
         </DialogFooter>

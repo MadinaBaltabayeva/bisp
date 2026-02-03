@@ -1,3 +1,5 @@
+"use client";
+
 import {
   UserPlus,
   Package,
@@ -5,7 +7,7 @@ import {
   Star,
   Activity,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { useTranslations, useFormatter } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const TYPE_ICONS: Record<string, typeof Activity> = {
@@ -24,14 +26,17 @@ interface ActivityFeedProps {
 }
 
 export function ActivityFeed({ items }: ActivityFeedProps) {
+  const t = useTranslations("Admin.dashboard");
+  const format = useFormatter();
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle>{t("recentActivity")}</CardTitle>
       </CardHeader>
       <CardContent>
         {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No recent activity.</p>
+          <p className="text-sm text-muted-foreground">{t("noActivity")}</p>
         ) : (
           <div className="space-y-4">
             {items.map((item, i) => {
@@ -44,9 +49,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm">{item.description}</p>
                     <p className="text-xs text-muted-foreground">
-                      {formatDistanceToNow(new Date(item.timestamp), {
-                        addSuffix: true,
-                      })}
+                      {format.relativeTime(new Date(item.timestamp))}
                     </p>
                   </div>
                 </div>

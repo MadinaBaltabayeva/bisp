@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useTranslations } from "next-intl";
 import { Trash2, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -31,6 +32,7 @@ export function DeleteUserDialog({
   userName,
   onDeleted,
 }: DeleteUserDialogProps) {
+  const t = useTranslations("Admin.users");
   const [open, setOpen] = useState(false);
   const [counts, setCounts] = useState<{
     listings: number;
@@ -54,7 +56,7 @@ export function DeleteUserDialog({
         }
         setCounts(result as { listings: number; rentals: number; messages: number; reviews: number });
       } catch {
-        toast.error("Failed to load deletion counts");
+        toast.error(t("deletionCountsError"));
         setOpen(false);
       } finally {
         setLoading(false);
@@ -70,7 +72,7 @@ export function DeleteUserDialog({
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`${userName} has been deleted`);
+        toast.success(t("deletedToast", { name: userName }));
         setOpen(false);
         onDeleted();
       }
@@ -86,10 +88,9 @@ export function DeleteUserDialog({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Delete {userName}?</AlertDialogTitle>
+          <AlertDialogTitle>{t("deleteTitle", { name: userName })}</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the user
-            account and all associated data.
+            {t("deleteWarning")}
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -100,19 +101,19 @@ export function DeleteUserDialog({
         ) : counts ? (
           <div className="rounded-md bg-destructive/10 p-4 text-sm">
             <p className="font-medium text-destructive mb-2">
-              This will permanently delete:
+              {t("willDelete")}
             </p>
             <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-              <li>{counts.listings} listing{counts.listings !== 1 ? "s" : ""}</li>
-              <li>{counts.rentals} rental{counts.rentals !== 1 ? "s" : ""}</li>
-              <li>{counts.messages} message{counts.messages !== 1 ? "s" : ""}</li>
-              <li>{counts.reviews} review{counts.reviews !== 1 ? "s" : ""}</li>
+              <li>{t("listingsCount", { count: counts.listings })}</li>
+              <li>{t("rentalsCount", { count: counts.rentals })}</li>
+              <li>{t("messagesCount", { count: counts.messages })}</li>
+              <li>{t("reviewsCount", { count: counts.reviews })}</li>
             </ul>
           </div>
         ) : null}
 
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             variant="destructive"
             onClick={handleDelete}
@@ -121,10 +122,10 @@ export function DeleteUserDialog({
             {isPending ? (
               <>
                 <Loader2 className="size-4 animate-spin" />
-                Deleting...
+                {t("deleting")}
               </>
             ) : (
-              "Delete User"
+              t("deleteUser")
             )}
           </AlertDialogAction>
         </AlertDialogFooter>

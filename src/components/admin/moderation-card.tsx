@@ -2,6 +2,7 @@
 
 import { useTransition, useCallback } from "react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { approveListing } from "@/features/admin/actions";
@@ -41,6 +42,7 @@ function parseModerationResult(raw: string | null): {
 }
 
 export function ModerationCard({ listing, onAction }: ModerationCardProps) {
+  const t = useTranslations("Admin.moderation");
   const [isPending, startTransition] = useTransition();
   const modResult = parseModerationResult(listing.moderationResult);
   const coverImage = listing.images[0]?.url;
@@ -51,7 +53,7 @@ export function ModerationCard({ listing, onAction }: ModerationCardProps) {
       if (result.error) {
         toast.error(result.error);
       } else {
-        toast.success(`"${listing.title}" has been approved`);
+        toast.success(t("approvedToast", { title: listing.title }));
         onAction();
       }
     });
@@ -80,7 +82,7 @@ export function ModerationCard({ listing, onAction }: ModerationCardProps) {
               <div>
                 <h3 className="font-semibold">{listing.title}</h3>
                 <p className="text-sm text-muted-foreground">
-                  by {listing.owner.name} ({listing.owner.email})
+                  {t("by")} {listing.owner.name} ({listing.owner.email})
                 </p>
               </div>
               <Badge variant="secondary">{listing.category.name}</Badge>
@@ -90,14 +92,14 @@ export function ModerationCard({ listing, onAction }: ModerationCardProps) {
             {modResult.flagReason && (
               <div className="rounded-md bg-orange-50 border border-orange-200 p-3">
                 <p className="text-sm font-medium text-orange-800">
-                  AI Flag Reason
+                  {t("aiFlagReason")}
                 </p>
                 <p className="text-sm text-orange-700 mt-1">
                   {modResult.flagReason}
                 </p>
                 {modResult.confidence !== undefined && (
                   <p className="text-xs text-orange-600 mt-1">
-                    Confidence: {Math.round(modResult.confidence * 100)}%
+                    {t("confidence", { value: Math.round(modResult.confidence * 100) })}
                   </p>
                 )}
               </div>
@@ -117,7 +119,7 @@ export function ModerationCard({ listing, onAction }: ModerationCardProps) {
                 ) : (
                   <CheckCircle className="size-4" />
                 )}
-                Approve
+                {t("approve")}
               </Button>
               <RejectDialog
                 listingId={listing.id}
