@@ -10,6 +10,15 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+// Mock search module
+const mockUpsertFtsEntry = vi.fn();
+const mockDeleteFtsEntry = vi.fn();
+vi.mock("@/lib/search", () => ({
+  upsertFtsEntry: (...args: unknown[]) => mockUpsertFtsEntry(...args),
+  deleteFtsEntry: (...args: unknown[]) => mockDeleteFtsEntry(...args),
+  ensureFtsTable: vi.fn(),
+}));
+
 // Start with AI disabled (no API key)
 const mockOpenAI = {
   moderations: {
@@ -31,7 +40,7 @@ vi.mock("@/lib/openai", () => ({
   isAIEnabled: () => aiEnabled,
 }));
 
-import { moderateListing, suggestCategoryAndTags } from "../ai";
+import { moderateListing, suggestCategoryAndTags, translateListingText, translateAndIndexListing } from "../ai";
 import { prisma } from "@/lib/db";
 
 describe("listing AI", () => {
@@ -237,6 +246,128 @@ describe("listing AI", () => {
 
       const result = await suggestCategoryAndTags("data:image/jpeg;base64,abc");
       expect(result).toBeNull();
+    });
+  });
+
+  describe("translate", () => {
+    it("returns null when AI is not enabled", async () => {
+      aiEnabled = false;
+      const result = await translateListingText("Power Drill", "A great drill");
+      expect(result).toBeNull();
+    });
+
+    it("calls gpt-4o-mini with translation prompt and returns parsed JSON", async () => {
+      aiEnabled = true;
+      const translations = {
+        en: { title: "Power Drill", description: "A great drill" },
+        ru: { title: "Дрель", description: "Отличная дрель" },
+        uz: { title: "Matkap", description: "Ajoyib matkap" },
+      };
+
+      mockOpenAI.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(translations),
+            },
+          },
+        ],
+      });
+
+      const result = await translateListingText("Power Drill", "A great drill");
+
+      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          max_tokens: 1000,
+        })
+      );
+      expect(result).toEqual(translations);
+    });
+
+    it("returns null on API error", async () => {
+      aiEnabled = true;
+      mockOpenAI.chat.completions.create.mockRejectedValue(
+        new Error("Translation API Error")
+      );
+
+      const result = await translateListingText("Power Drill", "A great drill");
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("translateAndIndex", () => {
+    it("indexes with translations when AI available", async () => {
+      aiEnabled = true;
+
+      vi.mocked(prisma.listing.findUnique).mockResolvedValue({
+        id: "listing_456",
+        title: "Power Drill",
+        description: "A great drill",
+        tags: "drill,tool",
+      } as ReturnType<typeof prisma.listing.findUnique> extends Promise<infer T> ? T : never);
+
+      const translations = {
+        en: { title: "Power Drill", description: "A great drill" },
+        ru: { title: "Дрель", description: "Отличная дрель" },
+        uz: { title: "Matkap", description: "Ajoyib matkap" },
+      };
+
+      mockOpenAI.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(translations),
+            },
+          },
+        ],
+      });
+
+      await translateAndIndexListing("listing_456");
+
+      expect(mockUpsertFtsEntry).toHaveBeenCalledWith("listing_456", {
+        titleEn: "Power Drill",
+        titleRu: "Дрель",
+        titleUz: "Matkap",
+        descEn: "A great drill",
+        descRu: "Отличная дрель",
+        descUz: "Ajoyib matkap",
+        tags: "drill,tool",
+      });
+    });
+
+    it("indexes with original text when AI disabled", async () => {
+      aiEnabled = false;
+
+      vi.mocked(prisma.listing.findUnique).mockResolvedValue({
+        id: "listing_789",
+        title: "Power Drill",
+        description: "A great drill",
+        tags: "drill",
+      } as ReturnType<typeof prisma.listing.findUnique> extends Promise<infer T> ? T : never);
+
+      await translateAndIndexListing("listing_789");
+
+      expect(mockUpsertFtsEntry).toHaveBeenCalledWith("listing_789", {
+        titleEn: "Power Drill",
+        titleRu: "Power Drill",
+        titleUz: "Power Drill",
+        descEn: "A great drill",
+        descRu: "A great drill",
+        descUz: "A great drill",
+        tags: "drill",
+      });
+    });
+
+    it("handles missing listing gracefully", async () => {
+      aiEnabled = true;
+
+      vi.mocked(prisma.listing.findUnique).mockResolvedValue(null);
+
+      await translateAndIndexListing("nonexistent");
+
+      expect(mockUpsertFtsEntry).not.toHaveBeenCalled();
     });
   });
 });
