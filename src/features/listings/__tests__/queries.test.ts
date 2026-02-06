@@ -15,6 +15,27 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
+// Mock FTS5 search module
+const mockFtsSearch = vi.fn();
+const mockGetDictionary = vi.fn();
+const mockEnsureFtsTable = vi.fn();
+
+vi.mock("@/lib/search", () => ({
+  ftsSearch: (...args: unknown[]) => mockFtsSearch(...args),
+  getDictionary: (...args: unknown[]) => mockGetDictionary(...args),
+  ensureFtsTable: (...args: unknown[]) => mockEnsureFtsTable(...args),
+}));
+
+// Mock search-utils (use real implementations for buildFtsQuery)
+vi.mock("../search-utils", async () => {
+  const actual =
+    await vi.importActual<typeof import("../search-utils")>("../search-utils");
+  return {
+    ...actual,
+    // Keep real implementations for all functions
+  };
+});
+
 import { searchListings, getListingById, getUserListings } from "../queries";
 
 describe("listing queries", () => {
@@ -22,40 +43,139 @@ describe("listing queries", () => {
     vi.clearAllMocks();
     mockFindMany.mockResolvedValue([]);
     mockFindUnique.mockResolvedValue(null);
+    mockFtsSearch.mockResolvedValue([]);
+    mockGetDictionary.mockResolvedValue([]);
   });
 
-  describe("search", () => {
-    it("returns active listings matching keyword in title", async () => {
+  describe("search - FTS5 path", () => {
+    it("uses FTS5 two-step query when q is provided", async () => {
+      mockFtsSearch.mockResolvedValue([
+        { listing_id: "1", rank: -5 },
+      ]);
       mockFindMany.mockResolvedValue([
         { id: "1", title: "Power Drill", status: "active" },
       ]);
 
-      await searchListings({ q: "drill", sort: "date" });
+      const result = await searchListings({ q: "drill", sort: "date" });
+
+      // Step 1: FTS5 search called
+      expect(mockFtsSearch).toHaveBeenCalledWith('"drill"*');
+
+      // Step 2: Prisma called with matched IDs
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: "active",
+            id: { in: ["1"] },
+          }),
+        })
+      );
+
+      // Returns new shape
+      expect(result.listings).toHaveLength(1);
+      expect(result.suggestion).toBeNull();
+      expect(result.highlightTerms).toEqual(["drill"]);
+    });
+
+    it("returns suggestion when FTS5 finds no results", async () => {
+      mockFtsSearch.mockResolvedValue([]);
+      mockGetDictionary.mockResolvedValue(["bicycle", "car", "drill"]);
+
+      const result = await searchListings({ q: "bycicle", sort: "date" });
+
+      expect(mockFtsSearch).toHaveBeenCalled();
+      expect(mockGetDictionary).toHaveBeenCalled();
+      expect(result.listings).toHaveLength(0);
+      expect(result.suggestion).toBe("bicycle");
+      expect(result.highlightTerms).toEqual([]);
+    });
+
+    it("preserves FTS5 rank order for relevance sort", async () => {
+      mockFtsSearch.mockResolvedValue([
+        { listing_id: "2", rank: -10 },
+        { listing_id: "1", rank: -5 },
+      ]);
+      mockFindMany.mockResolvedValue([
+        { id: "1", title: "Drill", status: "active" },
+        { id: "2", title: "Power Drill Kit", status: "active" },
+      ]);
+
+      const result = await searchListings({ q: "drill", sort: "relevance" });
+
+      // ID "2" has better rank (-10 < -5), should be first
+      expect(result.listings[0].id).toBe("2");
+      expect(result.listings[1].id).toBe("1");
+    });
+
+    it("returns highlightTerms when query has results", async () => {
+      mockFtsSearch.mockResolvedValue([
+        { listing_id: "1", rank: -5 },
+      ]);
+      mockFindMany.mockResolvedValue([
+        { id: "1", title: "Power Drill", status: "active" },
+      ]);
+
+      const result = await searchListings({
+        q: "power drill",
+        sort: "date",
+      });
+
+      expect(result.highlightTerms).toEqual(["power", "drill"]);
+    });
+
+    it("combines FTS5 results with category filter", async () => {
+      mockFtsSearch.mockResolvedValue([
+        { listing_id: "1", rank: -5 },
+      ]);
+      mockFindMany.mockResolvedValue([
+        { id: "1", title: "Power Drill", status: "active" },
+      ]);
+
+      await searchListings({
+        q: "drill",
+        category: "tools",
+        sort: "date",
+      });
 
       expect(mockFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
             status: "active",
-            OR: expect.arrayContaining([
-              { title: { contains: "drill" } },
-            ]),
+            id: { in: ["1"] },
+            category: { slug: "tools" },
+          }),
+        })
+      );
+    });
+  });
+
+  describe("search - Prisma-only path", () => {
+    it("falls back to Prisma-only when no query", async () => {
+      await searchListings({ sort: "date" });
+
+      // FTS5 should NOT be called
+      expect(mockFtsSearch).not.toHaveBeenCalled();
+
+      // Prisma should be called directly
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: "active",
           }),
         })
       );
     });
 
-    it("returns active listings matching keyword in description", async () => {
-      await searchListings({ q: "power", sort: "date" });
+    it("returns { listings, suggestion: null, highlightTerms: [] } for no-query path", async () => {
+      mockFindMany.mockResolvedValue([
+        { id: "1", title: "Drill", status: "active" },
+      ]);
 
-      expect(mockFindMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            OR: expect.arrayContaining([
-              { description: { contains: "power" } },
-            ]),
-          }),
-        })
-      );
+      const result = await searchListings({ sort: "date" });
+
+      expect(result.listings).toHaveLength(1);
+      expect(result.suggestion).toBeNull();
+      expect(result.highlightTerms).toEqual([]);
     });
 
     it("excludes non-active listings from results", async () => {
@@ -119,26 +239,6 @@ describe("listing queries", () => {
         })
       );
     });
-
-    it("combines keyword search with category filter", async () => {
-      await searchListings({
-        q: "drill",
-        category: "tools",
-        sort: "date",
-      });
-
-      expect(mockFindMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            status: "active",
-            category: { slug: "tools" },
-            OR: expect.arrayContaining([
-              { title: { contains: "drill" } },
-            ]),
-          }),
-        })
-      );
-    });
   });
 
   describe("location", () => {
@@ -170,7 +270,7 @@ describe("listing queries", () => {
         },
       ]);
 
-      const results = await searchListings({
+      const result = await searchListings({
         latitude: 37.7749,
         longitude: -122.4194,
         radius: 10,
@@ -194,8 +294,8 @@ describe("listing queries", () => {
       );
 
       // Post-filter should keep nearby listing and exclude distant one
-      expect(results).toHaveLength(1);
-      expect(results[0].id).toBe("1");
+      expect(result.listings).toHaveLength(1);
+      expect(result.listings[0].id).toBe("1");
     });
   });
 
@@ -226,6 +326,23 @@ describe("listing queries", () => {
       expect(mockFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           orderBy: { priceDaily: "desc" },
+        })
+      );
+    });
+
+    it("uses price sort even with FTS5 results", async () => {
+      mockFtsSearch.mockResolvedValue([
+        { listing_id: "1", rank: -5 },
+      ]);
+      mockFindMany.mockResolvedValue([
+        { id: "1", title: "Drill", status: "active", priceDaily: 10 },
+      ]);
+
+      await searchListings({ q: "drill", sort: "price_asc" });
+
+      expect(mockFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { priceDaily: "asc" },
         })
       );
     });

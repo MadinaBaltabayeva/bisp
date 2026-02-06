@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/db";
 import type { SearchParams } from "@/lib/validations/listing";
+import { ftsSearch, getDictionary } from "@/lib/search";
+import {
+  buildFtsQuery,
+  suggestCorrection,
+  extractHighlightTerms,
+} from "./search-utils";
 
 /**
  * Compute Haversine distance between two points in miles.
@@ -23,22 +29,47 @@ function haversineDistance(
   return R * c;
 }
 
+/** Shared include clause for listing queries */
+const LISTING_INCLUDE = {
+  images: {
+    where: { isCover: true },
+    take: 1,
+  },
+  category: true,
+  owner: {
+    select: {
+      id: true,
+      name: true,
+      image: true,
+      idVerified: true,
+    },
+  },
+} as const;
+
+/** Return type for searchListings */
+export interface SearchListingsResult {
+  listings: Awaited<ReturnType<typeof prisma.listing.findMany>>;
+  suggestion: string | null;
+  highlightTerms: string[];
+}
+
 /**
- * Search listings with filters, keyword search, location radius, and sorting.
+ * Search listings with FTS5 full-text search, filters, location radius, and sorting.
+ *
+ * When `params.q` is provided, uses FTS5 two-step query:
+ * 1. FTS5 returns ranked listing IDs via BM25
+ * 2. Prisma fetches full data with filters applied
+ *
+ * When no query, falls back to Prisma-only path.
  */
-export async function searchListings(params: SearchParams) {
+export async function searchListings(
+  params: SearchParams
+): Promise<SearchListingsResult> {
+  // Build filter conditions (shared between FTS5 and Prisma-only paths)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {
     status: "active",
   };
-
-  // Keyword search on title and description
-  if (params.q) {
-    where.OR = [
-      { title: { contains: params.q } },
-      { description: { contains: params.q } },
-    ];
-  }
 
   // Category filter by slug
   if (params.category) {
@@ -72,9 +103,7 @@ export async function searchListings(params: SearchParams) {
     const lng = params.longitude!;
     const radiusMiles = params.radius!;
 
-    // 1 degree latitude ~ 69 miles
     const latDelta = radiusMiles / 69;
-    // 1 degree longitude ~ 69 * cos(lat) miles
     const lngDelta = radiusMiles / (69 * Math.cos((lat * Math.PI) / 180));
 
     where.latitude = {
@@ -87,7 +116,82 @@ export async function searchListings(params: SearchParams) {
     };
   }
 
-  // Dynamic sort
+  // FTS5 path: when search query is provided
+  if (params.q) {
+    const ftsQuery = buildFtsQuery(params.q);
+
+    // If query builder returns empty (all stopwords/empty input), fall through to Prisma-only
+    if (ftsQuery) {
+      const ftsResults = await ftsSearch(ftsQuery);
+
+      // No results: suggest correction
+      if (ftsResults.length === 0) {
+        const dictionary = await getDictionary();
+        const suggestion = suggestCorrection(params.q, dictionary);
+        return { listings: [], suggestion, highlightTerms: [] };
+      }
+
+      // Combine FTS5 IDs with Prisma filters
+      const matchedIds = ftsResults.map((r) => r.listing_id);
+      where.id = { in: matchedIds };
+
+      // Determine sort: for price sorts, let Prisma handle; for relevance/date, re-sort by FTS rank
+      const usePriceSort =
+        params.sort === "price_asc" || params.sort === "price_desc";
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let orderBy: any;
+      if (usePriceSort) {
+        orderBy =
+          params.sort === "price_asc"
+            ? { priceDaily: "asc" }
+            : { priceDaily: "desc" };
+      } else {
+        // For relevance and date sort with query, we re-sort by FTS rank after fetch
+        orderBy = undefined;
+      }
+
+      const listings = await prisma.listing.findMany({
+        where,
+        ...(orderBy ? { orderBy } : {}),
+        include: LISTING_INCLUDE,
+      });
+
+      // Apply Haversine post-filter
+      let filteredListings = listings;
+      if (hasGeoFilter) {
+        const lat = params.latitude!;
+        const lng = params.longitude!;
+        const radiusMiles = params.radius!;
+        filteredListings = listings.filter((listing) => {
+          if (listing.latitude == null || listing.longitude == null)
+            return false;
+          return (
+            haversineDistance(lat, lng, listing.latitude, listing.longitude) <=
+            radiusMiles
+          );
+        });
+      }
+
+      // Re-sort by FTS5 BM25 rank (more negative = better) for relevance sort
+      if (!usePriceSort) {
+        const rankMap = new Map(
+          ftsResults.map((r) => [r.listing_id, r.rank])
+        );
+        filteredListings.sort(
+          (a, b) => (rankMap.get(a.id) ?? 0) - (rankMap.get(b.id) ?? 0)
+        );
+      }
+
+      return {
+        listings: filteredListings,
+        suggestion: null,
+        highlightTerms: extractHighlightTerms(params.q),
+      };
+    }
+  }
+
+  // Prisma-only path: no query or empty FTS query
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let orderBy: any;
   switch (params.sort) {
@@ -107,42 +211,29 @@ export async function searchListings(params: SearchParams) {
   const listings = await prisma.listing.findMany({
     where,
     orderBy,
-    include: {
-      images: {
-        where: { isCover: true },
-        take: 1,
-      },
-      category: true,
-      owner: {
-        select: {
-          id: true,
-          name: true,
-          image: true,
-          idVerified: true,
-        },
-      },
-    },
+    include: LISTING_INCLUDE,
   });
 
-  // Post-filter by exact Haversine distance to exclude corners of bounding box
+  // Post-filter by exact Haversine distance
   if (hasGeoFilter) {
     const lat = params.latitude!;
     const lng = params.longitude!;
     const radiusMiles = params.radius!;
 
-    return listings.filter((listing) => {
-      if (listing.latitude == null || listing.longitude == null) return false;
-      const distance = haversineDistance(
-        lat,
-        lng,
-        listing.latitude,
-        listing.longitude
-      );
-      return distance <= radiusMiles;
-    });
+    return {
+      listings: listings.filter((listing) => {
+        if (listing.latitude == null || listing.longitude == null) return false;
+        return (
+          haversineDistance(lat, lng, listing.latitude, listing.longitude) <=
+          radiusMiles
+        );
+      }),
+      suggestion: null,
+      highlightTerms: [],
+    };
   }
 
-  return listings;
+  return { listings, suggestion: null, highlightTerms: [] };
 }
 
 /**

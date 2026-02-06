@@ -34,7 +34,7 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
   }
 
   const parsed = searchSchema.parse(flatParams);
-  const listings = await searchListings(parsed);
+  const { listings } = await searchListings(parsed);
   const categories = await prisma.category.findMany({
     orderBy: { sortOrder: "asc" },
   });
