@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { listingSchema } from "@/lib/validations/listing";
 import { getSession } from "@/features/auth/queries";
-import { moderateListing, suggestCategoryAndTags } from "./ai";
+import { moderateListing, suggestCategoryAndTags, translateAndIndexListing } from "./ai";
+import { deleteFtsEntry } from "@/lib/search";
 import { checkNotSuspended } from "@/features/admin/queries";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
@@ -115,6 +116,9 @@ export async function createListing(formData: FormData) {
 
     // Fire-and-forget AI moderation
     moderateListing(listing.id).catch(console.error);
+
+    // Fire-and-forget FTS indexing with translation
+    translateAndIndexListing(listing.id).catch(console.error);
 
     revalidatePath("/browse");
     revalidatePath("/");
@@ -268,6 +272,9 @@ export async function updateListing(listingId: string, formData: FormData) {
       moderateListing(listingId).catch(console.error);
     }
 
+    // Always re-index FTS (any field change could affect search)
+    translateAndIndexListing(listingId).catch(console.error);
+
     revalidatePath(`/listings/${listingId}`);
     revalidatePath("/browse");
     revalidatePath("/");
@@ -305,6 +312,9 @@ export async function deleteListing(listingId: string) {
     await prisma.listing.delete({
       where: { id: listingId },
     });
+
+    // Fire-and-forget FTS cleanup
+    deleteFtsEntry(listingId).catch(console.error);
 
     revalidatePath("/browse");
     revalidatePath("/");

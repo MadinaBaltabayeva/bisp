@@ -1,5 +1,6 @@
 import { openai, isAIEnabled } from "@/lib/openai";
 import { prisma } from "@/lib/db";
+import { upsertFtsEntry } from "@/lib/search";
 import { readFile } from "fs/promises";
 import { join } from "path";
 
@@ -145,5 +146,99 @@ Return ONLY valid JSON.`,
   } catch (error) {
     console.error("AI suggestion failed:", error);
     return null;
+  }
+}
+
+/**
+ * Translate listing title and description to English, Russian, and Uzbek using GPT-4o-mini.
+ * Returns null if AI is disabled or on error (graceful degradation).
+ */
+export async function translateListingText(
+  title: string,
+  description: string
+): Promise<{
+  en: { title: string; description: string };
+  ru: { title: string; description: string };
+  uz: { title: string; description: string };
+} | null> {
+  if (!isAIEnabled() || !openai) return null;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Translate the following listing title and description into English, Russian, and Uzbek. Return ONLY valid JSON with this structure:
+{
+  "en": { "title": "...", "description": "..." },
+  "ru": { "title": "...", "description": "..." },
+  "uz": { "title": "...", "description": "..." }
+}
+
+Title: ${title}
+Description: ${description}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return null;
+
+    const parsed = JSON.parse(content) as {
+      en: { title: string; description: string };
+      ru: { title: string; description: string };
+      uz: { title: string; description: string };
+    };
+
+    return parsed;
+  } catch (error) {
+    console.error("Translation failed:", error);
+    return null;
+  }
+}
+
+/**
+ * Translate a listing and sync it into the FTS5 index.
+ * Falls back to indexing original text in all columns if AI is unavailable.
+ */
+export async function translateAndIndexListing(
+  listingId: string
+): Promise<void> {
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { id: true, title: true, description: true, tags: true },
+  });
+
+  if (!listing) return;
+
+  const translations = await translateListingText(
+    listing.title,
+    listing.description
+  );
+
+  if (translations) {
+    await upsertFtsEntry(listingId, {
+      titleEn: translations.en.title,
+      titleRu: translations.ru.title,
+      titleUz: translations.uz.title,
+      descEn: translations.en.description,
+      descRu: translations.ru.description,
+      descUz: translations.uz.description,
+      tags: listing.tags || "",
+    });
+  } else {
+    // AI disabled or error -- index original text in all columns for basic FTS
+    await upsertFtsEntry(listingId, {
+      titleEn: listing.title,
+      titleRu: listing.title,
+      titleUz: listing.title,
+      descEn: listing.description,
+      descRu: listing.description,
+      descUz: listing.description,
+      tags: listing.tags || "",
+    });
   }
 }
