@@ -233,6 +233,34 @@ async function main() {
 
   console.log(`\nSeeded ${listingsCreated} listings with ${imagesCreated} images`);
 
+  // === FTS5 search index backfill ===
+  // Ensure FTS5 virtual table exists
+  await prisma.$executeRawUnsafe(
+    `CREATE VIRTUAL TABLE IF NOT EXISTS listing_search USING fts5(listing_id UNINDEXED, title_en, title_ru, title_uz, desc_en, desc_ru, desc_uz, tags, tokenize='unicode61')`
+  );
+  // Clear existing FTS data for idempotency
+  await prisma.$executeRawUnsafe(`DELETE FROM listing_search`);
+  // Backfill all listings into FTS (using original text for all language columns -- no OpenAI in seed)
+  const allListingsForFts = await prisma.listing.findMany({
+    select: { id: true, title: true, description: true, tags: true },
+  });
+  for (const listing of allListingsForFts) {
+    await prisma.$executeRawUnsafe(
+      `INSERT INTO listing_search(listing_id, title_en, title_ru, title_uz, desc_en, desc_ru, desc_uz, tags) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      listing.id,
+      listing.title,
+      listing.title,
+      listing.title,
+      listing.description,
+      listing.description,
+      listing.description,
+      listing.tags || ""
+    );
+  }
+  console.log(
+    `Backfilled ${allListingsForFts.length} listings into FTS5 search index`
+  );
+
   // === Seed rentals, conversations, messages, and reviews ===
   try {
     // Get all users and listings for ID resolution
