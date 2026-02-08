@@ -9,6 +9,7 @@ import { SearchBar } from "@/components/browse/search-bar";
 import { SortSelect } from "@/components/browse/sort-select";
 import { FilterSidebar } from "@/components/browse/filter-sidebar";
 import { ListingGrid } from "@/components/browse/listing-grid";
+import { DidYouMean } from "@/components/browse/did-you-mean";
 import { LazyMapView } from "@/components/map/lazy-map-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -34,7 +35,7 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
   }
 
   const parsed = searchSchema.parse(flatParams);
-  const { listings } = await searchListings(parsed);
+  const { listings, suggestion, highlightTerms } = await searchListings(parsed);
   const categories = await prisma.category.findMany({
     orderBy: { sortOrder: "asc" },
   });
@@ -88,6 +89,13 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
         </div>
       </div>
 
+      {/* Did you mean? suggestion banner */}
+      {suggestion && parsed.q && (
+        <Suspense>
+          <DidYouMean suggestion={suggestion} currentQuery={parsed.q} />
+        </Suspense>
+      )}
+
       {/* Main content with sidebar */}
       <div className="flex gap-8">
         {/* Filter sidebar: shows desktop aside + mobile sheet trigger */}
@@ -104,7 +112,7 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
             </TabsList>
 
             <TabsContent value="grid">
-              <ListingGrid listings={listings} />
+              <ListingGrid listings={listings} highlightTerms={highlightTerms} />
             </TabsContent>
 
             <TabsContent value="map">
