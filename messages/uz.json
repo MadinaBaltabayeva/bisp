@@ -282,7 +282,9 @@
     "noResultsHint": "Filtrlar yoki qidiruv soʻzlarini oʻzgartirib koʻring.",
     "mapView": "Xarita koʻrinishi",
     "listView": "Roʻyxat koʻrinishi",
-    "resultsCount": "{count, plural, one {# buyum} other {# buyum}} topildi"
+    "resultsCount": "{count, plural, one {# buyum} other {# buyum}} topildi",
+    "didYouMean": "<link>\"{suggestion}\"</link> deb nazarda tutdingizmi?",
+    "searchTip": "Imlo yoki boshqa kalit so'zlarni tekshirib ko'ring"
   },
   "Rentals": {
     "title": "Ijaralarim",

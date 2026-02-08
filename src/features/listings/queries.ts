@@ -46,9 +46,14 @@ const LISTING_INCLUDE = {
   },
 } as const;
 
+/** Listing type with relations included by search queries */
+type ListingWithRelations = Awaited<
+  ReturnType<typeof prisma.listing.findMany<{ include: typeof LISTING_INCLUDE }>>
+>[number];
+
 /** Return type for searchListings */
 export interface SearchListingsResult {
-  listings: Awaited<ReturnType<typeof prisma.listing.findMany>>;
+  listings: ListingWithRelations[];
   suggestion: string | null;
   highlightTerms: string[];
 }

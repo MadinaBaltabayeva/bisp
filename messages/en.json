@@ -282,7 +282,9 @@
     "noResultsHint": "Try adjusting your filters or search terms.",
     "mapView": "Map View",
     "listView": "List View",
-    "resultsCount": "{count, plural, one {# item} other {# items}} found"
+    "resultsCount": "{count, plural, one {# item} other {# items}} found",
+    "didYouMean": "Did you mean <link>\"{suggestion}\"</link>?",
+    "searchTip": "Try checking your spelling or using different keywords"
   },
   "Rentals": {
     "title": "My Rentals",

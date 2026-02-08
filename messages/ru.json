@@ -282,7 +282,9 @@
     "noResultsHint": "Попробуйте изменить фильтры или поисковый запрос.",
     "mapView": "Вид карты",
     "listView": "Вид списка",
-    "resultsCount": "{count, plural, one {# товар} few {# товара} many {# товаров} other {# товаров}} найдено"
+    "resultsCount": "{count, plural, one {# товар} few {# товара} many {# товаров} other {# товаров}} найдено",
+    "didYouMean": "Возможно, вы имели в виду <link>\"{suggestion}\"</link>?",
+    "searchTip": "Проверьте правильность написания или используйте другие ключевые слова"
   },
   "Rentals": {
     "title": "Мои аренды",

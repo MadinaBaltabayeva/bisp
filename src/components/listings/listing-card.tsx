@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
@@ -20,9 +21,30 @@ interface ListingCardProps {
     category: { id: string; name: string; slug: string };
     owner?: { idVerified: boolean };
   };
+  highlightTerms?: string[];
 }
 
-export function ListingCard({ listing }: ListingCardProps) {
+function highlightText(text: string, terms?: string[]): ReactNode {
+  if (!terms || terms.length === 0) return text;
+
+  const escaped = terms.map((t) =>
+    t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+  );
+  const regex = new RegExp(`(${escaped.join("|")})`, "gi");
+  const parts = text.split(regex);
+
+  return parts.map((part, i) =>
+    regex.test(part) ? (
+      <mark key={i} className="rounded bg-yellow-200 px-0.5 text-gray-900">
+        {part}
+      </mark>
+    ) : (
+      part
+    )
+  );
+}
+
+export function ListingCard({ listing, highlightTerms }: ListingCardProps) {
   const t = useTranslations("Listings.card");
   const coverImage = listing.images.find((img) => img.isCover) ?? listing.images[0];
 
@@ -73,7 +95,7 @@ export function ListingCard({ listing }: ListingCardProps) {
       <div className="mt-2 space-y-1">
         <div className="flex items-center gap-1.5">
           <h3 className="truncate font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-            {listing.title}
+            {highlightText(listing.title, highlightTerms)}
           </h3>
           {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
         </div>
