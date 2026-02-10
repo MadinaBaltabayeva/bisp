@@ -11,10 +11,25 @@ vi.mock("@/features/auth/queries", () => ({
   getSession: () => mockGetSession(),
 }));
 
+// Mock admin queries (checkNotSuspended)
+vi.mock("@/features/admin/queries", () => ({
+  checkNotSuspended: vi.fn().mockResolvedValue({}),
+}));
+
+// Mock search module
+vi.mock("@/lib/search", () => ({
+  deleteFtsEntry: vi.fn().mockResolvedValue(undefined),
+  upsertFtsEntry: vi.fn().mockResolvedValue(undefined),
+  ensureFtsTable: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock AI
+const mockTranslateForLocale = vi.fn();
 vi.mock("../ai", () => ({
   moderateListing: vi.fn().mockResolvedValue(undefined),
   suggestCategoryAndTags: vi.fn().mockResolvedValue(null),
+  translateAndIndexListing: vi.fn().mockResolvedValue(undefined),
+  translateForLocale: (...args: unknown[]) => mockTranslateForLocale(...args),
 }));
 
 // Mock file system
@@ -54,6 +69,10 @@ const mockFindUnique = vi.fn();
 const mockDeleteMany = vi.fn();
 const mockFindFirst = vi.fn();
 
+const mockTranslationFindUnique = vi.fn();
+const mockTranslationUpsert = vi.fn();
+const mockTranslationDeleteMany = vi.fn();
+
 vi.mock("@/lib/db", () => ({
   prisma: {
     listing: {
@@ -66,10 +85,15 @@ vi.mock("@/lib/db", () => ({
       deleteMany: (...args: unknown[]) => mockDeleteMany(...args),
       findFirst: (...args: unknown[]) => mockFindFirst(...args),
     },
+    listingTranslation: {
+      findUnique: (...args: unknown[]) => mockTranslationFindUnique(...args),
+      upsert: (...args: unknown[]) => mockTranslationUpsert(...args),
+      deleteMany: (...args: unknown[]) => mockTranslationDeleteMany(...args),
+    },
   },
 }));
 
-import { createListing, updateListing, deleteListing } from "../actions";
+import { createListing, updateListing, deleteListing, translateListing } from "../actions";
 
 function makeFormData(fields: Record<string, string>): FormData {
   const fd = new FormData();
@@ -196,6 +220,131 @@ describe("listing actions", () => {
         error: "You can only edit your own listings.",
       });
       expect(mockUpdate).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("edit - cache invalidation", () => {
+    it("deletes cached translations when title/description changes", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_1", name: "Alice" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        title: "Old Title",
+        description: "Old description",
+      });
+      mockUpdate.mockResolvedValue({ id: "listing_1" });
+      mockFindFirst.mockResolvedValue(null);
+
+      const fd = makeFormData({
+        ...validFields,
+        title: "New Title", // Changed from "Old Title"
+      });
+      const result = await updateListing("listing_1", fd);
+
+      expect(result).toEqual({ success: true });
+      expect(mockTranslationDeleteMany).toHaveBeenCalledWith({
+        where: { listingId: "listing_1" },
+      });
+    });
+  });
+
+  describe("translateListing", () => {
+    it("returns cached translation without calling AI when cache exists", async () => {
+      mockTranslationFindUnique.mockResolvedValue({
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+        detectedLanguage: "en",
+      });
+
+      const result = await translateListing("listing_1", "ru");
+
+      expect(result).toEqual({
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+        detectedLanguage: "en",
+      });
+      expect(mockTranslateForLocale).not.toHaveBeenCalled();
+    });
+
+    it("calls AI and caches result on cache miss", async () => {
+      mockTranslationFindUnique.mockResolvedValue(null);
+      mockFindUnique.mockResolvedValue({
+        title: "Power Drill",
+        description: "A great drill",
+      });
+      mockTranslateForLocale.mockResolvedValue({
+        detectedLanguage: "en",
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+      });
+      mockTranslationUpsert.mockResolvedValue({});
+
+      const result = await translateListing("listing_1", "ru");
+
+      expect(mockTranslateForLocale).toHaveBeenCalledWith(
+        "Power Drill",
+        "A great drill",
+        "ru"
+      );
+      expect(mockTranslationUpsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { listingId_locale: { listingId: "listing_1", locale: "ru" } },
+          create: expect.objectContaining({
+            listingId: "listing_1",
+            locale: "ru",
+            translatedTitle: "Дрель",
+            translatedDescription: "Отличная дрель",
+            detectedLanguage: "en",
+          }),
+        })
+      );
+      expect(result).toEqual({
+        detectedLanguage: "en",
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+      });
+    });
+
+    it("returns error when listing not found", async () => {
+      mockTranslationFindUnique.mockResolvedValue(null);
+      mockFindUnique.mockResolvedValue(null);
+
+      const result = await translateListing("nonexistent", "ru");
+
+      expect(result).toEqual({ error: "Listing not found." });
+    });
+
+    it("returns error when AI translation fails", async () => {
+      mockTranslationFindUnique.mockResolvedValue(null);
+      mockFindUnique.mockResolvedValue({
+        title: "Power Drill",
+        description: "A great drill",
+      });
+      mockTranslateForLocale.mockResolvedValue(null);
+
+      const result = await translateListing("listing_1", "ru");
+
+      expect(result).toEqual({ error: "Translation unavailable." });
+    });
+
+    it("uses upsert to handle race conditions", async () => {
+      mockTranslationFindUnique.mockResolvedValue(null);
+      mockFindUnique.mockResolvedValue({
+        title: "Power Drill",
+        description: "A great drill",
+      });
+      mockTranslateForLocale.mockResolvedValue({
+        detectedLanguage: "en",
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+      });
+      mockTranslationUpsert.mockResolvedValue({});
+
+      await translateListing("listing_1", "ru");
+
+      // Verify upsert is used (not create) for idempotent cache writes
+      expect(mockTranslationUpsert).toHaveBeenCalled();
     });
   });
 

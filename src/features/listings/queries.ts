@@ -269,6 +269,21 @@ export async function getListingById(id: string) {
 }
 
 /**
+ * Get a cached translation for a listing in a specific locale.
+ * Returns null if no cached translation exists.
+ */
+export async function getCachedTranslation(listingId: string, locale: string) {
+  return prisma.listingTranslation.findUnique({
+    where: { listingId_locale: { listingId, locale } },
+    select: {
+      translatedTitle: true,
+      translatedDescription: true,
+      detectedLanguage: true,
+    },
+  });
+}
+
+/**
  * Get all listings for a specific user.
  */
 export async function getUserListings(userId: string) {

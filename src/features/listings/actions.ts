@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { listingSchema } from "@/lib/validations/listing";
 import { getSession } from "@/features/auth/queries";
-import { moderateListing, suggestCategoryAndTags, translateAndIndexListing } from "./ai";
+import { moderateListing, suggestCategoryAndTags, translateAndIndexListing, translateForLocale } from "./ai";
 import { deleteFtsEntry } from "@/lib/search";
 import { checkNotSuspended } from "@/features/admin/queries";
 import { randomUUID } from "crypto";
@@ -264,12 +264,14 @@ export async function updateListing(listingId: string, formData: FormData) {
       },
     });
 
-    // Re-moderate if content changed
+    // Re-moderate and invalidate translation cache if content changed
     const contentChanged =
       existing.title !== result.data.title ||
       existing.description !== result.data.description;
     if (contentChanged) {
       moderateListing(listingId).catch(console.error);
+      // Invalidate cached translations when content changes
+      await prisma.listingTranslation.deleteMany({ where: { listingId } });
     }
 
     // Always re-index FTS (any field change could affect search)
@@ -354,4 +356,56 @@ export async function getAISuggestions(formData: FormData) {
     console.error("Failed to get AI suggestions:", error);
     return { error: "Failed to analyze photo." };
   }
+}
+
+/**
+ * Translate a listing to a target locale. No auth required (accessible to guests).
+ * Uses cache-first pattern: returns cached translation if available, otherwise calls AI.
+ */
+export async function translateListing(listingId: string, targetLocale: string) {
+  // Step 1: Check cache first
+  const cached = await prisma.listingTranslation.findUnique({
+    where: { listingId_locale: { listingId, locale: targetLocale } },
+  });
+  if (cached) {
+    return {
+      translatedTitle: cached.translatedTitle,
+      translatedDescription: cached.translatedDescription,
+      detectedLanguage: cached.detectedLanguage,
+    };
+  }
+
+  // Step 2: Fetch original listing
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { title: true, description: true },
+  });
+  if (!listing) return { error: "Listing not found." };
+
+  // Step 3: Call AI for translation
+  const result = await translateForLocale(
+    listing.title,
+    listing.description,
+    targetLocale
+  );
+  if (!result) return { error: "Translation unavailable." };
+
+  // Step 4: Cache result using upsert to handle race conditions
+  await prisma.listingTranslation.upsert({
+    where: { listingId_locale: { listingId, locale: targetLocale } },
+    create: {
+      listingId,
+      locale: targetLocale,
+      translatedTitle: result.translatedTitle,
+      translatedDescription: result.translatedDescription,
+      detectedLanguage: result.detectedLanguage,
+    },
+    update: {
+      translatedTitle: result.translatedTitle,
+      translatedDescription: result.translatedDescription,
+      detectedLanguage: result.detectedLanguage,
+    },
+  });
+
+  return result;
 }
