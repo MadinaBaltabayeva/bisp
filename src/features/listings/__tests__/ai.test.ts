@@ -40,7 +40,7 @@ vi.mock("@/lib/openai", () => ({
   isAIEnabled: () => aiEnabled,
 }));
 
-import { moderateListing, suggestCategoryAndTags, translateListingText, translateAndIndexListing } from "../ai";
+import { moderateListing, suggestCategoryAndTags, translateListingText, translateAndIndexListing, translateForLocale } from "../ai";
 import { prisma } from "@/lib/db";
 
 describe("listing AI", () => {
@@ -293,6 +293,54 @@ describe("listing AI", () => {
       );
 
       const result = await translateListingText("Power Drill", "A great drill");
+      expect(result).toBeNull();
+    });
+  });
+
+  describe("translateForLocale", () => {
+    it("returns null when AI is not enabled", async () => {
+      aiEnabled = false;
+      const result = await translateForLocale("Power Drill", "A great drill", "ru");
+      expect(result).toBeNull();
+    });
+
+    it("calls gpt-4o-mini and returns detected language + translation", async () => {
+      aiEnabled = true;
+      const translationResult = {
+        detectedLanguage: "en",
+        translatedTitle: "Дрель",
+        translatedDescription: "Отличная дрель",
+      };
+
+      mockOpenAI.chat.completions.create.mockResolvedValue({
+        choices: [
+          {
+            message: {
+              content: JSON.stringify(translationResult),
+            },
+          },
+        ],
+      });
+
+      const result = await translateForLocale("Power Drill", "A great drill", "ru");
+
+      expect(mockOpenAI.chat.completions.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          model: "gpt-4o-mini",
+          response_format: { type: "json_object" },
+          max_tokens: 1000,
+        })
+      );
+      expect(result).toEqual(translationResult);
+    });
+
+    it("returns null on API error", async () => {
+      aiEnabled = true;
+      mockOpenAI.chat.completions.create.mockRejectedValue(
+        new Error("Translation API Error")
+      );
+
+      const result = await translateForLocale("Power Drill", "A great drill", "ru");
       expect(result).toBeNull();
     });
   });

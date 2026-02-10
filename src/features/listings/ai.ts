@@ -201,6 +201,59 @@ Description: ${description}`,
 }
 
 /**
+ * Translate title and description to a single target locale with language detection.
+ * Returns null if AI is disabled or on error (graceful degradation).
+ */
+export async function translateForLocale(
+  title: string,
+  description: string,
+  targetLocale: string
+): Promise<{
+  detectedLanguage: string;
+  translatedTitle: string;
+  translatedDescription: string;
+} | null> {
+  if (!isAIEnabled() || !openai) return null;
+
+  const localeNames: Record<string, string> = {
+    en: "English",
+    ru: "Russian",
+    uz: "Uzbek",
+  };
+  const targetLang = localeNames[targetLocale] || "English";
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: `Detect the language of the following text and translate it to ${targetLang}.
+Return ONLY valid JSON:
+{
+  "detectedLanguage": "<ISO 639-1 code, e.g. en, ru, uz>",
+  "translatedTitle": "<translated title>",
+  "translatedDescription": "<translated description>"
+}
+
+Title: ${title}
+Description: ${description}`,
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 1000,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return null;
+    return JSON.parse(content);
+  } catch (error) {
+    console.error("Translation failed:", error);
+    return null;
+  }
+}
+
+/**
  * Translate a listing and sync it into the FTS5 index.
  * Falls back to indexing original text in all columns if AI is unavailable.
  */

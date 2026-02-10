@@ -125,6 +125,23 @@ model Listing {
   // Phase 3: Rental lifecycle relations
   rentals       Rental[]
   conversations Conversation[]
+
+  // Phase 7: AI translation cache
+  translations ListingTranslation[]
+}
+
+model ListingTranslation {
+  id                    String   @id @default(cuid())
+  listingId             String
+  locale                String
+  translatedTitle       String
+  translatedDescription String
+  detectedLanguage      String   @default("")
+  createdAt             DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, locale])
 }
 
 model ListingImage {
