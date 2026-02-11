@@ -599,5 +599,20 @@
     "good": "Хорошее",
     "fair": "Удовлетворительное",
     "poor": "Плохое"
+  },
+  "Translation": {
+    "banner": "Это объявление на {language}",
+    "translateTo": "Перевести на {targetLanguage}",
+    "translating": "Перевод...",
+    "translate": "Перевести",
+    "translatedFrom": "Переведено с {language}",
+    "showOriginal": "Показать оригинал",
+    "error": "Перевод недоступен",
+    "languages": {
+      "en": "английский",
+      "ru": "русский",
+      "uz": "узбекский",
+      "unknown": "другой язык"
+    }
   }
 }

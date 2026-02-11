@@ -599,5 +599,20 @@
     "good": "Yaxshi",
     "fair": "Oʻrtacha",
     "poor": "Yomon"
+  },
+  "Translation": {
+    "banner": "Bu e'lon {language} tilida",
+    "translateTo": "{targetLanguage} tiliga tarjima qilish",
+    "translating": "Tarjima qilinmoqda...",
+    "translate": "Tarjima qilish",
+    "translatedFrom": "{language} tilidan tarjima qilingan",
+    "showOriginal": "Asl nusxani ko'rsatish",
+    "error": "Tarjima mavjud emas",
+    "languages": {
+      "en": "ingliz",
+      "ru": "rus",
+      "uz": "o'zbek",
+      "unknown": "boshqa til"
+    }
   }
 }

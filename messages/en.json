@@ -599,5 +599,20 @@
     "good": "Good",
     "fair": "Fair",
     "poor": "Poor"
+  },
+  "Translation": {
+    "banner": "This listing is in {language}",
+    "translateTo": "Translate to {targetLanguage}",
+    "translating": "Translating...",
+    "translate": "Translate",
+    "translatedFrom": "Translated from {language}",
+    "showOriginal": "Show original",
+    "error": "Translation unavailable",
+    "languages": {
+      "en": "English",
+      "ru": "Russian",
+      "uz": "Uzbek",
+      "unknown": "another language"
+    }
   }
 }

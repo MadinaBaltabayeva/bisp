@@ -15,9 +15,11 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { getListingById } from "@/features/listings/queries";
+import { getListingById, getCachedTranslation } from "@/features/listings/queries";
 import { getSession } from "@/features/auth/queries";
 import { getReviewsForListing } from "@/features/reviews/queries";
+import { isAIEnabled } from "@/lib/openai";
+import { TranslationBanner } from "@/components/listings/translation-banner";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { PhotoCarousel } from "@/components/listings/photo-carousel";
 import { PriceDisplay } from "@/components/listings/price-display";
@@ -86,6 +88,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isOwner = session?.user?.id === listing.ownerId;
   const isRejected = listing.status === "rejected";
   const isUnderReview = listing.status === "under_review";
+
+  const aiEnabled = isAIEnabled();
+  let cachedTranslation = null;
+  if (aiEnabled) {
+    cachedTranslation = await getCachedTranslation(listing.id, locale);
+  }
 
   // Non-owners should not see rejected listings
   if (isRejected && !isOwner) {
@@ -156,61 +164,105 @@ export default async function ListingDetailPage({ params }: PageProps) {
             title={listing.title}
           />
 
-          {/* Title */}
-          <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl">
-            {listing.title}
-          </h1>
-
-          {/* Badges row */}
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Badge variant="secondary">{listing.category.name}</Badge>
-            <Badge variant="outline">
-              {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
-            </Badge>
-            <div className="flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="size-3.5" />
-              {listing.location}
-            </div>
-            {listing.aiVerified && (
-              <Badge className="bg-green-600 text-white hover:bg-green-700">
-                <ShieldCheck className="size-3" />
-                {t("aiVerified")}
-              </Badge>
-            )}
-          </div>
-
-          {/* Tags */}
-          {tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-muted-foreground"
-                >
-                  <Tag className="size-3" />
-                  {tag}
-                </span>
-              ))}
-            </div>
+          {/* Title + Badges + Tags + Mobile Price + Description */}
+          {aiEnabled ? (
+            <TranslationBanner
+              listingId={listing.id}
+              locale={locale}
+              originalTitle={listing.title}
+              originalDescription={listing.description}
+              descriptionHeading={t("description")}
+              cachedTranslation={cachedTranslation}
+              aiEnabled={aiEnabled}
+            >
+              {/* Badges row */}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{listing.category.name}</Badge>
+                <Badge variant="outline">
+                  {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
+                </Badge>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="size-3.5" />
+                  {listing.location}
+                </div>
+                {listing.aiVerified && (
+                  <Badge className="bg-green-600 text-white hover:bg-green-700">
+                    <ShieldCheck className="size-3" />
+                    {t("aiVerified")}
+                  </Badge>
+                )}
+              </div>
+              {/* Tags */}
+              {tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-muted-foreground"
+                    >
+                      <Tag className="size-3" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* Mobile price card */}
+              <div className="mt-6 lg:hidden">
+                <PriceCard listing={listing} isOwner={isOwner} />
+              </div>
+            </TranslationBanner>
+          ) : (
+            <>
+              {/* Title */}
+              <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl">
+                {listing.title}
+              </h1>
+              {/* Badges row */}
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <Badge variant="secondary">{listing.category.name}</Badge>
+                <Badge variant="outline">
+                  {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
+                </Badge>
+                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <MapPin className="size-3.5" />
+                  {listing.location}
+                </div>
+                {listing.aiVerified && (
+                  <Badge className="bg-green-600 text-white hover:bg-green-700">
+                    <ShieldCheck className="size-3" />
+                    {t("aiVerified")}
+                  </Badge>
+                )}
+              </div>
+              {/* Tags */}
+              {tags.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  {tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-muted-foreground"
+                    >
+                      <Tag className="size-3" />
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {/* Mobile price card */}
+              <div className="mt-6 lg:hidden">
+                <PriceCard listing={listing} isOwner={isOwner} />
+              </div>
+              {/* Description */}
+              <div className="mt-8">
+                <h2 className="text-lg font-semibold text-gray-900">
+                  {t("description")}
+                </h2>
+                <p className="mt-2 whitespace-pre-line text-gray-600 leading-relaxed">
+                  {listing.description}
+                </p>
+              </div>
+            </>
           )}
-
-          {/* Mobile price card */}
-          <div className="mt-6 lg:hidden">
-            <PriceCard
-              listing={listing}
-              isOwner={isOwner}
-            />
-          </div>
-
-          {/* Description */}
-          <div className="mt-8">
-            <h2 className="text-lg font-semibold text-gray-900">
-              {t("description")}
-            </h2>
-            <p className="mt-2 whitespace-pre-line text-gray-600 leading-relaxed">
-              {listing.description}
-            </p>
-          </div>
 
           {/* Owner section */}
           <div className="mt-8 border-t pt-8">
