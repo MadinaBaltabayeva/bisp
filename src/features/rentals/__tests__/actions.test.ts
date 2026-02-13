@@ -1,45 +1,285 @@
-import { describe, it } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
+// Mock Next.js server modules
+vi.mock("next/cache", () => ({
+  revalidatePath: vi.fn(),
+}));
+
+// Mock auth
+const mockGetSession = vi.fn();
+vi.mock("@/features/auth/queries", () => ({
+  getSession: () => mockGetSession(),
+}));
+
+// Mock admin queries (checkNotSuspended)
+vi.mock("@/features/admin/queries", () => ({
+  checkNotSuspended: vi.fn().mockResolvedValue({}),
+}));
+
+// Mock Prisma
+const mockRentalCreate = vi.fn();
+const mockRentalFindUnique = vi.fn();
+const mockRentalUpdate = vi.fn();
+const mockRentalUpdateMany = vi.fn();
+const mockRentalFindMany = vi.fn();
+const mockListingFindUnique = vi.fn();
+
+vi.mock("@/lib/db", () => ({
+  prisma: {
+    rental: {
+      create: (...args: unknown[]) => mockRentalCreate(...args),
+      findUnique: (...args: unknown[]) => mockRentalFindUnique(...args),
+      update: (...args: unknown[]) => mockRentalUpdate(...args),
+      updateMany: (...args: unknown[]) => mockRentalUpdateMany(...args),
+      findMany: (...args: unknown[]) => mockRentalFindMany(...args),
+    },
+    listing: {
+      findUnique: (...args: unknown[]) => mockListingFindUnique(...args),
+    },
+  },
+}));
+
+import {
+  createRentalRequest,
+  approveRental,
+  declineRental,
+  markReturned,
+  completeRental,
+} from "../actions";
+import { getRentalsAsRenter, getRentalsAsOwner, activateApprovedRentals } from "../queries";
+
+const tomorrow = new Date();
+tomorrow.setDate(tomorrow.getDate() + 1);
+const dayAfter = new Date();
+dayAfter.setDate(dayAfter.getDate() + 5);
+
+const validRequest = {
+  listingId: "listing_1",
+  startDate: tomorrow,
+  endDate: dayAfter,
+  message: "I'd like to rent this",
+};
 
 describe("rental actions", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   describe("createRentalRequest", () => {
-    it.todo(
-      "createRentalRequest: creates rental with valid dates and listing"
-    ); // RENT-01
-    it.todo("createRentalRequest: rejects request on own listing"); // RENT-01
-    it.todo("createRentalRequest: rejects invalid date range"); // RENT-01
-    it.todo(
-      "createRentalRequest: calculates total price from daily rate * days"
-    ); // RENT-04
-    it.todo(
-      "createRentalRequest: calculates security deposit as 20% of total"
-    ); // RENT-04
+    it("creates rental with valid dates and listing", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockListingFindUnique.mockResolvedValue({
+        id: "listing_1",
+        ownerId: "user_2",
+        status: "active",
+        priceDaily: 10,
+      });
+      mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+
+      const result = await createRentalRequest(validRequest);
+      expect(result).toEqual({ success: true });
+      expect(mockRentalCreate).toHaveBeenCalled();
+    });
+
+    it("rejects request on own listing", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockListingFindUnique.mockResolvedValue({
+        id: "listing_1",
+        ownerId: "user_1",
+        status: "active",
+        priceDaily: 10,
+      });
+
+      const result = await createRentalRequest(validRequest);
+      expect(result).toEqual({ error: "You cannot rent your own listing." });
+      expect(mockRentalCreate).not.toHaveBeenCalled();
+    });
+
+    it("rejects invalid date range", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+
+      const result = await createRentalRequest({
+        ...validRequest,
+        startDate: dayAfter,
+        endDate: tomorrow,
+      });
+      expect(result.error).toBeDefined();
+      expect(mockRentalCreate).not.toHaveBeenCalled();
+    });
+
+    it("calculates total price from daily rate * days", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockListingFindUnique.mockResolvedValue({
+        id: "listing_1",
+        ownerId: "user_2",
+        status: "active",
+        priceDaily: 10,
+      });
+      mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+
+      await createRentalRequest(validRequest);
+
+      const createCall = mockRentalCreate.mock.calls[0][0];
+      const days = Math.ceil(
+        (dayAfter.getTime() - tomorrow.getTime()) / (1000 * 60 * 60 * 24)
+      );
+      expect(createCall.data.totalPrice).toBe(days * 10);
+    });
+
+    it("calculates security deposit as 20% of total", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockListingFindUnique.mockResolvedValue({
+        id: "listing_1",
+        ownerId: "user_2",
+        status: "active",
+        priceDaily: 100,
+      });
+      mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+
+      await createRentalRequest(validRequest);
+
+      const createCall = mockRentalCreate.mock.calls[0][0];
+      expect(createCall.data.securityDeposit).toBe(
+        createCall.data.totalPrice * 0.2
+      );
+    });
   });
 
   describe("approveRental", () => {
-    it.todo("approveRental: owner can approve a requested rental"); // RENT-02
-    it.todo("approveRental: non-owner cannot approve"); // RENT-02
+    it("owner can approve a requested rental", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "requested",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+
+      const result = await approveRental("rental_1");
+      expect(result).toEqual({ success: true });
+      expect(mockRentalUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { status: "approved" },
+        })
+      );
+    });
+
+    it("non-owner cannot approve", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "requested",
+      });
+
+      const result = await approveRental("rental_1");
+      expect(result).toEqual({
+        error: "Only the listing owner can approve rentals.",
+      });
+      expect(mockRentalUpdate).not.toHaveBeenCalled();
+    });
   });
 
   describe("declineRental", () => {
-    it.todo("declineRental: owner can decline a requested rental"); // RENT-02
+    it("owner can decline a requested rental", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "requested",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+
+      const result = await declineRental("rental_1");
+      expect(result).toEqual({ success: true });
+      expect(mockRentalUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { status: "declined" },
+        })
+      );
+    });
   });
 
   describe("markReturned", () => {
-    it.todo("markReturned: owner can mark active rental as returned"); // RENT-03
+    it("owner can mark active rental as returned", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "active",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+
+      const result = await markReturned("rental_1");
+      expect(result).toEqual({ success: true });
+      expect(mockRentalUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { status: "returned" },
+        })
+      );
+    });
   });
 
   describe("completeRental", () => {
-    it.todo("completeRental: returned rental transitions to completed"); // RENT-03
+    it("returned rental transitions to completed", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "returned",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+
+      const result = await completeRental("rental_1");
+      expect(result).toEqual({ success: true });
+      expect(mockRentalUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: { status: "completed" },
+        })
+      );
+    });
   });
 
   describe("activateApprovedRentals", () => {
-    it.todo(
-      "activateApprovedRentals: transitions approved rentals past start date to active"
-    ); // RENT-03
+    it("transitions approved rentals past start date to active", async () => {
+      mockRentalUpdateMany.mockResolvedValue({ count: 2 });
+
+      const count = await activateApprovedRentals("user_1");
+      expect(count).toBe(2);
+      expect(mockRentalUpdateMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            status: "approved",
+            startDate: expect.objectContaining({ lte: expect.any(Date) }),
+          }),
+          data: { status: "active" },
+        })
+      );
+    });
   });
 
   describe("queries", () => {
-    it.todo("getRentalsAsRenter: returns rentals where user is renter"); // RENT-03
-    it.todo("getRentalsAsOwner: returns rentals where user is owner"); // RENT-03
+    it("getRentalsAsRenter returns rentals where user is renter", async () => {
+      mockRentalFindMany.mockResolvedValue([
+        { id: "rental_1", renterId: "user_1" },
+      ]);
+
+      const result = await getRentalsAsRenter("user_1");
+      expect(result).toHaveLength(1);
+      expect(mockRentalFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { renterId: "user_1" },
+        })
+      );
+    });
+
+    it("getRentalsAsOwner returns rentals where user is owner", async () => {
+      mockRentalFindMany.mockResolvedValue([
+        { id: "rental_1", ownerId: "user_2" },
+      ]);
+
+      const result = await getRentalsAsOwner("user_2");
+      expect(result).toHaveLength(1);
+      expect(mockRentalFindMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { ownerId: "user_2" },
+        })
+      );
+    });
   });
 });
