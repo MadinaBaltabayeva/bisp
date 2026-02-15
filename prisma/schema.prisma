@@ -33,6 +33,7 @@ model User {
   sessions Session[]
   accounts Account[]
   listings Listing[]
+  favorites Favorite[]
 
   // Phase 3: Rental lifecycle relations
   rentalsAsRenter  Rental[]        @relation("RentalsAsRenter")
@@ -109,7 +110,7 @@ model Listing {
   region           String    @default("")
   latitude         Float?
   longitude        Float?
-  status           String    @default("active") // active, under_review, hidden, draft
+  status           String    @default("active") // active, under_review, hidden, draft, rejected, unavailable
   aiVerified       Boolean   @default(false)
   moderationResult String?   // JSON string
   tags             String    @default("") // comma-separated
@@ -121,6 +122,8 @@ model Listing {
   owner    User           @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   category Category       @relation(fields: [categoryId], references: [id])
   images   ListingImage[]
+
+  favorites Favorite[]
 
   // Phase 3: Rental lifecycle relations
   rentals       Rental[]
@@ -176,6 +179,7 @@ model Rental {
   owner        User           @relation("RentalsAsOwner", fields: [ownerId], references: [id], onDelete: Cascade)
   reviews      Review[]
   conversation Conversation?
+  events       RentalEvent[]
 }
 
 model Conversation {
@@ -225,4 +229,30 @@ model Review {
   reviewee User   @relation("ReviewsReceived", fields: [revieweeId], references: [id], onDelete: Cascade)
 
   @@unique([rentalId, reviewerId])
+}
+
+// === Phase 8: Favorites & Timeline Tables ===
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  listingId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, listingId])
+}
+
+model RentalEvent {
+  id        String   @id @default(cuid())
+  rentalId  String
+  status    String   // requested, approved, active, returned, completed, declined
+  actorId   String   // who triggered the change
+  createdAt DateTime @default(now())
+
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+
+  @@index([rentalId])
 }

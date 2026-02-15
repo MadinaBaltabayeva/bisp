@@ -431,6 +431,64 @@ async function main() {
     }
 
     console.log(`Recalculated ratings for ${reviewedUserIds.length} users`);
+
+    // === Phase 8: Backfill RentalEvent rows for existing rentals ===
+    await prisma.rentalEvent.deleteMany();
+
+    const STATUS_ORDER = ["requested", "approved", "active", "returned", "completed"];
+    let eventsCreated = 0;
+
+    const allRentals = await prisma.rental.findMany({
+      select: { id: true, status: true, renterId: true, ownerId: true, createdAt: true },
+    });
+
+    for (const rental of allRentals) {
+      const baseTime = new Date(rental.createdAt);
+
+      // Always create the initial "requested" event
+      await prisma.rentalEvent.create({
+        data: {
+          rentalId: rental.id,
+          status: "requested",
+          actorId: rental.renterId,
+          createdAt: baseTime,
+        },
+      });
+      eventsCreated++;
+
+      if (rental.status === "declined") {
+        // Declined is an alternate path from requested
+        const declinedTime = new Date(baseTime.getTime() + 60 * 60 * 1000);
+        await prisma.rentalEvent.create({
+          data: {
+            rentalId: rental.id,
+            status: "declined",
+            actorId: rental.ownerId,
+            createdAt: declinedTime,
+          },
+        });
+        eventsCreated++;
+      } else if (rental.status !== "requested") {
+        // Walk through status order and create events up to current status
+        const currentIndex = STATUS_ORDER.indexOf(rental.status);
+        if (currentIndex > 0) {
+          for (let i = 1; i <= currentIndex; i++) {
+            const eventTime = new Date(baseTime.getTime() + i * 60 * 60 * 1000);
+            await prisma.rentalEvent.create({
+              data: {
+                rentalId: rental.id,
+                status: STATUS_ORDER[i],
+                actorId: rental.ownerId,
+                createdAt: eventTime,
+              },
+            });
+            eventsCreated++;
+          }
+        }
+      }
+    }
+
+    console.log(`Backfilled ${eventsCreated} rental events for ${allRentals.length} rentals`);
   } catch (error) {
     console.error("Error seeding rental lifecycle data:", error);
   }
