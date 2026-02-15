@@ -60,7 +60,8 @@
     "logOut": "Chiqish",
     "myProfile": "Profilim",
     "settings": "Sozlamalar",
-    "backToRentHub": "RentHubga qaytish"
+    "backToRentHub": "RentHubga qaytish",
+    "favorites": "Sevimlilar"
   },
   "BottomNav": {
     "home": "Bosh sahifa",
@@ -251,6 +252,16 @@
       "rejected": "Rad etilgan",
       "draft": "Qoralama",
       "rented": "Hozir ijarada"
+    },
+    "availability": {
+      "available": "Mavjud",
+      "unavailable": "Mavjud emas",
+      "toggleAvailable": "Mavjud deb belgilash",
+      "toggleUnavailable": "Mavjud emas deb belgilash",
+      "markedAvailable": "Eʼlon endi mavjud",
+      "markedUnavailable": "Eʼlon endi mavjud emas",
+      "cannotToggle": "Joriy holatda mavjudlikni oʻzgartirib boʻlmaydi",
+      "unavailableBanner": "Bu eʼlon hozirda mavjud emas"
     }
   },
   "Browse": {
@@ -354,6 +365,19 @@
       "asRenter": "Siz hali hech narsa ijaraga olmadingiz. Ijaraga olish uchun eʼlonlarni koʻring.",
       "asOwner": "Eʼlonlaringiz uchun hali ijara soʻrovlari yoʻq.",
       "browseItems": "Ijaraga olish uchun buyumlarni koʻring"
+    },
+    "detail": {
+      "title": "Ijara tafsilotlari",
+      "listing": "Eʼlon",
+      "renter": "Ijarachi",
+      "owner": "Egasi",
+      "dates": "Sanalar",
+      "price": "Umumiy narx",
+      "deposit": "Kafolat depoziti",
+      "message": "Xabar",
+      "timeline": "Xronologiya",
+      "actions": "Harakatlar",
+      "notFound": "Ijara topilmadi"
     }
   },
   "Messages": {
@@ -599,6 +623,30 @@
     "good": "Yaxshi",
     "fair": "Oʻrtacha",
     "poor": "Yomon"
+  },
+  "Favorites": {
+    "title": "Sevimlilar",
+    "empty": "Hali sevimlilar yoʻq",
+    "emptyDescription": "Saqlangan eʼlonlar bu yerda paydo boʻladi",
+    "addedToFavorites": "Sevimlilarga qoʻshildi",
+    "removedFromFavorites": "Sevimlilardan olib tashlandi",
+    "removeFromFavorites": "Sevimlilardan olib tashlash",
+    "addToFavorites": "Sevimlilarga qoʻshish",
+    "browseListings": "Eʼlonlarni koʻrish"
+  },
+  "Share": {
+    "share": "Ulashish",
+    "linkCopied": "Havola nusxalandi!",
+    "copyFailed": "Havolani nusxalab boʻlmadi"
+  },
+  "Timeline": {
+    "title": "Ijara xronologiyasi",
+    "requested": "Soʻralgan",
+    "approved": "Tasdiqlangan",
+    "active": "Faol",
+    "returned": "Qaytarilgan",
+    "completed": "Yakunlangan",
+    "declined": "Rad etilgan"
   },
   "Translation": {
     "banner": "Bu e'lon {language} tilida",

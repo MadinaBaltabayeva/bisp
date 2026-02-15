@@ -60,7 +60,8 @@
     "logOut": "Log Out",
     "myProfile": "My Profile",
     "settings": "Settings",
-    "backToRentHub": "Back to RentHub"
+    "backToRentHub": "Back to RentHub",
+    "favorites": "Favorites"
   },
   "BottomNav": {
     "home": "Home",
@@ -251,6 +252,16 @@
       "rejected": "Rejected",
       "draft": "Draft",
       "rented": "Currently Rented"
+    },
+    "availability": {
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "toggleAvailable": "Mark as available",
+      "toggleUnavailable": "Mark as unavailable",
+      "markedAvailable": "Listing is now available",
+      "markedUnavailable": "Listing is now unavailable",
+      "cannotToggle": "Cannot change availability in current state",
+      "unavailableBanner": "This listing is currently unavailable"
     }
   },
   "Browse": {
@@ -354,6 +365,19 @@
       "asRenter": "You haven't rented anything yet. Browse listings to find items to rent.",
       "asOwner": "No rental requests for your listings yet.",
       "browseItems": "Browse items to rent"
+    },
+    "detail": {
+      "title": "Rental Details",
+      "listing": "Listing",
+      "renter": "Renter",
+      "owner": "Owner",
+      "dates": "Dates",
+      "price": "Total Price",
+      "deposit": "Security Deposit",
+      "message": "Message",
+      "timeline": "Timeline",
+      "actions": "Actions",
+      "notFound": "Rental not found"
     }
   },
   "Messages": {
@@ -599,6 +623,30 @@
     "good": "Good",
     "fair": "Fair",
     "poor": "Poor"
+  },
+  "Favorites": {
+    "title": "My Favorites",
+    "empty": "No favorites yet",
+    "emptyDescription": "Items you save will appear here",
+    "addedToFavorites": "Added to favorites",
+    "removedFromFavorites": "Removed from favorites",
+    "removeFromFavorites": "Remove from favorites",
+    "addToFavorites": "Add to favorites",
+    "browseListings": "Browse listings"
+  },
+  "Share": {
+    "share": "Share",
+    "linkCopied": "Link copied to clipboard!",
+    "copyFailed": "Could not copy link"
+  },
+  "Timeline": {
+    "title": "Rental Timeline",
+    "requested": "Requested",
+    "approved": "Approved",
+    "active": "Active",
+    "returned": "Returned",
+    "completed": "Completed",
+    "declined": "Declined"
   },
   "Translation": {
     "banner": "This listing is in {language}",

@@ -60,7 +60,8 @@
     "logOut": "Выйти",
     "myProfile": "Мой профиль",
     "settings": "Настройки",
-    "backToRentHub": "Вернуться на RentHub"
+    "backToRentHub": "Вернуться на RentHub",
+    "favorites": "Избранное"
   },
   "BottomNav": {
     "home": "Главная",
@@ -251,6 +252,16 @@
       "rejected": "Отклонено",
       "draft": "Черновик",
       "rented": "Сейчас в аренде"
+    },
+    "availability": {
+      "available": "Доступно",
+      "unavailable": "Недоступно",
+      "toggleAvailable": "Сделать доступным",
+      "toggleUnavailable": "Сделать недоступным",
+      "markedAvailable": "Объявление теперь доступно",
+      "markedUnavailable": "Объявление теперь недоступно",
+      "cannotToggle": "Невозможно изменить доступность в текущем состоянии",
+      "unavailableBanner": "Это объявление сейчас недоступно"
     }
   },
   "Browse": {
@@ -354,6 +365,19 @@
       "asRenter": "Вы ещё ничего не арендовали. Просмотрите объявления, чтобы найти вещи для аренды.",
       "asOwner": "Запросов на аренду ваших вещей пока нет.",
       "browseItems": "Просмотреть товары для аренды"
+    },
+    "detail": {
+      "title": "Детали аренды",
+      "listing": "Объявление",
+      "renter": "Арендатор",
+      "owner": "Владелец",
+      "dates": "Даты",
+      "price": "Итоговая цена",
+      "deposit": "Залог",
+      "message": "Сообщение",
+      "timeline": "Хронология",
+      "actions": "Действия",
+      "notFound": "Аренда не найдена"
     }
   },
   "Messages": {
@@ -599,6 +623,30 @@
     "good": "Хорошее",
     "fair": "Удовлетворительное",
     "poor": "Плохое"
+  },
+  "Favorites": {
+    "title": "Избранное",
+    "empty": "Пока нет избранного",
+    "emptyDescription": "Сохранённые объявления появятся здесь",
+    "addedToFavorites": "Добавлено в избранное",
+    "removedFromFavorites": "Удалено из избранного",
+    "removeFromFavorites": "Удалить из избранного",
+    "addToFavorites": "Добавить в избранное",
+    "browseListings": "Просмотреть объявления"
+  },
+  "Share": {
+    "share": "Поделиться",
+    "linkCopied": "Ссылка скопирована!",
+    "copyFailed": "Не удалось скопировать ссылку"
+  },
+  "Timeline": {
+    "title": "Хронология аренды",
+    "requested": "Запрошено",
+    "approved": "Одобрено",
+    "active": "Активно",
+    "returned": "Возвращено",
+    "completed": "Завершено",
+    "declined": "Отклонено"
   },
   "Translation": {
     "banner": "Это объявление на {language}",
