@@ -23,6 +23,8 @@ const mockRentalUpdate = vi.fn();
 const mockRentalUpdateMany = vi.fn();
 const mockRentalFindMany = vi.fn();
 const mockListingFindUnique = vi.fn();
+const mockRentalEventCreate = vi.fn();
+const mock$Transaction = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -36,6 +38,10 @@ vi.mock("@/lib/db", () => ({
     listing: {
       findUnique: (...args: unknown[]) => mockListingFindUnique(...args),
     },
+    rentalEvent: {
+      create: (...args: unknown[]) => mockRentalEventCreate(...args),
+    },
+    $transaction: (...args: unknown[]) => mock$Transaction(...args),
   },
 }));
 
@@ -46,7 +52,7 @@ import {
   markReturned,
   completeRental,
 } from "../actions";
-import { getRentalsAsRenter, getRentalsAsOwner, activateApprovedRentals } from "../queries";
+import { getRentalsAsRenter, getRentalsAsOwner, activateApprovedRentals, getRentalWithEvents } from "../queries";
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -63,10 +69,20 @@ const validRequest = {
 describe("rental actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default: $transaction executes the callback (interactive transaction pattern)
+    mock$Transaction.mockImplementation(async (cbOrArray: unknown) => {
+      if (typeof cbOrArray === "function") {
+        // Interactive transaction: call the callback with the mock prisma object
+        const { prisma } = await import("@/lib/db");
+        return cbOrArray(prisma);
+      }
+      // Batch transaction: resolve all promises
+      return Promise.all(cbOrArray as Promise<unknown>[]);
+    });
   });
 
   describe("createRentalRequest", () => {
-    it("creates rental with valid dates and listing", async () => {
+    it("creates rental with valid dates and listing using $transaction", async () => {
       mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
@@ -75,10 +91,34 @@ describe("rental actions", () => {
         priceDaily: 10,
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       const result = await createRentalRequest(validRequest);
       expect(result).toEqual({ success: true });
-      expect(mockRentalCreate).toHaveBeenCalled();
+      expect(mock$Transaction).toHaveBeenCalled();
+    });
+
+    it("creates RentalEvent with status 'requested' during rental creation", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockListingFindUnique.mockResolvedValue({
+        id: "listing_1",
+        ownerId: "user_2",
+        status: "active",
+        priceDaily: 10,
+      });
+      mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
+
+      await createRentalRequest(validRequest);
+      expect(mockRentalEventCreate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            rentalId: "rental_1",
+            status: "requested",
+            actorId: "user_1",
+          }),
+        })
+      );
     });
 
     it("rejects request on own listing", async () => {
@@ -116,6 +156,7 @@ describe("rental actions", () => {
         priceDaily: 10,
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       await createRentalRequest(validRequest);
 
@@ -135,6 +176,7 @@ describe("rental actions", () => {
         priceDaily: 100,
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       await createRentalRequest(validRequest);
 
@@ -146,21 +188,35 @@ describe("rental actions", () => {
   });
 
   describe("approveRental", () => {
-    it("owner can approve a requested rental", async () => {
+    it("owner can approve a requested rental using $transaction", async () => {
       mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
         status: "requested",
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       const result = await approveRental("rental_1");
       expect(result).toEqual({ success: true });
-      expect(mockRentalUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: { status: "approved" },
-        })
-      );
+      expect(mock$Transaction).toHaveBeenCalled();
+    });
+
+    it("creates RentalEvent with status 'approved' on approval", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "requested",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
+
+      await approveRental("rental_1");
+
+      // Verify $transaction was called with an array containing the event create
+      const txArg = mock$Transaction.mock.calls[0][0];
+      expect(txArg).toBeInstanceOf(Array);
+      expect(txArg).toHaveLength(2);
     });
 
     it("non-owner cannot approve", async () => {
@@ -174,64 +230,71 @@ describe("rental actions", () => {
       expect(result).toEqual({
         error: "Only the listing owner can approve rentals.",
       });
-      expect(mockRentalUpdate).not.toHaveBeenCalled();
+      expect(mock$Transaction).not.toHaveBeenCalled();
     });
   });
 
   describe("declineRental", () => {
-    it("owner can decline a requested rental", async () => {
+    it("owner can decline a requested rental using $transaction", async () => {
       mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
         status: "requested",
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       const result = await declineRental("rental_1");
       expect(result).toEqual({ success: true });
-      expect(mockRentalUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: { status: "declined" },
-        })
-      );
+      expect(mock$Transaction).toHaveBeenCalled();
+    });
+
+    it("creates RentalEvent with status 'declined' on decline", async () => {
+      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockRentalFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        status: "requested",
+      });
+      mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
+
+      await declineRental("rental_1");
+
+      const txArg = mock$Transaction.mock.calls[0][0];
+      expect(txArg).toBeInstanceOf(Array);
+      expect(txArg).toHaveLength(2);
     });
   });
 
   describe("markReturned", () => {
-    it("owner can mark active rental as returned", async () => {
+    it("owner can mark active rental as returned using $transaction", async () => {
       mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
         status: "active",
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       const result = await markReturned("rental_1");
       expect(result).toEqual({ success: true });
-      expect(mockRentalUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: { status: "returned" },
-        })
-      );
+      expect(mock$Transaction).toHaveBeenCalled();
     });
   });
 
   describe("completeRental", () => {
-    it("returned rental transitions to completed", async () => {
+    it("returned rental transitions to completed using $transaction", async () => {
       mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
         status: "returned",
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
+      mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
 
       const result = await completeRental("rental_1");
       expect(result).toEqual({ success: true });
-      expect(mockRentalUpdate).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: { status: "completed" },
-        })
-      );
+      expect(mock$Transaction).toHaveBeenCalled();
     });
   });
 
@@ -278,6 +341,31 @@ describe("rental actions", () => {
       expect(mockRentalFindMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { ownerId: "user_2" },
+        })
+      );
+    });
+
+    it("getRentalWithEvents returns rental with events ordered by createdAt asc", async () => {
+      const mockRental = {
+        id: "rental_1",
+        events: [
+          { id: "e1", status: "requested", createdAt: new Date("2026-03-01") },
+          { id: "e2", status: "approved", createdAt: new Date("2026-03-02") },
+        ],
+        listing: { id: "listing_1", title: "Test", images: [], category: null },
+        renter: { id: "user_1", name: "Renter", image: null },
+        owner: { id: "user_2", name: "Owner", image: null },
+      };
+      mockRentalFindUnique.mockResolvedValue(mockRental);
+
+      const result = await getRentalWithEvents("rental_1");
+      expect(result).toEqual(mockRental);
+      expect(mockRentalFindUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: "rental_1" },
+          include: expect.objectContaining({
+            events: { orderBy: { createdAt: "asc" } },
+          }),
         })
       );
     });
