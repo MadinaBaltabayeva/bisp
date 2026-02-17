@@ -97,6 +97,26 @@ export async function getPendingActionCount(userId: string) {
 }
 
 /**
+ * Get a single rental by ID with full details including events for timeline.
+ */
+export async function getRentalWithEvents(id: string) {
+  return prisma.rental.findUnique({
+    where: { id },
+    include: {
+      listing: {
+        include: {
+          images: { where: { isCover: true }, take: 1 },
+          category: true,
+        },
+      },
+      renter: { select: { id: true, name: true, image: true } },
+      owner: { select: { id: true, name: true, image: true } },
+      events: { orderBy: { createdAt: "asc" } },
+    },
+  });
+}
+
+/**
  * Auto-activate approved rentals whose start date has passed.
  * Transitions approved -> active for rentals the user is involved in.
  */

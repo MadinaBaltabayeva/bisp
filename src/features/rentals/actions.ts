@@ -9,6 +9,7 @@ import { checkNotSuspended } from "@/features/admin/queries";
 /**
  * Create a new rental request.
  * Renter submits a request with date range and optional message.
+ * Atomically creates the rental and a "requested" RentalEvent.
  */
 export async function createRentalRequest(data: unknown) {
   const session = await getSession();
@@ -56,18 +57,27 @@ export async function createRentalRequest(data: unknown) {
   const securityDeposit = totalPrice * 0.2;
 
   try {
-    await prisma.rental.create({
-      data: {
-        startDate,
-        endDate,
-        status: "requested",
-        message: message || "",
-        totalPrice,
-        securityDeposit,
-        listingId,
-        renterId: session.user.id,
-        ownerId: listing.ownerId,
-      },
+    await prisma.$transaction(async (tx) => {
+      const newRental = await tx.rental.create({
+        data: {
+          startDate,
+          endDate,
+          status: "requested",
+          message: message || "",
+          totalPrice,
+          securityDeposit,
+          listingId,
+          renterId: session.user.id,
+          ownerId: listing.ownerId,
+        },
+      });
+      await tx.rentalEvent.create({
+        data: {
+          rentalId: newRental.id,
+          status: "requested",
+          actorId: session.user.id,
+        },
+      });
     });
 
     revalidatePath("/rentals");
@@ -82,6 +92,7 @@ export async function createRentalRequest(data: unknown) {
 
 /**
  * Approve a rental request. Only the listing owner can approve.
+ * Atomically updates rental status and creates an "approved" RentalEvent.
  */
 export async function approveRental(rentalId: string) {
   const session = await getSession();
@@ -107,10 +118,19 @@ export async function approveRental(rentalId: string) {
   }
 
   try {
-    await prisma.rental.update({
-      where: { id: rentalId },
-      data: { status: "approved" },
-    });
+    await prisma.$transaction([
+      prisma.rental.update({
+        where: { id: rentalId },
+        data: { status: "approved" },
+      }),
+      prisma.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "approved",
+          actorId: session.user.id,
+        },
+      }),
+    ]);
 
     revalidatePath("/rentals");
     return { success: true };
@@ -122,6 +142,7 @@ export async function approveRental(rentalId: string) {
 
 /**
  * Decline a rental request. Only the listing owner can decline.
+ * Atomically updates rental status and creates a "declined" RentalEvent.
  */
 export async function declineRental(rentalId: string) {
   const session = await getSession();
@@ -147,10 +168,19 @@ export async function declineRental(rentalId: string) {
   }
 
   try {
-    await prisma.rental.update({
-      where: { id: rentalId },
-      data: { status: "declined" },
-    });
+    await prisma.$transaction([
+      prisma.rental.update({
+        where: { id: rentalId },
+        data: { status: "declined" },
+      }),
+      prisma.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "declined",
+          actorId: session.user.id,
+        },
+      }),
+    ]);
 
     revalidatePath("/rentals");
     return { success: true };
@@ -162,6 +192,7 @@ export async function declineRental(rentalId: string) {
 
 /**
  * Mark an active rental as returned. Only the listing owner can mark returned.
+ * Atomically updates rental status and creates a "returned" RentalEvent.
  */
 export async function markReturned(rentalId: string) {
   const session = await getSession();
@@ -187,10 +218,19 @@ export async function markReturned(rentalId: string) {
   }
 
   try {
-    await prisma.rental.update({
-      where: { id: rentalId },
-      data: { status: "returned" },
-    });
+    await prisma.$transaction([
+      prisma.rental.update({
+        where: { id: rentalId },
+        data: { status: "returned" },
+      }),
+      prisma.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "returned",
+          actorId: session.user.id,
+        },
+      }),
+    ]);
 
     revalidatePath("/rentals");
     return { success: true };
@@ -202,6 +242,7 @@ export async function markReturned(rentalId: string) {
 
 /**
  * Complete a returned rental. Only the listing owner can complete.
+ * Atomically updates rental status and creates a "completed" RentalEvent.
  */
 export async function completeRental(rentalId: string) {
   const session = await getSession();
@@ -227,10 +268,19 @@ export async function completeRental(rentalId: string) {
   }
 
   try {
-    await prisma.rental.update({
-      where: { id: rentalId },
-      data: { status: "completed" },
-    });
+    await prisma.$transaction([
+      prisma.rental.update({
+        where: { id: rentalId },
+        data: { status: "completed" },
+      }),
+      prisma.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "completed",
+          actorId: session.user.id,
+        },
+      }),
+    ]);
 
     revalidatePath("/rentals");
     return { success: true };
