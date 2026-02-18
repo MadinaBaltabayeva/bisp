@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   Search,
+  Heart,
   PlusCircle,
   Calendar,
   MessageCircle,
@@ -31,6 +32,7 @@ import {
 
 const NAV_LINKS = [
   { href: "/", labelKey: "browse", icon: Search },
+  { href: "/favorites", labelKey: "favorites", icon: Heart },
   { href: "/listings/new", labelKey: "listItem", icon: PlusCircle },
   { href: "/rentals", labelKey: "myRentals", icon: Calendar },
   { href: "/messages", labelKey: "messages", icon: MessageCircle },

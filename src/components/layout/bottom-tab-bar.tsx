@@ -2,13 +2,14 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { House, Search, PlusCircle, Calendar, MessageCircle } from "lucide-react";
+import { House, Search, Heart, PlusCircle, Calendar, MessageCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 
 const TAB_ITEMS = [
   { href: "/", labelKey: "home", icon: House },
   { href: "/#categories", labelKey: "browse", icon: Search },
+  { href: "/favorites", labelKey: "favorites", icon: Heart },
   { href: "/listings/new", labelKey: "list", icon: PlusCircle },
   { href: "/rentals", labelKey: "rentals", icon: Calendar },
   { href: "/messages", labelKey: "messages", icon: MessageCircle },

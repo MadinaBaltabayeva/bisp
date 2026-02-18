@@ -47,6 +47,10 @@
     "adminModeration": {
       "title": "Модерация контента - RentHub",
       "description": "Проверяйте и модерируйте пользовательский контент."
+    },
+    "favorites": {
+      "title": "Избранное - RentHub",
+      "description": "Просмотр и управление вашими избранными объявлениями."
     }
   },
   "Navigation": {
@@ -66,6 +70,7 @@
   "BottomNav": {
     "home": "Главная",
     "browse": "Просмотр",
+    "favorites": "Избранное",
     "list": "Подать",
     "rentals": "Аренды",
     "messages": "Сообщения"
@@ -377,7 +382,8 @@
       "message": "Сообщение",
       "timeline": "Хронология",
       "actions": "Действия",
-      "notFound": "Аренда не найдена"
+      "notFound": "Аренда не найдена",
+      "viewDetails": "Подробнее"
     }
   },
   "Messages": {

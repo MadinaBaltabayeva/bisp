@@ -47,6 +47,10 @@
     "adminModeration": {
       "title": "Kontent moderatsiyasi - RentHub",
       "description": "Foydalanuvchilar yuborgan kontentni koʻrib chiqing va moderatsiya qiling."
+    },
+    "favorites": {
+      "title": "Sevimlilar - RentHub",
+      "description": "Sevimli eʼlonlaringizni koʻring va boshqaring."
     }
   },
   "Navigation": {
@@ -66,6 +70,7 @@
   "BottomNav": {
     "home": "Bosh sahifa",
     "browse": "Koʻrish",
+    "favorites": "Sevimlilar",
     "list": "Eʼlon",
     "rentals": "Ijaralar",
     "messages": "Xabarlar"
@@ -377,7 +382,8 @@
       "message": "Xabar",
       "timeline": "Xronologiya",
       "actions": "Harakatlar",
-      "notFound": "Ijara topilmadi"
+      "notFound": "Ijara topilmadi",
+      "viewDetails": "Batafsil"
     }
   },
   "Messages": {

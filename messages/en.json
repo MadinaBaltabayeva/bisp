@@ -47,6 +47,10 @@
     "adminModeration": {
       "title": "Content Moderation - RentHub",
       "description": "Review and moderate user-submitted content."
+    },
+    "favorites": {
+      "title": "My Favorites - RentHub",
+      "description": "View and manage your saved favorite listings."
     }
   },
   "Navigation": {
@@ -66,6 +70,7 @@
   "BottomNav": {
     "home": "Home",
     "browse": "Browse",
+    "favorites": "Favorites",
     "list": "List",
     "rentals": "Rentals",
     "messages": "Messages"
@@ -377,7 +382,8 @@
       "message": "Message",
       "timeline": "Timeline",
       "actions": "Actions",
-      "notFound": "Rental not found"
+      "notFound": "Rental not found",
+      "viewDetails": "View details"
     }
   },
   "Messages": {
