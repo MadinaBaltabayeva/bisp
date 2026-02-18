@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck } from "lucide-react";
+import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations, useFormatter } from "next-intl";
 
@@ -147,6 +147,15 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 &ldquo;{rental.message}&rdquo;
               </p>
             )}
+
+            {/* View details link */}
+            <Link
+              href={`/rentals/${rental.id}`}
+              className="mt-1 inline-flex items-center text-xs font-medium text-primary hover:underline"
+            >
+              {t("detail.viewDetails" as Parameters<typeof t>[0])}
+              <ChevronRight className="ml-0.5 size-3" />
+            </Link>
           </div>
         </div>
 
