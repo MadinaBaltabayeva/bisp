@@ -93,7 +93,7 @@ vi.mock("@/lib/db", () => ({
   },
 }));
 
-import { createListing, updateListing, deleteListing, translateListing } from "../actions";
+import { createListing, updateListing, deleteListing, translateListing, toggleListingAvailability } from "../actions";
 
 function makeFormData(fields: Record<string, string>): FormData {
   const fd = new FormData();
@@ -378,6 +378,108 @@ describe("listing actions", () => {
         error: "You can only delete your own listings.",
       });
       expect(mockDelete).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("toggleListingAvailability", () => {
+    it("toggles active listing to unavailable", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_1", name: "Alice" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        status: "active",
+      });
+      mockUpdate.mockResolvedValue({ id: "listing_1" });
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({ success: true, status: "unavailable" });
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: "listing_1" },
+          data: { status: "unavailable" },
+        })
+      );
+    });
+
+    it("toggles unavailable listing to active", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_1", name: "Alice" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        status: "unavailable",
+      });
+      mockUpdate.mockResolvedValue({ id: "listing_1" });
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({ success: true, status: "active" });
+      expect(mockUpdate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: "listing_1" },
+          data: { status: "active" },
+        })
+      );
+    });
+
+    it("blocks toggle for hidden listings", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_1", name: "Alice" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        status: "hidden",
+      });
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({
+        error: "Cannot toggle availability in current state.",
+      });
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it("blocks toggle for under_review listings", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_1", name: "Alice" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        status: "under_review",
+      });
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({
+        error: "Cannot toggle availability in current state.",
+      });
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it("blocks toggle for non-owners", async () => {
+      mockGetSession.mockResolvedValue({
+        user: { id: "user_2", name: "Bob" },
+      });
+      mockFindUnique.mockResolvedValue({
+        ownerId: "user_1",
+        status: "active",
+      });
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({ error: "Not authorized." });
+      expect(mockUpdate).not.toHaveBeenCalled();
+    });
+
+    it("requires authentication", async () => {
+      mockGetSession.mockResolvedValue(null);
+
+      const result = await toggleListingAvailability("listing_1");
+
+      expect(result).toEqual({ error: "Must be logged in." });
+      expect(mockUpdate).not.toHaveBeenCalled();
     });
   });
 });
