@@ -5,6 +5,8 @@ import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
 import { searchSchema } from "@/lib/validations/listing";
 import { searchListings } from "@/features/listings/queries";
+import { getSession } from "@/features/auth/queries";
+import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { SearchBar } from "@/components/browse/search-bar";
 import { SortSelect } from "@/components/browse/sort-select";
 import { FilterSidebar } from "@/components/browse/filter-sidebar";
@@ -35,10 +37,18 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
   }
 
   const parsed = searchSchema.parse(flatParams);
-  const { listings, suggestion, highlightTerms } = await searchListings(parsed);
-  const categories = await prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
-  });
+  const [{ listings, suggestion, highlightTerms }, categories, session] = await Promise.all([
+    searchListings(parsed),
+    prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
+    getSession(),
+  ]);
+
+  // Fetch favorite IDs for the current user
+  let favoriteIds: string[] = [];
+  if (session) {
+    const favSet = await getUserFavoriteIds(session.user.id);
+    favoriteIds = Array.from(favSet);
+  }
 
   const filterProps = {
     categories: categories.map((c) => ({
@@ -112,7 +122,12 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
             </TabsList>
 
             <TabsContent value="grid">
-              <ListingGrid listings={listings} highlightTerms={highlightTerms} />
+              <ListingGrid
+                listings={listings}
+                highlightTerms={highlightTerms}
+                favoriteIds={favoriteIds}
+                isAuthenticated={!!session}
+              />
             </TabsContent>
 
             <TabsContent value="map">

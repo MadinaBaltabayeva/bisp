@@ -1,9 +1,8 @@
-import { Link } from "@/i18n/navigation";
-import Image from "next/image";
 import { Package, Star, UserCircle } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Separator } from "@/components/ui/separator";
 import { ReviewCard } from "@/components/reviews/review-card";
+import { ListingCard } from "@/components/listings/listing-card";
 
 interface ReviewData {
   id: string;
@@ -20,9 +19,16 @@ interface ReviewData {
 interface ListingData {
   id: string;
   title: string;
+  status: string;
   priceDaily: number | null;
-  images: { url: string }[];
-  category: { name: string };
+  priceHourly: number | null;
+  priceWeekly: number | null;
+  priceMonthly: number | null;
+  location: string;
+  aiVerified: boolean;
+  images: Array<{ id: string; url: string; isCover: boolean }>;
+  category: { id: string; name: string; slug: string };
+  owner?: { idVerified: boolean };
 }
 
 interface ProfileSectionsProps {
@@ -32,6 +38,8 @@ interface ProfileSectionsProps {
   isOwnProfile: boolean;
   reviews?: ReviewData[];
   listings?: ListingData[];
+  favoriteIds?: Set<string>;
+  isAuthenticated?: boolean;
 }
 
 function SectionHeading({
@@ -62,6 +70,8 @@ export async function ProfileSections({
   isOwnProfile,
   reviews = [],
   listings = [],
+  favoriteIds = new Set(),
+  isAuthenticated = false,
 }: ProfileSectionsProps) {
   const t = await getTranslations("Profile");
 
@@ -73,40 +83,15 @@ export async function ProfileSections({
         {listings.length > 0 ? (
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
             {listings.map((listing) => (
-              <Link
+              <ListingCard
                 key={listing.id}
-                href={`/listings/${listing.id}`}
-                className="group overflow-hidden rounded-lg border transition-shadow hover:shadow-md"
-              >
-                <div className="relative aspect-[4/3] bg-muted">
-                  {listing.images[0]?.url ? (
-                    <Image
-                      src={listing.images[0].url}
-                      alt={listing.title}
-                      fill
-                      className="object-cover transition-transform group-hover:scale-105"
-                      sizes="(max-width: 640px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-muted-foreground">
-                      <Package className="size-8" />
-                    </div>
-                  )}
-                </div>
-                <div className="p-2">
-                  <p className="truncate text-sm font-medium">{listing.title}</p>
-                  <div className="flex items-center justify-between">
-                    {listing.priceDaily && (
-                      <p className="text-xs font-medium text-primary-600">
-                        ${listing.priceDaily}/day
-                      </p>
-                    )}
-                    <p className="text-xs text-muted-foreground">
-                      {listing.category.name}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+                listing={listing}
+                isFavorited={favoriteIds.has(listing.id)}
+                isAuthenticated={isAuthenticated}
+                showFavoriteButton={true}
+                status={listing.status}
+                showAvailabilityToggle={isOwnProfile}
+              />
             ))}
           </div>
         ) : (

@@ -7,6 +7,8 @@ import { HeroSection } from "@/components/landing/hero-section";
 import { CategoryGrid } from "@/components/landing/category-grid";
 import { ListingCard } from "@/components/listings/listing-card";
 import { prisma } from "@/lib/db";
+import { getSession } from "@/features/auth/queries";
+import { getUserFavoriteIds } from "@/features/favorites/queries";
 
 export const dynamic = "force-dynamic";
 
@@ -41,7 +43,17 @@ export default async function Home({
   const { locale } = await params;
   setRequestLocale(locale as (typeof routing.locales)[number]);
   const t = await getTranslations("HomePage");
-  const listings = await getPopularListings();
+
+  const [listings, session] = await Promise.all([
+    getPopularListings(),
+    getSession(),
+  ]);
+
+  // Fetch favorite IDs for the current user
+  let favoriteIds: Set<string> = new Set();
+  if (session) {
+    favoriteIds = await getUserFavoriteIds(session.user.id);
+  }
 
   return (
     <>
@@ -67,7 +79,12 @@ export default async function Home({
         {listings.length > 0 ? (
           <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {listings.map((listing) => (
-              <ListingCard key={listing.id} listing={listing} />
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                isFavorited={favoriteIds.has(listing.id)}
+                isAuthenticated={!!session}
+              />
             ))}
           </div>
         ) : (

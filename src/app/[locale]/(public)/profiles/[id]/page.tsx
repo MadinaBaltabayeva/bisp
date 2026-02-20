@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { getUserProfile, getSession } from "@/features/auth/queries";
 import { getReviewsForUser } from "@/features/reviews/queries";
 import { getUserListings } from "@/features/listings/queries";
+import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileSections } from "@/components/profile/profile-sections";
 
@@ -46,6 +47,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   const isOwnProfile = session?.user.id === user.id;
 
+  // Fetch favorite IDs for the current user
+  let favoriteIds: Set<string> = new Set();
+  if (session) {
+    favoriteIds = await getUserFavoriteIds(session.user.id);
+  }
+
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
       <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
@@ -54,6 +61,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         isOwnProfile={isOwnProfile}
         reviews={reviews}
         listings={listings}
+        favoriteIds={favoriteIds}
+        isAuthenticated={!!session}
       />
     </div>
   );

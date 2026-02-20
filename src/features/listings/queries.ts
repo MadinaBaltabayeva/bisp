@@ -296,6 +296,12 @@ export async function getUserListings(userId: string) {
         take: 1,
       },
       category: true,
+      owner: {
+        select: {
+          id: true,
+          idVerified: true,
+        },
+      },
     },
   });
 }

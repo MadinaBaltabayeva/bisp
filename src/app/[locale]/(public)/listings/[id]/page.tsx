@@ -18,13 +18,17 @@ import {
 import { getListingById, getCachedTranslation } from "@/features/listings/queries";
 import { getSession } from "@/features/auth/queries";
 import { getReviewsForListing } from "@/features/reviews/queries";
+import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { isAIEnabled } from "@/lib/openai";
+import { prisma } from "@/lib/db";
 import { TranslationBanner } from "@/components/listings/translation-banner";
 import { ReviewCard } from "@/components/reviews/review-card";
 import { PhotoCarousel } from "@/components/listings/photo-carousel";
 import { PriceDisplay } from "@/components/listings/price-display";
 import { RentalRequestForm } from "@/components/rentals/rental-request-form";
 import { MessageOwnerButton } from "@/components/messages/message-owner-button";
+import { FavoriteButton } from "@/components/favorites/favorite-button";
+import { ShareButton } from "@/components/listings/share-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "@/components/profile/verification-badge";
@@ -73,12 +77,13 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const locale = rawLocale as (typeof routing.locales)[number];
   setRequestLocale(locale);
 
-  const [listing, session, listingReviews, t, tc] = await Promise.all([
+  const [listing, session, listingReviews, t, tc, ta] = await Promise.all([
     getListingById(id),
     getSession(),
     getReviewsForListing(id),
     getTranslations("Listings.detail"),
     getTranslations("Conditions"),
+    getTranslations("Listings.availability"),
   ]);
 
   if (!listing || listing.status === "hidden") {
@@ -88,6 +93,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isOwner = session?.user?.id === listing.ownerId;
   const isRejected = listing.status === "rejected";
   const isUnderReview = listing.status === "under_review";
+  const isUnavailable = listing.status === "unavailable";
+
+  // Fetch favorite IDs for the current user
+  let isFavorited = false;
+  if (session) {
+    const favoriteIds = await getUserFavoriteIds(session.user.id);
+    isFavorited = favoriteIds.has(listing.id);
+  }
 
   const aiEnabled = isAIEnabled();
   let cachedTranslation = null;
@@ -98,6 +111,49 @@ export default async function ListingDetailPage({ params }: PageProps) {
   // Non-owners should not see rejected listings
   if (isRejected && !isOwner) {
     notFound();
+  }
+
+  // Unavailable listing handling: show to owner and rental participants, show banner to others
+  if (isUnavailable) {
+    const hasActiveRental = session
+      ? await prisma.rental.findFirst({
+          where: {
+            listingId: listing.id,
+            OR: [
+              { renterId: session.user.id },
+              { ownerId: session.user.id },
+            ],
+            status: {
+              in: ["requested", "approved", "active", "returned"],
+            },
+          },
+        })
+      : null;
+    const canViewUnavailable = isOwner || !!hasActiveRental;
+
+    if (!canViewUnavailable) {
+      // Show a soft "unavailable" page (not 404)
+      return (
+        <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-md text-center">
+            <Card>
+              <CardContent className="py-12">
+                <AlertTriangle className="mx-auto size-12 text-yellow-500" />
+                <h1 className="mt-4 text-xl font-semibold text-gray-900">
+                  {listing.title}
+                </h1>
+                <p className="mt-2 text-muted-foreground">
+                  {ta("unavailableBanner")}
+                </p>
+                <Button asChild className="mt-6" variant="outline">
+                  <Link href="/browse">{t("requestRental")}</Link>
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      );
+    }
   }
 
   // Parse rejection reason from moderationResult JSON
@@ -126,6 +182,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
     { month: "long", year: "numeric" }
   );
 
+  // Construct share URL
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const shareUrl = `${baseUrl}/${locale}/listings/${listing.id}`;
+  const shareText = listing.priceDaily
+    ? `$${listing.priceDaily}/day - ${listing.description.slice(0, 100)}`
+    : listing.description.slice(0, 100);
+
+  // Whether to hide the rental request form (unavailable listing viewed by participant)
+  const hideRentalForm = isUnavailable && !isOwner;
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {/* Rejected banner (owner only) */}
@@ -151,6 +217,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
         </div>
       )}
 
+      {/* Unavailable banner (for owner/participants who can still view) */}
+      {isUnavailable && (
+        <div className="mb-6 flex items-center gap-2 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+          <AlertTriangle className="size-4 shrink-0" />
+          {ta("unavailableBanner")}
+        </div>
+      )}
+
       {/* Split layout: left content + right sticky price card */}
       <div className="lg:grid lg:grid-cols-5 lg:gap-10">
         {/* === Left column (desktop) / Top (mobile) === */}
@@ -164,7 +238,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             title={listing.title}
           />
 
-          {/* Title + Badges + Tags + Mobile Price + Description */}
+          {/* Title + Favorite + Share buttons */}
           {aiEnabled ? (
             <TranslationBanner
               listingId={listing.id}
@@ -175,6 +249,22 @@ export default async function ListingDetailPage({ params }: PageProps) {
               cachedTranslation={cachedTranslation}
               aiEnabled={aiEnabled}
             >
+              {/* Action buttons row */}
+              <div className="mt-3 flex items-center gap-2">
+                <div className="rounded-full bg-gray-100">
+                  <FavoriteButton
+                    listingId={listing.id}
+                    isFavorited={isFavorited}
+                    isAuthenticated={!!session}
+                    className="text-gray-600 hover:text-red-500"
+                  />
+                </div>
+                <ShareButton
+                  title={listing.title}
+                  text={shareText}
+                  url={shareUrl}
+                />
+              </div>
               {/* Badges row */}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{listing.category.name}</Badge>
@@ -208,7 +298,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} />
               </div>
             </TranslationBanner>
           ) : (
@@ -217,6 +307,22 @@ export default async function ListingDetailPage({ params }: PageProps) {
               <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl">
                 {listing.title}
               </h1>
+              {/* Action buttons row */}
+              <div className="mt-3 flex items-center gap-2">
+                <div className="rounded-full bg-gray-100">
+                  <FavoriteButton
+                    listingId={listing.id}
+                    isFavorited={isFavorited}
+                    isAuthenticated={!!session}
+                    className="text-gray-600 hover:text-red-500"
+                  />
+                </div>
+                <ShareButton
+                  title={listing.title}
+                  text={shareText}
+                  url={shareUrl}
+                />
+              </div>
               {/* Badges row */}
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <Badge variant="secondary">{listing.category.name}</Badge>
@@ -250,7 +356,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} />
               </div>
               {/* Description */}
               <div className="mt-8">
@@ -342,6 +448,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             <PriceCard
               listing={listing}
               isOwner={isOwner}
+              hideRentalForm={hideRentalForm}
             />
           </div>
         </div>
@@ -355,6 +462,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 async function PriceCard({
   listing,
   isOwner,
+  hideRentalForm = false,
 }: {
   listing: {
     id: string;
@@ -364,6 +472,7 @@ async function PriceCard({
     priceMonthly: number | null;
   };
   isOwner: boolean;
+  hideRentalForm?: boolean;
 }) {
   const t = await getTranslations("Listings.detail");
 
@@ -385,6 +494,10 @@ async function PriceCard({
               {t("editListing")}
             </Link>
           </Button>
+        ) : hideRentalForm ? (
+          <p className="text-center text-sm text-muted-foreground">
+            {t("notChargedYet")}
+          </p>
         ) : (
           <div className="space-y-3">
             <RentalRequestForm

@@ -24,6 +24,8 @@ interface ListingGridProps {
   listings: Listing[];
   loading?: boolean;
   highlightTerms?: string[];
+  favoriteIds?: string[];
+  isAuthenticated?: boolean;
 }
 
 function SkeletonCard() {
@@ -37,7 +39,8 @@ function SkeletonCard() {
   );
 }
 
-export function ListingGrid({ listings, loading, highlightTerms }: ListingGridProps) {
+export function ListingGrid({ listings, loading, highlightTerms, favoriteIds = [], isAuthenticated = false }: ListingGridProps) {
+  const favoriteSet = new Set(favoriteIds);
   const t = useTranslations("Browse");
   if (loading) {
     return (
@@ -72,7 +75,13 @@ export function ListingGrid({ listings, loading, highlightTerms }: ListingGridPr
   return (
     <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
       {listings.map((listing) => (
-        <ListingCard key={listing.id} listing={listing} highlightTerms={highlightTerms} />
+        <ListingCard
+            key={listing.id}
+            listing={listing}
+            highlightTerms={highlightTerms}
+            isFavorited={favoriteSet.has(listing.id)}
+            isAuthenticated={isAuthenticated}
+          />
       ))}
     </div>
   );

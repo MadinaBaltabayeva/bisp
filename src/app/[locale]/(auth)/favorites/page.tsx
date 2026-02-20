@@ -7,7 +7,6 @@ import { Link } from "@/i18n/navigation";
 import { getSession } from "@/features/auth/queries";
 import { getFavoriteListings, getUserFavoriteIds } from "@/features/favorites/queries";
 import { ListingCard } from "@/components/listings/listing-card";
-import { FavoriteButton } from "@/components/favorites/favorite-button";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -67,17 +66,12 @@ export default async function FavoritesPage({ params }: PageProps) {
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {favorites.map((favorite) => (
-            <div key={favorite.id} className="relative">
-              <ListingCard listing={favorite.listing} />
-              <div className="absolute left-2 top-2 z-10">
-                <FavoriteButton
-                  listingId={favorite.listing.id}
-                  isFavorited={favoriteIds.has(favorite.listing.id)}
-                  isAuthenticated={true}
-                  className="bg-black/30 backdrop-blur-sm hover:bg-black/40"
-                />
-              </div>
-            </div>
+            <ListingCard
+              key={favorite.id}
+              listing={favorite.listing}
+              isFavorited={favoriteIds.has(favorite.listing.id)}
+              isAuthenticated={true}
+            />
           ))}
         </div>
       )}
