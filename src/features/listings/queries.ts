@@ -73,7 +73,7 @@ export async function searchListings(
   // Build filter conditions (shared between FTS5 and Prisma-only paths)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {
-    status: "active",
+    status: "active", // "unavailable" listings excluded by this filter
   };
 
   // Category filter by slug

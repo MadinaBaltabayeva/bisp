@@ -329,6 +329,39 @@ export async function deleteListing(listingId: string) {
 }
 
 /**
+ * Toggle listing availability between "active" and "unavailable".
+ * Only the owner can toggle, and only for listings in "active" or "unavailable" status.
+ */
+export async function toggleListingAvailability(listingId: string) {
+  const session = await getSession();
+  if (!session) return { error: "Must be logged in." };
+
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { ownerId: true, status: true },
+  });
+
+  if (!listing || listing.ownerId !== session.user.id) {
+    return { error: "Not authorized." };
+  }
+
+  if (listing.status !== "active" && listing.status !== "unavailable") {
+    return { error: "Cannot toggle availability in current state." };
+  }
+
+  const newStatus = listing.status === "active" ? "unavailable" : "active";
+
+  await prisma.listing.update({
+    where: { id: listingId },
+    data: { status: newStatus },
+  });
+
+  revalidatePath(`/profiles/${session.user.id}`);
+  revalidatePath("/");
+  return { success: true, status: newStatus };
+}
+
+/**
  * Get AI-powered category and tag suggestions from a photo.
  */
 export async function getAISuggestions(formData: FormData) {
