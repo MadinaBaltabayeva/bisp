@@ -447,7 +447,9 @@
     "photoUpdated": "Profile photo updated",
     "photoError": "Failed to upload photo",
     "removePhoto": "Remove Photo",
-    "identityVerification": "Identity Verification"
+    "identityVerification": "Identity Verification",
+    "emailNotifications": "Email notifications",
+    "emailNotificationsDescription": "Receive email notifications for rental updates, messages, and reviews"
   },
   "Admin": {
     "sidebar": {
@@ -629,6 +631,19 @@
     "good": "Good",
     "fair": "Fair",
     "poor": "Poor"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all notifications",
+    "bell": "Notifications",
+    "unread": "unread",
+    "justNow": "Just now",
+    "rental": "Rental update",
+    "message": "New message",
+    "review": "New review",
+    "favorite": "Listing favorited"
   },
   "Favorites": {
     "title": "My Favorites",

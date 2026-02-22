@@ -43,6 +43,11 @@ model User {
   messages         Message[]
   reviewsGiven     Review[]        @relation("ReviewsGiven")
   reviewsReceived  Review[]        @relation("ReviewsReceived")
+
+  // Phase 9: Notifications
+  emailNotifications    Boolean        @default(true)
+  notificationsReceived Notification[] @relation("NotificationsReceived")
+  notificationsActed    Notification[] @relation("NotificationsActed")
 }
 
 model Session {
@@ -243,6 +248,26 @@ model Favorite {
   listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 
   @@unique([userId, listingId])
+}
+
+// === Phase 9: Notifications ===
+
+model Notification {
+  id          String   @id @default(cuid())
+  recipientId String
+  actorId     String
+  type        String   // "rental" | "message" | "review" | "favorite"
+  title       String
+  message     String   @default("")
+  linkUrl     String
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  recipient User @relation("NotificationsReceived", fields: [recipientId], references: [id], onDelete: Cascade)
+  actor     User @relation("NotificationsActed", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([recipientId, read])
+  @@index([recipientId, createdAt])
 }
 
 model RentalEvent {

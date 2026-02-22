@@ -76,8 +76,8 @@
     "messages": "Xabarlar"
   },
   "LanguageSwitcher": {
-    "uz": "O\u02BBzbekcha",
-    "ru": "\u0420\u0443\u0441\u0441\u043A\u0438\u0439",
+    "uz": "Oʻzbekcha",
+    "ru": "Русский",
     "en": "English"
   },
   "HomePage": {
@@ -447,7 +447,9 @@
     "photoUpdated": "Profil rasmi yangilandi",
     "photoError": "Rasmni yuklashda xatolik",
     "removePhoto": "Rasmni olib tashlash",
-    "identityVerification": "Shaxsni tasdiqlash"
+    "identityVerification": "Shaxsni tasdiqlash",
+    "emailNotifications": "Email notifications",
+    "emailNotificationsDescription": "Receive email notifications for rental updates, messages, and reviews"
   },
   "Admin": {
     "sidebar": {
@@ -629,6 +631,19 @@
     "good": "Yaxshi",
     "fair": "Oʻrtacha",
     "poor": "Yomon"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all notifications",
+    "bell": "Notifications",
+    "unread": "unread",
+    "justNow": "Just now",
+    "rental": "Rental update",
+    "message": "New message",
+    "review": "New review",
+    "favorite": "Listing favorited"
   },
   "Favorites": {
     "title": "Sevimlilar",

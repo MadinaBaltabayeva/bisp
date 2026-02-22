@@ -76,8 +76,8 @@
     "messages": "Сообщения"
   },
   "LanguageSwitcher": {
-    "uz": "O\u02BBzbekcha",
-    "ru": "\u0420\u0443\u0441\u0441\u043A\u0438\u0439",
+    "uz": "Oʻzbekcha",
+    "ru": "Русский",
     "en": "English"
   },
   "HomePage": {
@@ -447,7 +447,9 @@
     "photoUpdated": "Фото профиля обновлено",
     "photoError": "Не удалось загрузить фото",
     "removePhoto": "Удалить фото",
-    "identityVerification": "Верификация личности"
+    "identityVerification": "Верификация личности",
+    "emailNotifications": "Email notifications",
+    "emailNotificationsDescription": "Receive email notifications for rental updates, messages, and reviews"
   },
   "Admin": {
     "sidebar": {
@@ -629,6 +631,19 @@
     "good": "Хорошее",
     "fair": "Удовлетворительное",
     "poor": "Плохое"
+  },
+  "Notifications": {
+    "title": "Notifications",
+    "empty": "No notifications yet",
+    "markAllRead": "Mark all as read",
+    "viewAll": "View all notifications",
+    "bell": "Notifications",
+    "unread": "unread",
+    "justNow": "Just now",
+    "rental": "Rental update",
+    "message": "New message",
+    "review": "New review",
+    "favorite": "Listing favorited"
   },
   "Favorites": {
     "title": "Избранное",
