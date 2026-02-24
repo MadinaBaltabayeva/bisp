@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/features/auth/queries";
+import { createNotification } from "@/features/notifications/create-notification";
 
 /**
  * Toggle a listing as a favorite for the current user.
@@ -34,5 +35,24 @@ export async function toggleFavorite(listingId: string) {
   });
   revalidatePath("/favorites");
   revalidatePath(`/listings/${listingId}`);
+
+  // Notify listing owner about the favorite (in-app only, fire-and-forget)
+  const listing = await prisma.listing.findUnique({
+    where: { id: listingId },
+    select: { ownerId: true, title: true },
+  });
+
+  if (listing) {
+    createNotification({
+      recipientId: listing.ownerId,
+      actorId: userId,
+      type: "favorite",
+      title: `${session.user.name} saved your '${listing.title}' to favorites`,
+      message: "Someone favorited your listing",
+      linkUrl: `/listings/${listingId}`,
+      sendEmail: false,
+    }).catch(() => {});
+  }
+
   return { success: true, isFavorited: true };
 }

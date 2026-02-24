@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { rentalRequestSchema } from "@/lib/validations/rental";
 import { getSession } from "@/features/auth/queries";
 import { checkNotSuspended } from "@/features/admin/queries";
+import { createNotification } from "@/features/notifications/create-notification";
 
 /**
  * Create a new rental request.
@@ -32,7 +33,7 @@ export async function createRentalRequest(data: unknown) {
   // Verify listing exists and is active
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
-    select: { id: true, ownerId: true, status: true, priceDaily: true },
+    select: { id: true, ownerId: true, status: true, priceDaily: true, title: true },
   });
 
   if (!listing) {
@@ -83,6 +84,16 @@ export async function createRentalRequest(data: unknown) {
     revalidatePath("/rentals");
     revalidatePath(`/listings/${listingId}`);
 
+    // Notify the listing owner about the rental request (fire-and-forget)
+    createNotification({
+      recipientId: listing.ownerId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `${session.user.name} requested to rent your '${listing.title}'`,
+      message: `Rental request for ${days} day(s)`,
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
     return { success: true };
   } catch (error) {
     console.error("Failed to create rental request:", error);
@@ -102,7 +113,7 @@ export async function approveRental(rentalId: string) {
 
   const rental = await prisma.rental.findUnique({
     where: { id: rentalId },
-    select: { ownerId: true, status: true },
+    select: { ownerId: true, renterId: true, status: true, listing: { select: { title: true } } },
   });
 
   if (!rental) {
@@ -133,6 +144,16 @@ export async function approveRental(rentalId: string) {
     ]);
 
     revalidatePath("/rentals");
+
+    createNotification({
+      recipientId: rental.renterId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `${session.user.name} approved your rental of '${rental.listing.title}'`,
+      message: "Your rental request has been approved",
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
     return { success: true };
   } catch (error) {
     console.error("Failed to approve rental:", error);
@@ -152,7 +173,7 @@ export async function declineRental(rentalId: string) {
 
   const rental = await prisma.rental.findUnique({
     where: { id: rentalId },
-    select: { ownerId: true, status: true },
+    select: { ownerId: true, renterId: true, status: true, listing: { select: { title: true } } },
   });
 
   if (!rental) {
@@ -183,6 +204,16 @@ export async function declineRental(rentalId: string) {
     ]);
 
     revalidatePath("/rentals");
+
+    createNotification({
+      recipientId: rental.renterId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `${session.user.name} declined your rental request for '${rental.listing.title}'`,
+      message: "Your rental request has been declined",
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
     return { success: true };
   } catch (error) {
     console.error("Failed to decline rental:", error);
@@ -202,7 +233,7 @@ export async function markReturned(rentalId: string) {
 
   const rental = await prisma.rental.findUnique({
     where: { id: rentalId },
-    select: { ownerId: true, status: true },
+    select: { ownerId: true, renterId: true, status: true, listing: { select: { title: true } } },
   });
 
   if (!rental) {
@@ -233,6 +264,16 @@ export async function markReturned(rentalId: string) {
     ]);
 
     revalidatePath("/rentals");
+
+    createNotification({
+      recipientId: rental.renterId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `Your rental of '${rental.listing.title}' has been marked as returned`,
+      message: "The listing owner confirmed the item was returned",
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
     return { success: true };
   } catch (error) {
     console.error("Failed to mark rental as returned:", error);
@@ -252,7 +293,7 @@ export async function completeRental(rentalId: string) {
 
   const rental = await prisma.rental.findUnique({
     where: { id: rentalId },
-    select: { ownerId: true, status: true },
+    select: { ownerId: true, renterId: true, status: true, listing: { select: { title: true } } },
   });
 
   if (!rental) {
@@ -283,6 +324,16 @@ export async function completeRental(rentalId: string) {
     ]);
 
     revalidatePath("/rentals");
+
+    createNotification({
+      recipientId: rental.renterId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `Your rental of '${rental.listing.title}' is now complete`,
+      message: "The rental has been completed successfully",
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
     return { success: true };
   } catch (error) {
     console.error("Failed to complete rental:", error);

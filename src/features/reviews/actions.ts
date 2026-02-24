@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { reviewSchema } from "@/lib/validations/review";
 import { getSession } from "@/features/auth/queries";
 import { checkNotSuspended } from "@/features/admin/queries";
+import { createNotification } from "@/features/notifications/create-notification";
 
 /**
  * Create a review for a completed rental.
@@ -31,7 +32,7 @@ export async function createReview(data: unknown) {
   // Fetch the rental to verify status and participants
   const rental = await prisma.rental.findUnique({
     where: { id: rentalId },
-    select: { id: true, status: true, renterId: true, ownerId: true },
+    select: { id: true, status: true, renterId: true, ownerId: true, listing: { select: { title: true } } },
   });
 
   if (!rental) {
@@ -87,6 +88,16 @@ export async function createReview(data: unknown) {
 
     revalidatePath("/rentals");
     revalidatePath(`/profiles/${revieweeId}`);
+
+    // Notify the reviewed user (fire-and-forget)
+    createNotification({
+      recipientId: revieweeId,
+      actorId: session.user.id,
+      type: "review",
+      title: `${session.user.name} left a review on '${rental.listing.title}'`,
+      message: `${rating}-star review`,
+      linkUrl: `/rentals`,
+    }).catch(() => {});
 
     return { success: true };
   } catch (error: unknown) {

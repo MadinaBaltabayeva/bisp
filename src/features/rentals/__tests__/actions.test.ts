@@ -16,6 +16,11 @@ vi.mock("@/features/admin/queries", () => ({
   checkNotSuspended: vi.fn().mockResolvedValue({}),
 }));
 
+// Mock notifications
+vi.mock("@/features/notifications/create-notification", () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock Prisma
 const mockRentalCreate = vi.fn();
 const mockRentalFindUnique = vi.fn();
@@ -83,12 +88,13 @@ describe("rental actions", () => {
 
   describe("createRentalRequest", () => {
     it("creates rental with valid dates and listing using $transaction", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
         ownerId: "user_2",
         status: "active",
         priceDaily: 10,
+        title: "Test Listing",
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -99,12 +105,13 @@ describe("rental actions", () => {
     });
 
     it("creates RentalEvent with status 'requested' during rental creation", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
         ownerId: "user_2",
         status: "active",
         priceDaily: 10,
+        title: "Test Listing",
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -122,12 +129,13 @@ describe("rental actions", () => {
     });
 
     it("rejects request on own listing", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
         ownerId: "user_1",
         status: "active",
         priceDaily: 10,
+        title: "Test Listing",
       });
 
       const result = await createRentalRequest(validRequest);
@@ -136,7 +144,7 @@ describe("rental actions", () => {
     });
 
     it("rejects invalid date range", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
 
       const result = await createRentalRequest({
         ...validRequest,
@@ -148,12 +156,13 @@ describe("rental actions", () => {
     });
 
     it("calculates total price from daily rate * days", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
         ownerId: "user_2",
         status: "active",
         priceDaily: 10,
+        title: "Test Listing",
       });
       mockRentalCreate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -168,7 +177,7 @@ describe("rental actions", () => {
     });
 
     it("calculates security deposit as 20% of total", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockListingFindUnique.mockResolvedValue({
         id: "listing_1",
         ownerId: "user_2",
@@ -189,10 +198,12 @@ describe("rental actions", () => {
 
   describe("approveRental", () => {
     it("owner can approve a requested rental using $transaction", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "requested",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -203,10 +214,12 @@ describe("rental actions", () => {
     });
 
     it("creates RentalEvent with status 'approved' on approval", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "requested",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -220,10 +233,12 @@ describe("rental actions", () => {
     });
 
     it("non-owner cannot approve", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "requested",
+        listing: { title: "Test Listing" },
       });
 
       const result = await approveRental("rental_1");
@@ -236,10 +251,12 @@ describe("rental actions", () => {
 
   describe("declineRental", () => {
     it("owner can decline a requested rental using $transaction", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "requested",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -250,10 +267,12 @@ describe("rental actions", () => {
     });
 
     it("creates RentalEvent with status 'declined' on decline", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "requested",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -268,10 +287,12 @@ describe("rental actions", () => {
 
   describe("markReturned", () => {
     it("owner can mark active rental as returned using $transaction", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "active",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });
@@ -284,10 +305,12 @@ describe("rental actions", () => {
 
   describe("completeRental", () => {
     it("returned rental transitions to completed using $transaction", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         ownerId: "user_2",
+        renterId: "user_1",
         status: "returned",
+        listing: { title: "Test Listing" },
       });
       mockRentalUpdate.mockResolvedValue({ id: "rental_1" });
       mockRentalEventCreate.mockResolvedValue({ id: "event_1" });

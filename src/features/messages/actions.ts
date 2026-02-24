@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import { messageSchema } from "@/lib/validations/message";
 import { getSession } from "@/features/auth/queries";
 import { checkNotSuspended } from "@/features/admin/queries";
+import { createNotification } from "@/features/notifications/create-notification";
 
 /**
  * Get or create a conversation between the current user and the listing owner.
@@ -123,6 +124,23 @@ export async function sendMessage(data: unknown) {
     });
 
     revalidatePath("/messages");
+
+    // Notify the other participant (fire-and-forget)
+    const recipientId =
+      conversation.user1Id === session.user.id
+        ? conversation.user2Id
+        : conversation.user1Id;
+    const truncatedContent =
+      content.length > 100 ? content.slice(0, 100) + "..." : content;
+
+    createNotification({
+      recipientId,
+      actorId: session.user.id,
+      type: "message",
+      title: `New message from ${session.user.name}`,
+      message: truncatedContent,
+      linkUrl: `/messages/${conversationId}`,
+    }).catch(() => {});
 
     return { success: true, message };
   } catch (error) {

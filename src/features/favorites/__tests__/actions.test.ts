@@ -11,10 +11,16 @@ vi.mock("@/features/auth/queries", () => ({
   getSession: () => mockGetSession(),
 }));
 
+// Mock notifications
+vi.mock("@/features/notifications/create-notification", () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock Prisma
 const mockFavoriteFindUnique = vi.fn();
 const mockFavoriteCreate = vi.fn();
 const mockFavoriteDelete = vi.fn();
+const mockListingFindUnique = vi.fn();
 
 vi.mock("@/lib/db", () => ({
   prisma: {
@@ -22,6 +28,9 @@ vi.mock("@/lib/db", () => ({
       findUnique: (...args: unknown[]) => mockFavoriteFindUnique(...args),
       create: (...args: unknown[]) => mockFavoriteCreate(...args),
       delete: (...args: unknown[]) => mockFavoriteDelete(...args),
+    },
+    listing: {
+      findUnique: (...args: unknown[]) => mockListingFindUnique(...args),
     },
   },
 }));
@@ -35,12 +44,16 @@ describe("favorites actions", () => {
 
   describe("toggleFavorite", () => {
     it("creates a favorite when none exists", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "Test User" } });
       mockFavoriteFindUnique.mockResolvedValue(null);
       mockFavoriteCreate.mockResolvedValue({
         id: "fav_1",
         userId: "user_1",
         listingId: "listing_1",
+      });
+      mockListingFindUnique.mockResolvedValue({
+        ownerId: "user_2",
+        title: "Test Listing",
       });
 
       const result = await toggleFavorite("listing_1");

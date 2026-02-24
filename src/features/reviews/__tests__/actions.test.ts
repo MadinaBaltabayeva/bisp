@@ -16,6 +16,11 @@ vi.mock("@/features/admin/queries", () => ({
   checkNotSuspended: vi.fn().mockResolvedValue({}),
 }));
 
+// Mock notifications
+vi.mock("@/features/notifications/create-notification", () => ({
+  createNotification: vi.fn().mockResolvedValue(undefined),
+}));
+
 // Mock Prisma
 const mockRentalFindUnique = vi.fn();
 const mockReviewCreate = vi.fn();
@@ -64,12 +69,13 @@ describe("review actions", () => {
 
   describe("createReview", () => {
     it("renter can review owner after completed rental", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockRentalFindUnique.mockResolvedValue({
         id: "rental_1",
         status: "completed",
         renterId: "user_1",
         ownerId: "user_2",
+        listing: { title: "Test Listing" },
       });
       mockReviewCreate.mockResolvedValue({ id: "review_1" });
       mockReviewAggregate.mockResolvedValue({
@@ -92,12 +98,13 @@ describe("review actions", () => {
     });
 
     it("owner can review renter after completed rental", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_2" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_2", name: "User 2" } });
       mockRentalFindUnique.mockResolvedValue({
         id: "rental_1",
         status: "completed",
         renterId: "user_1",
         ownerId: "user_2",
+        listing: { title: "Test Listing" },
       });
       mockReviewCreate.mockResolvedValue({ id: "review_2" });
       mockReviewAggregate.mockResolvedValue({
@@ -114,12 +121,13 @@ describe("review actions", () => {
     });
 
     it("rejects review on non-completed rental", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockRentalFindUnique.mockResolvedValue({
         id: "rental_1",
         status: "active",
         renterId: "user_1",
         ownerId: "user_2",
+        listing: { title: "Test Listing" },
       });
 
       const result = await createReview(validReview);
@@ -130,12 +138,13 @@ describe("review actions", () => {
     });
 
     it("rejects duplicate review", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockRentalFindUnique.mockResolvedValue({
         id: "rental_1",
         status: "completed",
         renterId: "user_1",
         ownerId: "user_2",
+        listing: { title: "Test Listing" },
       });
       mockReviewCreate.mockRejectedValue(
         new Error("UNIQUE constraint failed")
@@ -148,12 +157,13 @@ describe("review actions", () => {
     });
 
     it("recalculates reviewee averageRating and reviewCount", async () => {
-      mockGetSession.mockResolvedValue({ user: { id: "user_1" } });
+      mockGetSession.mockResolvedValue({ user: { id: "user_1", name: "User 1" } });
       mockRentalFindUnique.mockResolvedValue({
         id: "rental_1",
         status: "completed",
         renterId: "user_1",
         ownerId: "user_2",
+        listing: { title: "Test Listing" },
       });
       mockReviewCreate.mockResolvedValue({ id: "review_1" });
       mockReviewAggregate.mockResolvedValue({
