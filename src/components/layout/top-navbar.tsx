@@ -18,6 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import { Logo } from "./logo";
 import { LanguageSwitcher } from "./language-switcher";
 import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -111,6 +112,8 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
           {!mounted ? (
             <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
           ) : session ? (
+            <>
+            <NotificationBell />
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2">
@@ -156,6 +159,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <Button
