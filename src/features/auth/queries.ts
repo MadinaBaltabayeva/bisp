@@ -30,6 +30,7 @@ export async function getUserProfile(id: string) {
       reviewCount: true,
       isSuspended: true,
       idVerified: true,
+      emailNotifications: true,
       createdAt: true,
       role: true,
     },

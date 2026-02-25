@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 import { getCurrentUserProfile } from "@/features/auth/queries";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 import { VerificationSection } from "@/components/profile/verification-section";
+import { EmailToggle } from "@/components/notifications/email-toggle";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -51,6 +52,13 @@ export default async function SettingsPage({ params }: PageProps) {
           {t("identityVerification")}
         </h2>
         <VerificationSection isVerified={user.idVerified} />
+      </div>
+
+      <div className="mt-10 border-t pt-8">
+        <h2 className="mb-4 text-lg font-semibold text-gray-900">
+          {t("emailNotifications")}
+        </h2>
+        <EmailToggle defaultEnabled={user.emailNotifications} />
       </div>
     </div>
   );
