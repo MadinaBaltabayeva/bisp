@@ -258,6 +258,12 @@
       "draft": "Qoralama",
       "rented": "Hozir ijarada"
     },
+    "pricing": {
+      "aiSuggests": "AI taklifi: ${price}/kun",
+      "based": "{count} ta o'xshash e'lon asosida",
+      "apply": "Qo'llash",
+      "dismiss": "Yashirish"
+    },
     "availability": {
       "available": "Mavjud",
       "unavailable": "Mavjud emas",

@@ -258,6 +258,12 @@
       "draft": "Черновик",
       "rented": "Сейчас в аренде"
     },
+    "pricing": {
+      "aiSuggests": "ИИ предлагает: ${price}/день",
+      "based": "На основе {count} похожих объявлений",
+      "apply": "Применить",
+      "dismiss": "Скрыть"
+    },
     "availability": {
       "available": "Доступно",
       "unavailable": "Недоступно",

@@ -258,6 +258,12 @@
       "draft": "Draft",
       "rented": "Currently Rented"
     },
+    "pricing": {
+      "aiSuggests": "AI suggests: ${price}/day",
+      "based": "Based on {count} similar listings",
+      "apply": "Apply",
+      "dismiss": "Dismiss"
+    },
     "availability": {
       "available": "Available",
       "unavailable": "Unavailable",
