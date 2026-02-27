@@ -284,6 +284,79 @@ export async function getCachedTranslation(listingId: string, locale: string) {
 }
 
 /**
+ * Get category price statistics (median daily price) for AI pricing suggestions.
+ * Returns null when no active listings with priceDaily exist in the category.
+ */
+export async function getCategoryPriceStats(
+  categoryId: string,
+  excludeListingId?: string
+): Promise<{ averageDaily: number; count: number } | null> {
+  const results = await prisma.listing.findMany({
+    where: {
+      categoryId,
+      status: "active",
+      priceDaily: { not: null },
+      ...(excludeListingId ? { id: { not: excludeListingId } } : {}),
+    },
+    select: { priceDaily: true },
+  });
+
+  if (results.length === 0) return null;
+
+  const prices = results
+    .map((r) => r.priceDaily as number)
+    .sort((a, b) => a - b);
+
+  const mid = Math.floor(prices.length / 2);
+  const median =
+    prices.length % 2 !== 0
+      ? prices[mid]
+      : (prices[mid - 1] + prices[mid]) / 2;
+
+  return {
+    averageDaily: Math.round(median * 100) / 100,
+    count: results.length,
+  };
+}
+
+/**
+ * Get similar listings for the "You might also like" section.
+ * Returns same-category listings first, falls back to any-category if none match.
+ */
+export async function getSimilarListings(
+  listingId: string,
+  categoryId: string,
+  limit = 4
+) {
+  // Primary: same category, excluding current listing
+  const sameCategoryListings = await prisma.listing.findMany({
+    where: {
+      categoryId,
+      id: { not: listingId },
+      status: "active",
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: LISTING_INCLUDE,
+  });
+
+  if (sameCategoryListings.length > 0) {
+    return sameCategoryListings;
+  }
+
+  // Fallback: any category, excluding current listing
+  return prisma.listing.findMany({
+    where: {
+      id: { not: listingId },
+      status: "active",
+    },
+    orderBy: { createdAt: "desc" },
+    take: limit,
+    include: LISTING_INCLUDE,
+  });
+}
+
+/**
  * Get all listings for a specific user.
  */
 export async function getUserListings(userId: string) {
