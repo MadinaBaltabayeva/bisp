@@ -273,6 +273,9 @@
       "markedUnavailable": "Eʼlon endi mavjud emas",
       "cannotToggle": "Joriy holatda mavjudlikni oʻzgartirib boʻlmaydi",
       "unavailableBanner": "Bu eʼlon hozirda mavjud emas"
+    },
+    "similar": {
+      "heading": "Sizga ham yoqishi mumkin"
     }
   },
   "Browse": {
@@ -689,5 +692,11 @@
       "uz": "o'zbek",
       "unknown": "boshqa til"
     }
+  },
+  "Badges": {
+    "trustedOwner": "Ishonchli egasi",
+    "activeRenter": "Faol ijarachi",
+    "topRated": "Yuqori reytingli",
+    "newMember": "Yangi a'zo"
   }
 }

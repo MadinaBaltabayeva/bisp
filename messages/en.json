@@ -273,6 +273,9 @@
       "markedUnavailable": "Listing is now unavailable",
       "cannotToggle": "Cannot change availability in current state",
       "unavailableBanner": "This listing is currently unavailable"
+    },
+    "similar": {
+      "heading": "You might also like"
     }
   },
   "Browse": {
@@ -689,5 +692,11 @@
       "uz": "Uzbek",
       "unknown": "another language"
     }
+  },
+  "Badges": {
+    "trustedOwner": "Trusted Owner",
+    "activeRenter": "Active Renter",
+    "topRated": "Top Rated",
+    "newMember": "New Member"
   }
 }
