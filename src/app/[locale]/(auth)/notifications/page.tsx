@@ -22,7 +22,8 @@ export async function generateMetadata({
 }
 
 export default async function NotificationsPage({ params }: PageProps) {
-  const { locale } = await params;
+  const { locale: rawLocale } = await params;
+  const locale = rawLocale as (typeof routing.locales)[number];
   setRequestLocale(locale);
 
   const session = await getSession();

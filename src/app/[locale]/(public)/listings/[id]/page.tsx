@@ -29,6 +29,7 @@ import { RentalRequestForm } from "@/components/rentals/rental-request-form";
 import { MessageOwnerButton } from "@/components/messages/message-owner-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { ShareButton } from "@/components/listings/share-button";
+import { SimilarListings } from "@/components/listings/similar-listings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "@/components/profile/verification-badge";
@@ -96,11 +97,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isUnavailable = listing.status === "unavailable";
 
   // Fetch favorite IDs for the current user
-  let isFavorited = false;
-  if (session) {
-    const favoriteIds = await getUserFavoriteIds(session.user.id);
-    isFavorited = favoriteIds.has(listing.id);
-  }
+  const favoriteIds = session
+    ? await getUserFavoriteIds(session.user.id)
+    : new Set<string>();
+  const isFavorited = favoriteIds.has(listing.id);
 
   const aiEnabled = isAIEnabled();
   let cachedTranslation = null;
@@ -440,6 +440,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </p>
             )}
           </div>
+
+          {/* Similar listings section */}
+          <SimilarListings
+            listingId={listing.id}
+            categoryId={listing.categoryId}
+            favoriteIds={favoriteIds}
+            isAuthenticated={!!session}
+          />
         </div>
 
         {/* === Right column (desktop only) - sticky price card === */}
