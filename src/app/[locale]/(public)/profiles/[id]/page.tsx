@@ -6,6 +6,7 @@ import { getUserProfile, getSession } from "@/features/auth/queries";
 import { getReviewsForUser } from "@/features/reviews/queries";
 import { getUserListings } from "@/features/listings/queries";
 import { getUserFavoriteIds } from "@/features/favorites/queries";
+import { getUserBadges } from "@/features/badges/queries";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileSections } from "@/components/profile/profile-sections";
 
@@ -34,11 +35,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const locale = rawLocale as (typeof routing.locales)[number];
   setRequestLocale(locale);
 
-  const [user, session, reviews, listings] = await Promise.all([
+  const [user, session, reviews, listings, badges] = await Promise.all([
     getUserProfile(id),
     getSession(),
     getReviewsForUser(id),
     getUserListings(id),
+    getUserBadges(id),
   ]);
 
   if (!user) {
@@ -55,7 +57,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-      <ProfileHeader user={user} isOwnProfile={isOwnProfile} />
+      <ProfileHeader user={user} isOwnProfile={isOwnProfile} badges={badges} />
       <ProfileSections
         user={user}
         isOwnProfile={isOwnProfile}

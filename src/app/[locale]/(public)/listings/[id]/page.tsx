@@ -33,6 +33,8 @@ import { SimilarListings } from "@/components/listings/similar-listings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "@/components/profile/verification-badge";
+import { ReputationBadges } from "@/components/profile/reputation-badge";
+import { getUserBadges } from "@/features/badges/queries";
 import {
   Card,
   CardContent,
@@ -96,10 +98,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const isUnderReview = listing.status === "under_review";
   const isUnavailable = listing.status === "unavailable";
 
-  // Fetch favorite IDs for the current user
-  const favoriteIds = session
-    ? await getUserFavoriteIds(session.user.id)
-    : new Set<string>();
+  // Fetch favorite IDs and owner badges in parallel
+  const [favoriteIds, ownerBadges] = await Promise.all([
+    session ? getUserFavoriteIds(session.user.id) : Promise.resolve(new Set<string>()),
+    getUserBadges(listing.ownerId),
+  ]);
   const isFavorited = favoriteIds.has(listing.id);
 
   const aiEnabled = isAIEnabled();
@@ -401,6 +404,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   </Link>
                   {listing.owner.idVerified && <VerificationBadge />}
                 </div>
+                {ownerBadges.length > 0 && (
+                  <div className="mt-1">
+                    <ReputationBadges badges={ownerBadges} />
+                  </div>
+                )}
                 <div className="flex items-center gap-3 text-sm text-muted-foreground">
                   <span className="flex items-center gap-1">
                     <Calendar className="size-3.5" />

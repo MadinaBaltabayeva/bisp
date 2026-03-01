@@ -5,6 +5,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "@/components/profile/verification-badge";
+import { ReputationBadges } from "@/components/profile/reputation-badge";
+import type { UserBadge } from "@/features/badges/queries";
 
 interface ProfileHeaderProps {
   user: {
@@ -18,9 +20,10 @@ interface ProfileHeaderProps {
     idVerified: boolean;
   };
   isOwnProfile: boolean;
+  badges: UserBadge[];
 }
 
-export async function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) {
+export async function ProfileHeader({ user, isOwnProfile, badges }: ProfileHeaderProps) {
   const t = await getTranslations("Profile");
   const format = await getFormatter();
 
@@ -45,6 +48,7 @@ export async function ProfileHeader({ user, isOwnProfile }: ProfileHeaderProps) 
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
             {user.idVerified && <VerificationBadge />}
+            {badges.length > 0 && <ReputationBadges badges={badges} />}
             {isOwnProfile && (
               <Button variant="outline" size="sm" asChild>
                 <Link href="/settings">

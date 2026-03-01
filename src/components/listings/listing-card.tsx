@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { MapPin, ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
+import { ReputationBadgeIcon } from "@/components/profile/reputation-badge";
+import type { UserBadge } from "@/features/badges/queries";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { AvailabilityToggle } from "@/components/listings/availability-toggle";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +33,7 @@ interface ListingCardProps {
   showFavoriteButton?: boolean;
   status?: string;
   showAvailabilityToggle?: boolean;
+  ownerBadges?: UserBadge[];
 }
 
 function highlightText(text: string, terms?: string[]): ReactNode {
@@ -61,6 +64,7 @@ export function ListingCard({
   showFavoriteButton = true,
   status,
   showAvailabilityToggle = false,
+  ownerBadges,
 }: ListingCardProps) {
   const t = useTranslations("Listings.card");
   const ta = useTranslations("Listings.availability");
@@ -137,6 +141,9 @@ export function ListingCard({
               {highlightText(listing.title, highlightTerms)}
             </h3>
             {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
+            {ownerBadges?.map((badge) => (
+              <ReputationBadgeIcon key={badge.type} badge={badge} className="shrink-0" />
+            ))}
           </div>
           <p className="text-sm text-muted-foreground">{listing.category.name}</p>
           <div className="flex items-center gap-1 text-sm text-muted-foreground">
