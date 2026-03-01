@@ -21,6 +21,7 @@ import {
 
 import { PhotoUploadGrid } from "./photo-upload-grid";
 import { AISuggestions } from "./ai-suggestions";
+import { PriceSuggestion } from "./price-suggestion";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,6 +160,7 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
   });
 
   const descValue = form.watch("description") || "";
+  const watchedCategoryId = form.watch("categoryId");
 
   function handleAISuggest(suggestion: {
     category: string | null;
@@ -438,6 +440,17 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
                 ))}
               </div>
             )}
+
+            <PriceSuggestion
+              categoryId={watchedCategoryId}
+              listingId={listing?.id}
+              onApply={(prices) => {
+                form.setValue("priceHourly", prices.priceHourly, { shouldValidate: true });
+                form.setValue("priceDaily", prices.priceDaily, { shouldValidate: true });
+                form.setValue("priceWeekly", prices.priceWeekly, { shouldValidate: true });
+                form.setValue("priceMonthly", prices.priceMonthly, { shouldValidate: true });
+              }}
+            />
 
             {form.formState.errors.priceDaily?.message === "At least one pricing rate is required" && (
               <p className="text-sm text-destructive">{t("pricingRequired")}</p>
