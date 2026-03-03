@@ -36,6 +36,10 @@ export function RentalTimeline({
   const isDeclined = currentStatus === "declined";
   const steps = isDeclined ? ["requested", "declined"] : STATUS_ORDER;
 
+  // Check for extra statuses (disputed, cancelled) that branch off the normal flow
+  const disputedEvent = eventMap.get("disputed");
+  const cancelledEvent = eventMap.get("cancelled");
+
   return (
     <div className="relative pl-8">
       {/* Vertical connecting line */}
@@ -84,6 +88,46 @@ export function RentalTimeline({
             </div>
           );
         })}
+
+        {/* Disputed event (branching red dot) */}
+        {disputedEvent && (
+          <div className="relative flex items-start gap-4">
+            <div className="absolute -left-5 top-0.5 size-3 rounded-full border-2 border-red-500 bg-red-500" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-red-700">
+                {t("disputed" as Parameters<typeof t>[0])}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {format.dateTime(new Date(disputedEvent.createdAt), {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Cancelled event (gray dot) */}
+        {cancelledEvent && (
+          <div className="relative flex items-start gap-4">
+            <div className="absolute -left-5 top-0.5 size-3 rounded-full border-2 border-gray-400 bg-gray-400" />
+            <div className="flex-1">
+              <p className="text-sm font-medium text-gray-500">
+                {t("cancelled" as Parameters<typeof t>[0])}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {format.dateTime(new Date(cancelledEvent.createdAt), {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

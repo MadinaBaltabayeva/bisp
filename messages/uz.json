@@ -332,7 +332,8 @@
       "returned": "Qaytarilgan",
       "completed": "Yakunlangan",
       "declined": "Rad etilgan",
-      "cancelled": "Bekor qilingan"
+      "cancelled": "Bekor qilingan",
+      "disputed": "Bahslashilmoqda"
     },
     "card": {
       "renter": "Ijarachi",
@@ -392,7 +393,22 @@
       "timeline": "Xronologiya",
       "actions": "Harakatlar",
       "notFound": "Ijara topilmadi",
-      "viewDetails": "Batafsil"
+      "viewDetails": "Batafsil",
+      "payNow": "Toʻlash",
+      "awaitingPayment": "Toʻlov kutilmoqda",
+      "paymentInfo": "Toʻlov maʼlumotlari",
+      "paymentMethod": "Usul",
+      "paymentCard": "Karta",
+      "paymentAmount": "Toʻlangan summa",
+      "paymentDate": "Toʻlov sanasi",
+      "paymentStatus": "Holat",
+      "paid": "Toʻlangan",
+      "openDispute": "Bahslashishni ochish",
+      "disputeReason": "Bahslashish sababi",
+      "disputeReasonPlaceholder": "Muammoni tavsiflang...",
+      "submitDispute": "Bahslashishni yuborish",
+      "disputeOpened": "Bahslashish muvaffaqiyatli ochildi",
+      "disputeStatus": "Bu ijara hozirda bahslashilmoqda"
     }
   },
   "Messages": {
@@ -465,6 +481,7 @@
       "dashboard": "Boshqaruv paneli",
       "users": "Foydalanuvchilar",
       "moderation": "Moderatsiya",
+      "disputes": "Bahslashishlar",
       "panelLabel": "Administrator paneli",
       "backToRentHub": "RentHubga qaytish"
     },
@@ -542,6 +559,24 @@
       "rejectedToast": "\"{title}\" rad etildi",
       "reasonTooShort": "Rad etish sababi kamida 10 belgidan iborat boʻlishi kerak",
       "cancel": "Bekor qilish"
+    },
+    "disputes": {
+      "title": "Bahslashishlar navbati",
+      "empty": "Ochiq bahslashishlar yoʻq",
+      "favorRenter": "Ijarachi foydasiga",
+      "favorOwner": "Egasi foydasiga",
+      "dismiss": "Rad etish",
+      "resolutionNote": "Qaror izohi (ixtiyoriy)",
+      "resolutionNotePlaceholder": "Izoh qoʻshing...",
+      "resolve": "Hal qilish",
+      "resolveSuccess": "Bahslashish muvaffaqiyatli hal qilindi",
+      "disputeBy": "Bahslashish ochgan",
+      "reason": "Sabab",
+      "rental": "Ijara",
+      "parties": "Tomonlar",
+      "renter": "Ijarachi",
+      "owner": "Egasi",
+      "opened": "Ochildi"
     }
   },
   "Reviews": {
@@ -676,7 +711,9 @@
     "active": "Faol",
     "returned": "Qaytarilgan",
     "completed": "Yakunlangan",
-    "declined": "Rad etilgan"
+    "declined": "Rad etilgan",
+    "disputed": "Bahslashilmoqda",
+    "cancelled": "Bekor qilindi"
   },
   "Translation": {
     "banner": "Bu e'lon {language} tilida",
@@ -692,6 +729,27 @@
       "uz": "o'zbek",
       "unknown": "boshqa til"
     }
+  },
+  "Checkout": {
+    "title": "Toʻlov",
+    "subtitle": "Toʻlovni yakunlang",
+    "priceBreakdown": "Narx tafsiloti",
+    "dailyRate": "Kunlik tarif",
+    "days": "kun",
+    "subtotal": "Jami",
+    "securityDeposit": "Kafolat depoziti",
+    "total": "Umumiy",
+    "cardForm": "Karta maʼlumotlari",
+    "cardNumber": "Karta raqami",
+    "expiry": "Amal qilish muddati",
+    "cvc": "CVC",
+    "cardholderName": "Karta egasining ismi",
+    "completePayment": "Toʻlovni yakunlash",
+    "processing": "Qayta ishlanmoqda...",
+    "paymentSuccess": "Toʻlov muvaffaqiyatli yakunlandi!",
+    "cardPlaceholder": "1234567890123456",
+    "expiryPlaceholder": "OO/YY",
+    "cvcPlaceholder": "123"
   },
   "Badges": {
     "trustedOwner": "Ishonchli egasi",

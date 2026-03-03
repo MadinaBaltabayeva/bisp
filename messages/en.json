@@ -332,7 +332,8 @@
       "returned": "Returned",
       "completed": "Completed",
       "declined": "Declined",
-      "cancelled": "Cancelled"
+      "cancelled": "Cancelled",
+      "disputed": "Disputed"
     },
     "card": {
       "renter": "Renter",
@@ -392,7 +393,22 @@
       "timeline": "Timeline",
       "actions": "Actions",
       "notFound": "Rental not found",
-      "viewDetails": "View details"
+      "viewDetails": "View details",
+      "payNow": "Pay Now",
+      "awaitingPayment": "Awaiting Payment",
+      "paymentInfo": "Payment Information",
+      "paymentMethod": "Method",
+      "paymentCard": "Card",
+      "paymentAmount": "Amount Paid",
+      "paymentDate": "Payment Date",
+      "paymentStatus": "Status",
+      "paid": "Paid",
+      "openDispute": "Open Dispute",
+      "disputeReason": "Reason for dispute",
+      "disputeReasonPlaceholder": "Describe the issue...",
+      "submitDispute": "Submit Dispute",
+      "disputeOpened": "Dispute opened successfully",
+      "disputeStatus": "This rental is currently under dispute"
     }
   },
   "Messages": {
@@ -465,6 +481,7 @@
       "dashboard": "Dashboard",
       "users": "Users",
       "moderation": "Moderation",
+      "disputes": "Disputes",
       "panelLabel": "Admin Panel",
       "backToRentHub": "Back to RentHub"
     },
@@ -542,6 +559,24 @@
       "rejectedToast": "\"{title}\" has been rejected",
       "reasonTooShort": "Rejection reason must be at least 10 characters",
       "cancel": "Cancel"
+    },
+    "disputes": {
+      "title": "Dispute Queue",
+      "empty": "No open disputes",
+      "favorRenter": "Favor Renter",
+      "favorOwner": "Favor Owner",
+      "dismiss": "Dismiss",
+      "resolutionNote": "Resolution note (optional)",
+      "resolutionNotePlaceholder": "Add a note...",
+      "resolve": "Resolve",
+      "resolveSuccess": "Dispute resolved successfully",
+      "disputeBy": "Dispute by",
+      "reason": "Reason",
+      "rental": "Rental",
+      "parties": "Parties",
+      "renter": "Renter",
+      "owner": "Owner",
+      "opened": "Opened"
     }
   },
   "Reviews": {
@@ -676,7 +711,9 @@
     "active": "Active",
     "returned": "Returned",
     "completed": "Completed",
-    "declined": "Declined"
+    "declined": "Declined",
+    "disputed": "Disputed",
+    "cancelled": "Cancelled"
   },
   "Translation": {
     "banner": "This listing is in {language}",
@@ -692,6 +729,27 @@
       "uz": "Uzbek",
       "unknown": "another language"
     }
+  },
+  "Checkout": {
+    "title": "Checkout",
+    "subtitle": "Complete your payment",
+    "priceBreakdown": "Price Breakdown",
+    "dailyRate": "Daily rate",
+    "days": "days",
+    "subtotal": "Subtotal",
+    "securityDeposit": "Security Deposit",
+    "total": "Total",
+    "cardForm": "Card Details",
+    "cardNumber": "Card number",
+    "expiry": "Expiry date",
+    "cvc": "CVC",
+    "cardholderName": "Cardholder name",
+    "completePayment": "Complete Payment",
+    "processing": "Processing...",
+    "paymentSuccess": "Payment completed successfully!",
+    "cardPlaceholder": "1234567890123456",
+    "expiryPlaceholder": "MM/YY",
+    "cvcPlaceholder": "123"
   },
   "Badges": {
     "trustedOwner": "Trusted Owner",

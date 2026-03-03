@@ -7,7 +7,6 @@ import { getSession } from "@/features/auth/queries";
 import {
   getRentalsAsRenter,
   getRentalsAsOwner,
-  activateApprovedRentals,
   getPendingActionCount,
 } from "@/features/rentals/queries";
 import { hasReviewed } from "@/features/reviews/queries";
@@ -74,9 +73,6 @@ export default async function MyRentalsPage({ params }: PageProps) {
   ]);
 
   if (!session) return null;
-
-  // Auto-activate approved rentals past start date
-  await activateApprovedRentals(session.user.id);
 
   const [renterRentals, ownerRentals, pendingCounts] = await Promise.all([
     getRentalsAsRenter(session.user.id),

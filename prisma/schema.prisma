@@ -48,6 +48,10 @@ model User {
   emailNotifications    Boolean        @default(true)
   notificationsReceived Notification[] @relation("NotificationsReceived")
   notificationsActed    Notification[] @relation("NotificationsActed")
+
+  // Phase 11: Disputes
+  disputesOpened   Dispute[] @relation("DisputesOpened")
+  disputesResolved Dispute[] @relation("DisputesResolved")
 }
 
 model Session {
@@ -168,7 +172,7 @@ model Rental {
   id              String   @id @default(cuid())
   startDate       DateTime
   endDate         DateTime
-  status          String   @default("requested") // requested, approved, active, returned, completed, declined
+  status          String   @default("requested") // requested, approved, active, returned, completed, declined, disputed, cancelled
   message         String   @default("")
   securityDeposit Float    @default(0)
   totalPrice      Float    @default(0)
@@ -185,6 +189,8 @@ model Rental {
   reviews      Review[]
   conversation Conversation?
   events       RentalEvent[]
+  payment      Payment?
+  dispute      Dispute?
 }
 
 model Conversation {
@@ -273,11 +279,43 @@ model Notification {
 model RentalEvent {
   id        String   @id @default(cuid())
   rentalId  String
-  status    String   // requested, approved, active, returned, completed, declined
+  status    String   // requested, approved, active, returned, completed, declined, disputed, cancelled
   actorId   String   // who triggered the change
   createdAt DateTime @default(now())
 
   rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
 
   @@index([rentalId])
+}
+
+// === Phase 11: Payment & Dispute Tables ===
+
+model Payment {
+  id        String   @id @default(cuid())
+  rentalId  String   @unique
+  method    String   @default("card")
+  cardLast4 String
+  amount    Float
+  status    String   @default("paid")
+  createdAt DateTime @default(now())
+
+  rental Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+}
+
+model Dispute {
+  id             String    @id @default(cuid())
+  rentalId       String    @unique
+  openedById     String
+  reason         String
+  status         String    @default("open") // open, resolved
+  resolution     String?
+  resolvedById   String?
+  resolvedAt     DateTime?
+  previousStatus String
+  resolutionNote String?
+  createdAt      DateTime  @default(now())
+
+  rental     Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
+  openedBy   User   @relation("DisputesOpened", fields: [openedById], references: [id], onDelete: Cascade)
+  resolvedBy User?  @relation("DisputesResolved", fields: [resolvedById], references: [id], onDelete: Cascade)
 }

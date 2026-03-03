@@ -57,7 +57,7 @@ import {
   markReturned,
   completeRental,
 } from "../actions";
-import { getRentalsAsRenter, getRentalsAsOwner, activateApprovedRentals, getRentalWithEvents } from "../queries";
+import { getRentalsAsRenter, getRentalsAsOwner, getRentalWithEvents } from "../queries";
 
 const tomorrow = new Date();
 tomorrow.setDate(tomorrow.getDate() + 1);
@@ -318,24 +318,6 @@ describe("rental actions", () => {
       const result = await completeRental("rental_1");
       expect(result).toEqual({ success: true });
       expect(mock$Transaction).toHaveBeenCalled();
-    });
-  });
-
-  describe("activateApprovedRentals", () => {
-    it("transitions approved rentals past start date to active", async () => {
-      mockRentalUpdateMany.mockResolvedValue({ count: 2 });
-
-      const count = await activateApprovedRentals("user_1");
-      expect(count).toBe(2);
-      expect(mockRentalUpdateMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: expect.objectContaining({
-            status: "approved",
-            startDate: expect.objectContaining({ lte: expect.any(Date) }),
-          }),
-          data: { status: "active" },
-        })
-      );
     });
   });
 

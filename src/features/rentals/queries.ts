@@ -116,21 +116,3 @@ export async function getRentalWithEvents(id: string) {
   });
 }
 
-/**
- * Auto-activate approved rentals whose start date has passed.
- * Transitions approved -> active for rentals the user is involved in.
- */
-export async function activateApprovedRentals(userId: string) {
-  const now = new Date();
-
-  const result = await prisma.rental.updateMany({
-    where: {
-      status: "approved",
-      startDate: { lte: now },
-      OR: [{ renterId: userId }, { ownerId: userId }],
-    },
-    data: { status: "active" },
-  });
-
-  return result.count;
-}

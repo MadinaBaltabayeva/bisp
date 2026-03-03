@@ -332,7 +332,8 @@
       "returned": "Возвращено",
       "completed": "Завершено",
       "declined": "Отклонено",
-      "cancelled": "Отменено"
+      "cancelled": "Отменено",
+      "disputed": "Оспорено"
     },
     "card": {
       "renter": "Арендатор",
@@ -392,7 +393,22 @@
       "timeline": "Хронология",
       "actions": "Действия",
       "notFound": "Аренда не найдена",
-      "viewDetails": "Подробнее"
+      "viewDetails": "Подробнее",
+      "payNow": "Оплатить",
+      "awaitingPayment": "Ожидание оплаты",
+      "paymentInfo": "Информация об оплате",
+      "paymentMethod": "Способ",
+      "paymentCard": "Карта",
+      "paymentAmount": "Сумма оплаты",
+      "paymentDate": "Дата оплаты",
+      "paymentStatus": "Статус",
+      "paid": "Оплачено",
+      "openDispute": "Открыть спор",
+      "disputeReason": "Причина спора",
+      "disputeReasonPlaceholder": "Опишите проблему...",
+      "submitDispute": "Отправить спор",
+      "disputeOpened": "Спор открыт успешно",
+      "disputeStatus": "Эта аренда в настоящее время оспаривается"
     }
   },
   "Messages": {
@@ -465,6 +481,7 @@
       "dashboard": "Панель управления",
       "users": "Пользователи",
       "moderation": "Модерация",
+      "disputes": "Споры",
       "panelLabel": "Панель администратора",
       "backToRentHub": "Вернуться на RentHub"
     },
@@ -542,6 +559,24 @@
       "rejectedToast": "\"{title}\" отклонено",
       "reasonTooShort": "Причина отклонения должна содержать минимум 10 символов",
       "cancel": "Отмена"
+    },
+    "disputes": {
+      "title": "Очередь споров",
+      "empty": "Нет открытых споров",
+      "favorRenter": "В пользу арендатора",
+      "favorOwner": "В пользу владельца",
+      "dismiss": "Отклонить",
+      "resolutionNote": "Примечание к решению (необязательно)",
+      "resolutionNotePlaceholder": "Добавьте примечание...",
+      "resolve": "Решить",
+      "resolveSuccess": "Спор успешно решён",
+      "disputeBy": "Спор от",
+      "reason": "Причина",
+      "rental": "Аренда",
+      "parties": "Стороны",
+      "renter": "Арендатор",
+      "owner": "Владелец",
+      "opened": "Открыт"
     }
   },
   "Reviews": {
@@ -676,7 +711,9 @@
     "active": "Активно",
     "returned": "Возвращено",
     "completed": "Завершено",
-    "declined": "Отклонено"
+    "declined": "Отклонено",
+    "disputed": "Оспорено",
+    "cancelled": "Отменено"
   },
   "Translation": {
     "banner": "Это объявление на {language}",
@@ -692,6 +729,27 @@
       "uz": "узбекский",
       "unknown": "другой язык"
     }
+  },
+  "Checkout": {
+    "title": "Оформление оплаты",
+    "subtitle": "Завершите платёж",
+    "priceBreakdown": "Расчёт стоимости",
+    "dailyRate": "Дневная ставка",
+    "days": "дней",
+    "subtotal": "Подитог",
+    "securityDeposit": "Залог",
+    "total": "Итого",
+    "cardForm": "Данные карты",
+    "cardNumber": "Номер карты",
+    "expiry": "Срок действия",
+    "cvc": "CVC",
+    "cardholderName": "Имя владельца карты",
+    "completePayment": "Завершить оплату",
+    "processing": "Обработка...",
+    "paymentSuccess": "Оплата прошла успешно!",
+    "cardPlaceholder": "1234567890123456",
+    "expiryPlaceholder": "ММ/ГГ",
+    "cvcPlaceholder": "123"
   },
   "Badges": {
     "trustedOwner": "Надежный владелец",

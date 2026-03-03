@@ -38,6 +38,16 @@ const STATUS_CONFIG: Record<
     className: "",
     variant: "destructive",
   },
+  disputed: {
+    labelKey: "disputed",
+    className: "border-red-300 bg-red-50 text-red-700",
+    variant: "outline",
+  },
+  cancelled: {
+    labelKey: "cancelled",
+    className: "bg-gray-200 text-gray-500",
+    variant: "secondary",
+  },
 };
 
 export function RentalStatusBadge({ status }: { status: string }) {
