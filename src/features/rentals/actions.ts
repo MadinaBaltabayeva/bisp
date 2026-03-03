@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { rentalRequestSchema } from "@/lib/validations/rental";
+import type { PaymentFormValues } from "@/lib/validations/payment";
 import { getSession } from "@/features/auth/queries";
 import { checkNotSuspended } from "@/features/admin/queries";
 import { createNotification } from "@/features/notifications/create-notification";
@@ -338,5 +339,87 @@ export async function completeRental(rentalId: string) {
   } catch (error) {
     console.error("Failed to complete rental:", error);
     return { error: "Failed to complete rental. Please try again." };
+  }
+}
+
+/**
+ * Process a simulated payment for an approved rental.
+ * Creates a Payment record, transitions rental to "active", creates RentalEvent, and notifies owner.
+ */
+export async function processPayment(
+  rentalId: string,
+  cardData: PaymentFormValues
+) {
+  const session = await getSession();
+  if (!session) {
+    return { error: "You must be logged in." };
+  }
+
+  const rental = await prisma.rental.findUnique({
+    where: { id: rentalId },
+    select: {
+      renterId: true,
+      ownerId: true,
+      status: true,
+      totalPrice: true,
+      securityDeposit: true,
+      listing: { select: { title: true } },
+    },
+  });
+
+  if (!rental) {
+    return { error: "Rental not found." };
+  }
+
+  if (rental.renterId !== session.user.id) {
+    return { error: "Only the renter can make payment." };
+  }
+
+  if (rental.status !== "approved") {
+    return { error: "This rental cannot be paid in its current state." };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.payment.create({
+        data: {
+          rentalId,
+          method: "card",
+          cardLast4: cardData.cardNumber.slice(-4),
+          amount: rental.totalPrice + rental.securityDeposit,
+          status: "paid",
+        },
+      });
+
+      await tx.rental.update({
+        where: { id: rentalId },
+        data: { status: "active" },
+      });
+
+      await tx.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "active",
+          actorId: session.user.id,
+        },
+      });
+    });
+
+    revalidatePath("/rentals");
+    revalidatePath(`/rentals/${rentalId}`);
+
+    createNotification({
+      recipientId: rental.ownerId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `Payment received for '${rental.listing.title}'`,
+      message: "The renter has completed payment. The rental is now active.",
+      linkUrl: `/rentals`,
+    }).catch(() => {});
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to process payment:", error);
+    return { error: "Failed to process payment. Please try again." };
   }
 }

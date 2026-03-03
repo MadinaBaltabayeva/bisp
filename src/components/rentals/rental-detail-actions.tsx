@@ -8,6 +8,7 @@ import {
   RotateCcw,
   CheckCircle,
   CheckCheck,
+  CreditCard,
 } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
@@ -18,6 +19,7 @@ import {
   markReturned,
   completeRental,
 } from "@/features/rentals/actions";
+import { Link } from "@/i18n/navigation";
 import { ReviewForm } from "@/components/reviews/review-form";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -58,6 +60,25 @@ export function RentalDetailActions({
 
   return (
     <div className="space-y-3">
+      {/* Pay Now button for renter when approved */}
+      {role === "renter" && status === "approved" && (
+        <Link href={`/rentals/${rentalId}/checkout`}>
+          <Button className="w-full" size="lg">
+            <CreditCard className="mr-1.5 size-4" />
+            {t("detail.payNow")}
+          </Button>
+        </Link>
+      )}
+
+      {/* Awaiting payment badge for owner when approved */}
+      {role === "owner" && status === "approved" && (
+        <div className="flex justify-center">
+          <Badge variant="outline" className="border-blue-300 bg-blue-50 text-blue-700">
+            {t("detail.awaitingPayment")}
+          </Badge>
+        </div>
+      )}
+
       {/* Owner action buttons */}
       {role === "owner" && status === "requested" && (
         <div className="flex gap-3">

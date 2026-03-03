@@ -116,3 +116,10 @@ export async function getRentalWithEvents(id: string) {
   });
 }
 
+/**
+ * Get the payment record for a rental (if exists).
+ */
+export async function getPaymentForRental(rentalId: string) {
+  return prisma.payment.findUnique({ where: { rentalId } });
+}
+

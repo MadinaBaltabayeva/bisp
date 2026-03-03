@@ -7,11 +7,15 @@ import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 
 import { getSession } from "@/features/auth/queries";
-import { getRentalWithEvents } from "@/features/rentals/queries";
+import {
+  getRentalWithEvents,
+  getPaymentForRental,
+} from "@/features/rentals/queries";
 import { hasReviewed } from "@/features/reviews/queries";
 import { RentalTimeline } from "@/components/rentals/rental-timeline";
 import { RentalDetailActions } from "@/components/rentals/rental-detail-actions";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
+import { PaymentInfo } from "@/components/rentals/payment-info";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface PageProps {
@@ -60,9 +64,12 @@ export default async function RentalDetailPage({ params }: PageProps) {
   const revieweeId = role === "renter" ? (rental.owner?.id ?? "") : (rental.renter?.id ?? "");
   const revieweeName = role === "renter" ? (rental.owner?.name ?? "User") : (rental.renter?.name ?? "User");
 
-  const reviewed = rental.status === "completed"
-    ? await hasReviewed(rental.id, session.user.id)
-    : false;
+  const [reviewed, payment] = await Promise.all([
+    rental.status === "completed"
+      ? hasReviewed(rental.id, session.user.id)
+      : Promise.resolve(false),
+    getPaymentForRental(rental.id),
+  ]);
 
   const coverImage = rental.listing.images[0]?.url;
   const startDate = new Date(rental.startDate);
@@ -213,6 +220,24 @@ export default async function RentalDetailPage({ params }: PageProps) {
         </Card>
       )}
 
+      {/* Dispute status banner */}
+      {rental.status === "disputed" && (
+        <Card className="mb-6 border-red-300 bg-red-50">
+          <CardContent className="p-4">
+            <p className="text-sm font-medium text-red-700">
+              {t("disputeStatus")}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Payment info */}
+      {payment && (
+        <div className="mb-6">
+          <PaymentInfo payment={payment} />
+        </div>
+      )}
+
       {/* Timeline */}
       <Card className="mb-6">
         <CardHeader>
@@ -228,6 +253,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
 
       {/* Actions */}
       {(role === "owner" ||
+        (role === "renter" && rental.status === "approved") ||
         (rental.status === "completed" && !reviewed)) && (
         <Card>
           <CardHeader>
