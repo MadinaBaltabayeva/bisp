@@ -423,3 +423,94 @@ export async function processPayment(
     return { error: "Failed to process payment. Please try again." };
   }
 }
+
+/**
+ * Open a dispute on an active or returned rental.
+ * Either the renter or owner can initiate. Freezes the rental in "disputed" status
+ * until an admin resolves it. Captures previousStatus for later restoration.
+ */
+export async function openDispute(rentalId: string, reason: string) {
+  const session = await getSession();
+  if (!session) {
+    return { error: "You must be logged in." };
+  }
+
+  const rental = await prisma.rental.findUnique({
+    where: { id: rentalId },
+    select: {
+      renterId: true,
+      ownerId: true,
+      status: true,
+      listing: { select: { title: true } },
+    },
+  });
+
+  if (!rental) {
+    return { error: "Rental not found." };
+  }
+
+  // Only renter or owner can open a dispute
+  if (
+    session.user.id !== rental.renterId &&
+    session.user.id !== rental.ownerId
+  ) {
+    return { error: "Only the renter or owner can open a dispute." };
+  }
+
+  // Disputes can only be opened on active or returned rentals
+  if (rental.status !== "active" && rental.status !== "returned") {
+    return {
+      error: "Disputes can only be opened on active or returned rentals.",
+    };
+  }
+
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.dispute.create({
+        data: {
+          rentalId,
+          openedById: session.user.id,
+          reason,
+          previousStatus: rental.status,
+        },
+      });
+
+      await tx.rental.update({
+        where: { id: rentalId },
+        data: { status: "disputed" },
+      });
+
+      await tx.rentalEvent.create({
+        data: {
+          rentalId,
+          status: "disputed",
+          actorId: session.user.id,
+        },
+      });
+    });
+
+    revalidatePath("/rentals");
+    revalidatePath(`/rentals/${rentalId}`);
+
+    // Notify the other party (fire-and-forget)
+    const recipientId =
+      session.user.id === rental.renterId
+        ? rental.ownerId
+        : rental.renterId;
+
+    createNotification({
+      recipientId,
+      actorId: session.user.id,
+      type: "rental",
+      title: `${session.user.name} opened a dispute on '${rental.listing.title}'`,
+      message:
+        "A dispute has been opened. An admin will review and resolve it.",
+      linkUrl: "/rentals",
+    }).catch(() => {});
+
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to open dispute:", error);
+    return { error: "Failed to open dispute. Please try again." };
+  }
+}

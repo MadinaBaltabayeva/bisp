@@ -2,7 +2,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
-import { CalendarDays, DollarSign, MessageSquare, Shield } from "lucide-react";
+import { AlertTriangle, CalendarDays, DollarSign, MessageSquare, Shield } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 
@@ -12,6 +12,7 @@ import {
   getPaymentForRental,
 } from "@/features/rentals/queries";
 import { hasReviewed } from "@/features/reviews/queries";
+import { getDisputeForRental } from "@/features/disputes/queries";
 import { RentalTimeline } from "@/components/rentals/rental-timeline";
 import { RentalDetailActions } from "@/components/rentals/rental-detail-actions";
 import { RentalStatusBadge } from "@/components/rentals/rental-status-badge";
@@ -64,11 +65,14 @@ export default async function RentalDetailPage({ params }: PageProps) {
   const revieweeId = role === "renter" ? (rental.owner?.id ?? "") : (rental.renter?.id ?? "");
   const revieweeName = role === "renter" ? (rental.owner?.name ?? "User") : (rental.renter?.name ?? "User");
 
-  const [reviewed, payment] = await Promise.all([
+  const [reviewed, payment, dispute] = await Promise.all([
     rental.status === "completed"
       ? hasReviewed(rental.id, session.user.id)
       : Promise.resolve(false),
     getPaymentForRental(rental.id),
+    rental.status === "disputed"
+      ? getDisputeForRental(rental.id)
+      : Promise.resolve(null),
   ]);
 
   const coverImage = rental.listing.images[0]?.url;
@@ -221,12 +225,18 @@ export default async function RentalDetailPage({ params }: PageProps) {
       )}
 
       {/* Dispute status banner */}
-      {rental.status === "disputed" && (
-        <Card className="mb-6 border-red-300 bg-red-50">
-          <CardContent className="p-4">
-            <p className="text-sm font-medium text-red-700">
-              {t("disputeStatus")}
-            </p>
+      {rental.status === "disputed" && dispute && (
+        <Card className="mb-6 border-amber-300 bg-amber-50">
+          <CardContent className="flex items-start gap-3 p-4">
+            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-amber-600" />
+            <div className="space-y-1">
+              <p className="text-sm font-medium text-amber-800">
+                {t("disputeStatus")}
+              </p>
+              <p className="text-sm text-amber-700">
+                {dispute.reason}
+              </p>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -254,6 +264,7 @@ export default async function RentalDetailPage({ params }: PageProps) {
       {/* Actions */}
       {(role === "owner" ||
         (role === "renter" && rental.status === "approved") ||
+        (role === "renter" && (rental.status === "active" || rental.status === "returned")) ||
         (rental.status === "completed" && !reviewed)) && (
         <Card>
           <CardHeader>
