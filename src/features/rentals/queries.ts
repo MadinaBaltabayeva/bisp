@@ -123,3 +123,22 @@ export async function getPaymentForRental(rentalId: string) {
   return prisma.payment.findUnique({ where: { rentalId } });
 }
 
+/**
+ * Get booked date ranges for a listing.
+ * Returns non-terminal rentals (approved, active, disputed, requested)
+ * so the calendar UI can show unavailable dates.
+ */
+export async function getBookedDates(listingId: string) {
+  return prisma.rental.findMany({
+    where: {
+      listingId,
+      status: { in: ["approved", "active", "disputed", "requested"] },
+    },
+    select: {
+      startDate: true,
+      endDate: true,
+      status: true,
+    },
+  });
+}
+

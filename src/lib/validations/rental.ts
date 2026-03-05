@@ -10,6 +10,7 @@ export const rentalRequestSchema = z
         "Start date must be today or later"
       ),
     endDate: z.coerce.date(),
+    periodType: z.enum(["hourly", "daily", "weekly", "monthly"]),
     message: z
       .string()
       .max(500, "Message must be at most 500 characters")
@@ -20,5 +21,6 @@ export const rentalRequestSchema = z
     path: ["endDate"],
   });
 
+export type PeriodType = "hourly" | "daily" | "weekly" | "monthly";
 export type RentalRequestInput = z.input<typeof rentalRequestSchema>;
 export type RentalRequestValues = z.infer<typeof rentalRequestSchema>;
