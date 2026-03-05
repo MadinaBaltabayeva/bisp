@@ -29,12 +29,21 @@ export async function createRentalRequest(data: unknown) {
     return { error: firstError || "Invalid input." };
   }
 
-  const { listingId, startDate, endDate, message } = result.data;
+  const { listingId, startDate, endDate, periodType, message } = result.data;
 
   // Verify listing exists and is active
   const listing = await prisma.listing.findUnique({
     where: { id: listingId },
-    select: { id: true, ownerId: true, status: true, priceDaily: true, title: true },
+    select: {
+      id: true,
+      ownerId: true,
+      status: true,
+      priceHourly: true,
+      priceDaily: true,
+      priceWeekly: true,
+      priceMonthly: true,
+      title: true,
+    },
   });
 
   if (!listing) {
@@ -50,12 +59,52 @@ export async function createRentalRequest(data: unknown) {
     return { error: "You cannot rent your own listing." };
   }
 
-  // Calculate pricing
-  const days = Math.ceil(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
-  );
-  const dailyRate = listing.priceDaily ?? 0;
-  const totalPrice = days * dailyRate;
+  // Check for overlapping rentals (approved, active, or disputed)
+  const overlapping = await prisma.rental.findFirst({
+    where: {
+      listingId,
+      status: { in: ["approved", "active", "disputed"] },
+      startDate: { lt: endDate },
+      endDate: { gt: startDate },
+    },
+  });
+
+  if (overlapping) {
+    return {
+      error:
+        "These dates overlap with an existing rental. Please choose different dates.",
+    };
+  }
+
+  // Calculate period-aware pricing
+  const diffMs = endDate.getTime() - startDate.getTime();
+  let totalPrice: number;
+
+  switch (periodType) {
+    case "hourly": {
+      const hours = Math.ceil(diffMs / (1000 * 60 * 60));
+      totalPrice = hours * (listing.priceHourly ?? 0);
+      break;
+    }
+    case "daily": {
+      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      totalPrice = days * (listing.priceDaily ?? 0);
+      break;
+    }
+    case "weekly": {
+      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const weeks = Math.ceil(days / 7);
+      totalPrice = weeks * (listing.priceWeekly ?? 0);
+      break;
+    }
+    case "monthly": {
+      const days = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+      const months = Math.ceil(days / 30);
+      totalPrice = months * (listing.priceMonthly ?? 0);
+      break;
+    }
+  }
+
   const securityDeposit = totalPrice * 0.2;
 
   try {
@@ -91,7 +140,7 @@ export async function createRentalRequest(data: unknown) {
       actorId: session.user.id,
       type: "rental",
       title: `${session.user.name} requested to rent your '${listing.title}'`,
-      message: `Rental request for ${days} day(s)`,
+      message: `Rental request (${periodType})`,
       linkUrl: `/rentals`,
     }).catch(() => {});
 
