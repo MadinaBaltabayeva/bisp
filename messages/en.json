@@ -366,7 +366,21 @@
       "submit": "Submit Request",
       "submitting": "Submitting...",
       "success": "Rental request submitted! The owner will review it.",
-      "error": "Failed to submit rental request."
+      "error": "Failed to submit rental request.",
+      "periodLabel": "Rental period",
+      "hourly": "Hourly",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "hoursCount": "{count, plural, one {# hour} other {# hours}}",
+      "weeksCount": "{count, plural, one {# week} other {# weeks}}",
+      "monthsCount": "{count, plural, one {# month} other {# months}}",
+      "perHour": "/hr",
+      "perWeek": "/wk",
+      "perMonth": "/mo",
+      "bookedDates": "Booked",
+      "startTime": "Start time",
+      "endTime": "End time"
     },
     "actions": {
       "approve": "Approve",

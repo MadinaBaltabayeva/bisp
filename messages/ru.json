@@ -366,7 +366,21 @@
       "submit": "Отправить запрос",
       "submitting": "Отправка...",
       "success": "Запрос на аренду отправлен! Владелец рассмотрит его.",
-      "error": "Не удалось отправить запрос на аренду."
+      "error": "Не удалось отправить запрос на аренду.",
+      "periodLabel": "Период аренды",
+      "hourly": "Почасовая",
+      "daily": "Посуточная",
+      "weekly": "Понедельная",
+      "monthly": "Помесячная",
+      "hoursCount": "{count, plural, one {# час} few {# часа} other {# часов}}",
+      "weeksCount": "{count, plural, one {# неделя} few {# недели} other {# недель}}",
+      "monthsCount": "{count, plural, one {# месяц} few {# месяца} other {# месяцев}}",
+      "perHour": "/час",
+      "perWeek": "/нед",
+      "perMonth": "/мес",
+      "bookedDates": "Занято",
+      "startTime": "Время начала",
+      "endTime": "Время окончания"
     },
     "actions": {
       "approve": "Одобрить",

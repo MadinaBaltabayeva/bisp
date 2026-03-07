@@ -366,7 +366,21 @@
       "submit": "Soʻrov yuborish",
       "submitting": "Yuborilmoqda...",
       "success": "Ijara soʻrovi yuborildi! Egasi koʻrib chiqadi.",
-      "error": "Ijara soʻrovini yuborishda xatolik."
+      "error": "Ijara soʻrovini yuborishda xatolik.",
+      "periodLabel": "Ijara muddati",
+      "hourly": "Soatlik",
+      "daily": "Kunlik",
+      "weekly": "Haftalik",
+      "monthly": "Oylik",
+      "hoursCount": "{count} soat",
+      "weeksCount": "{count} hafta",
+      "monthsCount": "{count} oy",
+      "perHour": "/soat",
+      "perWeek": "/hafta",
+      "perMonth": "/oy",
+      "bookedDates": "Band",
+      "startTime": "Boshlanish vaqti",
+      "endTime": "Tugash vaqti"
     },
     "actions": {
       "approve": "Tasdiqlash",
