@@ -124,6 +124,32 @@ export async function getPaymentForRental(rentalId: string) {
 }
 
 /**
+ * Get the user's existing non-terminal rental on a listing (if any).
+ * Returns the most recent rental with status: requested, approved, active, or disputed.
+ */
+export async function getExistingRentalForListing(
+  listingId: string,
+  userId: string
+) {
+  return prisma.rental.findFirst({
+    where: {
+      listingId,
+      renterId: userId,
+      status: { in: ["requested", "approved", "active", "disputed"] },
+    },
+    select: {
+      id: true,
+      status: true,
+      startDate: true,
+      endDate: true,
+      totalPrice: true,
+      createdAt: true,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+/**
  * Get booked date ranges for a listing.
  * Returns non-terminal rentals (approved, active, disputed, requested)
  * so the calendar UI can show unavailable dates.

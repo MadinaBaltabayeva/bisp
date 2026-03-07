@@ -18,7 +18,7 @@ import {
 import { getListingById, getCachedTranslation } from "@/features/listings/queries";
 import { getSession } from "@/features/auth/queries";
 import { getReviewsForListing } from "@/features/reviews/queries";
-import { getBookedDates } from "@/features/rentals/queries";
+import { getBookedDates, getExistingRentalForListing } from "@/features/rentals/queries";
 import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { isAIEnabled } from "@/lib/openai";
 import { prisma } from "@/lib/db";
@@ -91,12 +91,28 @@ export default async function ListingDetailPage({ params }: PageProps) {
     getTranslations("Listings.availability"),
   ]);
 
+  // Fetch existing rental for the logged-in user on this listing
+  const existingRentalRaw = session
+    ? await getExistingRentalForListing(id, session.user.id)
+    : null;
+
   // Serialize dates for client components (Date objects can't be passed to "use client")
   const bookedDates = bookedDatesRaw.map((bd) => ({
     startDate: bd.startDate.toISOString(),
     endDate: bd.endDate.toISOString(),
     status: bd.status,
   }));
+
+  const existingRental = existingRentalRaw
+    ? {
+        id: existingRentalRaw.id,
+        status: existingRentalRaw.status,
+        startDate: existingRentalRaw.startDate.toISOString(),
+        endDate: existingRentalRaw.endDate.toISOString(),
+        totalPrice: existingRentalRaw.totalPrice,
+        createdAt: existingRentalRaw.createdAt.toISOString(),
+      }
+    : null;
 
   if (!listing || listing.status === "hidden") {
     notFound();
@@ -310,7 +326,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
               </div>
             </TranslationBanner>
           ) : (
@@ -368,7 +384,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
               </div>
               {/* Description */}
               <div className="mt-8">
@@ -475,6 +491,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               isOwner={isOwner}
               hideRentalForm={hideRentalForm}
               bookedDates={bookedDates}
+              existingRental={existingRental}
             />
           </div>
         </div>
@@ -490,6 +507,7 @@ async function PriceCard({
   isOwner,
   hideRentalForm = false,
   bookedDates,
+  existingRental,
 }: {
   listing: {
     id: string;
@@ -501,6 +519,14 @@ async function PriceCard({
   isOwner: boolean;
   hideRentalForm?: boolean;
   bookedDates: { startDate: string; endDate: string; status: string }[];
+  existingRental: {
+    id: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    totalPrice: number;
+    createdAt: string;
+  } | null;
 }) {
   const t = await getTranslations("Listings.detail");
 
@@ -535,6 +561,7 @@ async function PriceCard({
               priceWeekly={listing.priceWeekly}
               priceMonthly={listing.priceMonthly}
               bookedDates={bookedDates}
+              existingRental={existingRental}
             />
             <MessageOwnerButton listingId={listing.id} />
           </div>
