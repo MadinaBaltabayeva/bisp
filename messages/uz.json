@@ -382,6 +382,19 @@
       "startTime": "Boshlanish vaqti",
       "endTime": "Tugash vaqti"
     },
+    "existingRequest": {
+      "pendingTitle": "So'rov kutilmoqda",
+      "pendingDescription": "Ijara so'rovingiz egasi tomonidan ko'rib chiqilmoqda",
+      "approvedTitle": "So'rov tasdiqlandi",
+      "approvedDescription": "So'rovingiz tasdiqlandi — to'lovga o'ting",
+      "activeTitle": "Ijara faol",
+      "activeDescription": "Bu buyum uchun faol ijarangiz mavjud",
+      "disputedTitle": "Ijara bahslashilmoqda",
+      "disputedDescription": "Bu ijara bo'yicha ochiq bahs ko'rib chiqilmoqda",
+      "dates": "Sanalar",
+      "totalPrice": "Jami",
+      "viewDetails": "Batafsil"
+    },
     "actions": {
       "approve": "Tasdiqlash",
       "decline": "Rad etish",

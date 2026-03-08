@@ -382,6 +382,19 @@
       "startTime": "Время начала",
       "endTime": "Время окончания"
     },
+    "existingRequest": {
+      "pendingTitle": "Запрос на рассмотрении",
+      "pendingDescription": "Ваш запрос на аренду ожидает одобрения владельца",
+      "approvedTitle": "Запрос одобрен",
+      "approvedDescription": "Ваш запрос одобрен — перейдите к оплате",
+      "activeTitle": "Аренда активна",
+      "activeDescription": "У вас есть активная аренда этого предмета",
+      "disputedTitle": "Аренда оспорена",
+      "disputedDescription": "По этой аренде открыт спор на рассмотрении",
+      "dates": "Даты",
+      "totalPrice": "Итого",
+      "viewDetails": "Подробнее"
+    },
     "actions": {
       "approve": "Одобрить",
       "decline": "Отклонить",

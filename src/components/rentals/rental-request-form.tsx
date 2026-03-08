@@ -5,10 +5,18 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { differenceInCalendarDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import {
+  CalendarIcon,
+  Loader2,
+  Clock,
+  CheckCircle2,
+  Package,
+  AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations, useFormatter } from "next-intl";
 
+import { Link } from "@/i18n/navigation";
 import {
   rentalRequestSchema,
   type PeriodType,
@@ -49,6 +57,14 @@ interface RentalRequestFormProps {
   priceWeekly: number | null;
   priceMonthly: number | null;
   bookedDates: { startDate: string; endDate: string; status: string }[];
+  existingRental?: {
+    id: string;
+    status: string;
+    startDate: string;
+    endDate: string;
+    totalPrice: number;
+    createdAt: string;
+  } | null;
 }
 
 const PERIOD_PRIORITY: PeriodType[] = ["daily", "hourly", "weekly", "monthly"];
@@ -65,9 +81,11 @@ export function RentalRequestForm({
   priceWeekly,
   priceMonthly,
   bookedDates,
+  existingRental,
 }: RentalRequestFormProps) {
   const t = useTranslations("Rentals.requestForm");
   const tCard = useTranslations("Rentals.card");
+  const tExisting = useTranslations("Rentals.existingRequest");
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
   const format = useFormatter();
@@ -257,6 +275,106 @@ export function RentalRequestForm({
   }
 
   const canSubmit = priceCalc != null && priceCalc.totalPrice > 0;
+
+  // Show status banner when user already has a non-terminal rental on this listing
+  if (existingRental) {
+    const statusConfig: Record<
+      string,
+      {
+        icon: React.ReactNode;
+        bg: string;
+        text: string;
+        border: string;
+        titleKey: string;
+        descKey: string;
+      }
+    > = {
+      requested: {
+        icon: <Clock className="size-5" />,
+        bg: "bg-yellow-50",
+        text: "text-yellow-800",
+        border: "border-yellow-200",
+        titleKey: "pendingTitle",
+        descKey: "pendingDescription",
+      },
+      approved: {
+        icon: <CheckCircle2 className="size-5" />,
+        bg: "bg-green-50",
+        text: "text-green-800",
+        border: "border-green-200",
+        titleKey: "approvedTitle",
+        descKey: "approvedDescription",
+      },
+      active: {
+        icon: <Package className="size-5" />,
+        bg: "bg-blue-50",
+        text: "text-blue-800",
+        border: "border-blue-200",
+        titleKey: "activeTitle",
+        descKey: "activeDescription",
+      },
+      disputed: {
+        icon: <AlertTriangle className="size-5" />,
+        bg: "bg-red-50",
+        text: "text-red-800",
+        border: "border-red-200",
+        titleKey: "disputedTitle",
+        descKey: "disputedDescription",
+      },
+    };
+
+    const config = statusConfig[existingRental.status] ?? statusConfig.requested;
+
+    return (
+      <div
+        className={cn(
+          "rounded-lg border p-4 space-y-3",
+          config.bg,
+          config.text,
+          config.border
+        )}
+      >
+        <div className="flex items-center gap-2 font-semibold">
+          {config.icon}
+          {tExisting(config.titleKey as Parameters<typeof tExisting>[0])}
+        </div>
+        <p className="text-sm opacity-80">
+          {tExisting(config.descKey as Parameters<typeof tExisting>[0])}
+        </p>
+        <div className="space-y-1 text-sm">
+          <div className="flex justify-between">
+            <span className="font-medium">{tExisting("dates")}</span>
+            <span>
+              {format.dateTime(new Date(existingRental.startDate), {
+                month: "short",
+                day: "numeric",
+              })}{" "}
+              -{" "}
+              {format.dateTime(new Date(existingRental.endDate), {
+                month: "short",
+                day: "numeric",
+                year: "numeric",
+              })}
+            </span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium">{tExisting("totalPrice")}</span>
+            <span>${existingRental.totalPrice.toFixed(2)}</span>
+          </div>
+        </div>
+        <Link
+          href="/rentals"
+          className={cn(
+            "block w-full text-center rounded-md border px-4 py-2 text-sm font-medium transition-colors hover:opacity-80",
+            config.border,
+            config.text
+          )}
+        >
+          {tExisting("viewDetails")}
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

@@ -382,6 +382,19 @@
       "startTime": "Start time",
       "endTime": "End time"
     },
+    "existingRequest": {
+      "pendingTitle": "Request Pending",
+      "pendingDescription": "Your rental request is waiting for owner approval",
+      "approvedTitle": "Request Approved",
+      "approvedDescription": "Your request was approved — proceed to payment",
+      "activeTitle": "Rental Active",
+      "activeDescription": "You currently have an active rental for this item",
+      "disputedTitle": "Rental Disputed",
+      "disputedDescription": "This rental has an open dispute being reviewed",
+      "dates": "Dates",
+      "totalPrice": "Total",
+      "viewDetails": "View Details"
+    },
     "actions": {
       "approve": "Approve",
       "decline": "Decline",
