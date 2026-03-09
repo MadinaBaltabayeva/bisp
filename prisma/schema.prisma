@@ -140,6 +140,9 @@ model Listing {
 
   // Phase 7: AI translation cache
   translations ListingTranslation[]
+
+  // Phase 14: Availability blocks
+  availabilityBlocks AvailabilityBlock[]
 }
 
 model ListingTranslation {
@@ -178,6 +181,9 @@ model Rental {
   totalPrice      Float    @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // Phase 14: QR Handoff
+  handoffCode   String?
 
   listingId String
   renterId  String
@@ -318,4 +324,19 @@ model Dispute {
   rental     Rental @relation(fields: [rentalId], references: [id], onDelete: Cascade)
   openedBy   User   @relation("DisputesOpened", fields: [openedById], references: [id], onDelete: Cascade)
   resolvedBy User?  @relation("DisputesResolved", fields: [resolvedById], references: [id], onDelete: Cascade)
+}
+
+// === Phase 14: Availability & Analytics ===
+
+model AvailabilityBlock {
+  id        String   @id @default(cuid())
+  listingId String
+  startDate DateTime
+  endDate   DateTime
+  reason    String   @default("")
+  createdAt DateTime @default(now())
+
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@index([listingId])
 }
