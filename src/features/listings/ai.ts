@@ -254,6 +254,63 @@ Description: ${description}`,
 }
 
 /**
+ * Generate a listing title and description from a photo using GPT-4o-mini vision.
+ * Returns null if AI is not enabled or on error.
+ */
+export async function generateListingDescription(
+  imageBase64: string
+): Promise<{ title: string; description: string } | null> {
+  if (!isAIEnabled() || !openai) return null;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `You are helping someone list an item for rent on a peer-to-peer rental marketplace. Look at this photo and write:
+1. A short, catchy title (max 80 characters) for the rental listing
+2. A detailed description (100-300 words) that includes: what the item is, its apparent condition, potential uses, and what a renter should know
+
+Return ONLY valid JSON:
+{
+  "title": "<listing title>",
+  "description": "<listing description>"
+}`,
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageBase64.startsWith("data:")
+                  ? imageBase64
+                  : `data:image/jpeg;base64,${imageBase64}`,
+              },
+            },
+          ],
+        },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 500,
+    });
+
+    const content = response.choices[0]?.message?.content;
+    if (!content) return null;
+
+    const parsed = JSON.parse(content) as { title?: string; description?: string };
+    return {
+      title: parsed.title || "",
+      description: parsed.description || "",
+    };
+  } catch (error) {
+    console.error("AI description generation failed:", error);
+    return null;
+  }
+}
+
+/**
  * Translate a listing and sync it into the FTS5 index.
  * Falls back to indexing original text in all columns if AI is unavailable.
  */

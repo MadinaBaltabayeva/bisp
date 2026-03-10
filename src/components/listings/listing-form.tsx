@@ -21,6 +21,7 @@ import {
 
 import { PhotoUploadGrid } from "./photo-upload-grid";
 import { AISuggestions } from "./ai-suggestions";
+import { AIDescriptionGenerator } from "./ai-description-generator";
 import { PriceSuggestion } from "./price-suggestion";
 
 import { Button } from "@/components/ui/button";
@@ -274,7 +275,17 @@ export function ListingForm({ mode, listing, categories }: ListingFormProps) {
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
           {/* Basic Info */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">{t("basicInfo")}</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold">{t("basicInfo")}</h3>
+              <AIDescriptionGenerator
+                photos={photos}
+                existingImages={existingImages}
+                onGenerated={({ title, description }) => {
+                  form.setValue("title", title, { shouldValidate: true });
+                  form.setValue("description", description, { shouldValidate: true });
+                }}
+              />
+            </div>
 
             <FormField
               control={form.control}

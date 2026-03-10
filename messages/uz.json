@@ -276,6 +276,12 @@
     },
     "similar": {
       "heading": "Sizga ham yoqishi mumkin"
+    },
+    "aiGenerate": {
+      "generate": "AI bilan yaratish",
+      "generating": "Yaratilmoqda...",
+      "success": "AI sarlavha va tavsifni yaratdi!",
+      "error": "Yaratib bo'lmadi. Qaytadan urinib ko'ring."
     }
   },
   "Browse": {

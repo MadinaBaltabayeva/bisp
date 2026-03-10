@@ -276,6 +276,12 @@
     },
     "similar": {
       "heading": "You might also like"
+    },
+    "aiGenerate": {
+      "generate": "Generate with AI",
+      "generating": "Generating...",
+      "success": "AI generated title and description!",
+      "error": "Failed to generate. Try again."
     }
   },
   "Browse": {
