@@ -354,7 +354,8 @@
       "daysCount": "{count, plural, one {# kun} other {# kun}}",
       "perDay": "/kun",
       "total": "Jami",
-      "estimatedDeposit": "Taxminiy kafolat depoziti (simulyatsiya)"
+      "estimatedDeposit": "Taxminiy kafolat depoziti (simulyatsiya)",
+      "handoff": "QR Topshirish"
     },
     "requestForm": {
       "requestToRent": "Ijaraga soʻrov",
@@ -799,5 +800,22 @@
     "blockRemoved": "Blok olib tashlandi",
     "existingBlocks": "Bloklangan sanalar",
     "blockedDates": "Mavjud emas"
+  },
+  "Handoff": {
+    "pickupTitle": "Topshirish",
+    "returnTitle": "Qaytarish",
+    "listing": "Buyum",
+    "showToRenter": "Olishni tasdiqlash uchun ijarachiga bu QR kodni ko'rsating",
+    "showToOwner": "Qaytarishni tasdiqlash uchun egasiga bu QR kodni ko'rsating",
+    "orShareCode": "Yoki bu kodni ulashing:",
+    "enterPickupCode": "Olishni tasdiqlash uchun egasi ko'rsatgan kodni kiriting",
+    "enterReturnCode": "Qaytarishni tasdiqlash uchun ijarachi ko'rsatgan kodni kiriting",
+    "codePlaceholder": "Kodni kiriting",
+    "confirmPickup": "Olishni tasdiqlash",
+    "confirmReturn": "Qaytarishni tasdiqlash",
+    "pickupConfirmed": "Olish tasdiqlandi!",
+    "returnConfirmed": "Qaytarish tasdiqlandi!",
+    "enterCode": "Topshirish kodini kiriting",
+    "handoff": "Topshirish"
   }
 }

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
 import { rentalRequestSchema } from "@/lib/validations/rental";
 import type { PaymentFormValues } from "@/lib/validations/payment";
@@ -197,7 +198,7 @@ export async function approveRental(rentalId: string) {
     await prisma.$transaction([
       prisma.rental.update({
         where: { id: rentalId },
-        data: { status: "approved" },
+        data: { status: "approved", handoffCode: nanoid(10) },
       }),
       prisma.rentalEvent.create({
         data: {
@@ -577,4 +578,63 @@ export async function openDispute(rentalId: string, reason: string) {
     console.error("Failed to open dispute:", error);
     return { error: "Failed to open dispute. Please try again." };
   }
+}
+
+/**
+ * QR Handoff: verifies the handoff code matches.
+ * confirmPickup is called AFTER payment (when status is already "active") to
+ * record that the physical handoff happened. It creates a RentalEvent("picked_up")
+ * for the audit trail but does NOT change the rental status.
+ */
+export async function confirmPickup(rentalId: string, code: string) {
+  const session = await getSession();
+  if (!session) return { error: "Not authenticated" };
+
+  const rental = await prisma.rental.findUnique({
+    where: { id: rentalId },
+    select: { status: true, handoffCode: true, renterId: true, ownerId: true },
+  });
+
+  if (!rental) return { error: "Rental not found" };
+  if (rental.status !== "active") return { error: "Rental must be active (paid) first" };
+  if (rental.renterId !== session.user.id) return { error: "Only the renter can confirm pickup" };
+  if (rental.handoffCode !== code) return { error: "Invalid handoff code" };
+
+  await prisma.rentalEvent.create({
+    data: { rentalId, status: "picked_up", actorId: session.user.id },
+  });
+
+  revalidatePath("/rentals");
+  return { success: true };
+}
+
+/**
+ * QR-verified return — transitions rental to "returned" status.
+ */
+export async function confirmReturn(rentalId: string, code: string) {
+  const session = await getSession();
+  if (!session) return { error: "Not authenticated" };
+
+  const rental = await prisma.rental.findUnique({
+    where: { id: rentalId },
+    select: { status: true, handoffCode: true, renterId: true, ownerId: true },
+  });
+
+  if (!rental) return { error: "Rental not found" };
+  if (rental.status !== "active") return { error: "Rental must be active" };
+  if (rental.ownerId !== session.user.id) return { error: "Only the owner can confirm return" };
+  if (rental.handoffCode !== code) return { error: "Invalid handoff code" };
+
+  await prisma.$transaction([
+    prisma.rental.update({
+      where: { id: rentalId },
+      data: { status: "returned" },
+    }),
+    prisma.rentalEvent.create({
+      data: { rentalId, status: "returned", actorId: session.user.id },
+    }),
+  ]);
+
+  revalidatePath("/rentals");
+  return { success: true };
 }

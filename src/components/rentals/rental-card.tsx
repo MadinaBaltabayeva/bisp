@@ -3,7 +3,7 @@
 import { useTransition } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck, ChevronRight } from "lucide-react";
+import { Loader2, Check, X, RotateCcw, CheckCircle, CheckCheck, ChevronRight, QrCode } from "lucide-react";
 import { toast } from "sonner";
 import { useTranslations, useFormatter } from "next-intl";
 
@@ -234,6 +234,18 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 {t("actions.complete")}
               </Button>
             )}
+          </div>
+        )}
+
+        {/* QR Handoff button */}
+        {(rental.status === "approved" || rental.status === "active") && (
+          <div className="border-t px-4 py-2">
+            <Button variant="outline" size="sm" className="w-full" asChild>
+              <Link href={`/rentals/${rental.id}/handoff`}>
+                <QrCode className="mr-1 size-3.5" />
+                {t("card.handoff")}
+              </Link>
+            </Button>
           </div>
         )}
 

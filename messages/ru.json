@@ -354,7 +354,8 @@
       "daysCount": "{count, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
       "perDay": "/день",
       "total": "Итого",
-      "estimatedDeposit": "Примерный залог (симуляция)"
+      "estimatedDeposit": "Примерный залог (симуляция)",
+      "handoff": "QR Передача"
     },
     "requestForm": {
       "requestToRent": "Запрос на аренду",
@@ -799,5 +800,22 @@
     "blockRemoved": "Блок удалён",
     "existingBlocks": "Заблокированные даты",
     "blockedDates": "Недоступно"
+  },
+  "Handoff": {
+    "pickupTitle": "Передача",
+    "returnTitle": "Возврат",
+    "listing": "Предмет",
+    "showToRenter": "Покажите этот QR-код арендатору для подтверждения получения",
+    "showToOwner": "Покажите этот QR-код владельцу для подтверждения возврата",
+    "orShareCode": "Или передайте этот код:",
+    "enterPickupCode": "Введите код, показанный владельцем, для подтверждения получения",
+    "enterReturnCode": "Введите код, показанный арендатором, для подтверждения возврата",
+    "codePlaceholder": "Введите код",
+    "confirmPickup": "Подтвердить получение",
+    "confirmReturn": "Подтвердить возврат",
+    "pickupConfirmed": "Получение подтверждено!",
+    "returnConfirmed": "Возврат подтверждён!",
+    "enterCode": "Введите код передачи",
+    "handoff": "Передача"
   }
 }

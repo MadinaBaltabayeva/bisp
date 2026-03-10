@@ -354,7 +354,8 @@
       "daysCount": "{count, plural, one {# day} other {# days}}",
       "perDay": "/day",
       "total": "Total",
-      "estimatedDeposit": "Estimated security deposit (simulated)"
+      "estimatedDeposit": "Estimated security deposit (simulated)",
+      "handoff": "QR Handoff"
     },
     "requestForm": {
       "requestToRent": "Request to Rent",
@@ -799,5 +800,22 @@
     "blockRemoved": "Block removed",
     "existingBlocks": "Blocked Dates",
     "blockedDates": "Unavailable"
+  },
+  "Handoff": {
+    "pickupTitle": "Pickup Handoff",
+    "returnTitle": "Return Handoff",
+    "listing": "Item",
+    "showToRenter": "Show this QR code to the renter to confirm pickup",
+    "showToOwner": "Show this QR code to the owner to confirm return",
+    "orShareCode": "Or share this code:",
+    "enterPickupCode": "Enter the code shown by the owner to confirm pickup",
+    "enterReturnCode": "Enter the code shown by the renter to confirm return",
+    "codePlaceholder": "Enter code",
+    "confirmPickup": "Confirm Pickup",
+    "confirmReturn": "Confirm Return",
+    "pickupConfirmed": "Pickup confirmed! Rental is now active.",
+    "returnConfirmed": "Return confirmed!",
+    "enterCode": "Please enter the handoff code",
+    "handoff": "Handoff"
   }
 }
