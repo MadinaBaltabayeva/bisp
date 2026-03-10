@@ -57,6 +57,7 @@ interface RentalRequestFormProps {
   priceWeekly: number | null;
   priceMonthly: number | null;
   bookedDates: { startDate: string; endDate: string; status: string }[];
+  blockedDates?: { startDate: string; endDate: string }[];
   existingRental?: {
     id: string;
     status: string;
@@ -81,6 +82,7 @@ export function RentalRequestForm({
   priceWeekly,
   priceMonthly,
   bookedDates,
+  blockedDates = [],
   existingRental,
 }: RentalRequestFormProps) {
   const t = useTranslations("Rentals.requestForm");
@@ -132,6 +134,16 @@ export function RentalRequestForm({
     [bookedDates]
   );
 
+  // Parse blocked dates (owner availability blocks)
+  const blockedRanges = useMemo(
+    () =>
+      blockedDates.map((bd) => ({
+        from: new Date(bd.startDate),
+        to: new Date(bd.endDate),
+      })),
+    [blockedDates]
+  );
+
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -139,8 +151,8 @@ export function RentalRequestForm({
   }, []);
 
   const disabledMatcher = useMemo(
-    () => [{ before: today }, ...bookedRanges],
-    [today, bookedRanges]
+    () => [{ before: today }, ...bookedRanges, ...blockedRanges],
+    [today, bookedRanges, blockedRanges]
   );
 
   // Calculate price based on period type
@@ -448,9 +460,10 @@ export function RentalRequestForm({
                       selected={singleDate}
                       onSelect={handleSingleDateSelect}
                       disabled={disabledMatcher}
-                      modifiers={{ booked: bookedRanges }}
+                      modifiers={{ booked: bookedRanges, blocked: blockedRanges }}
                       modifiersClassNames={{
                         booked: "bg-red-100 text-red-400 line-through",
+                        blocked: "bg-red-100 text-red-700 line-through",
                       }}
                     />
                   </PopoverContent>
@@ -539,9 +552,10 @@ export function RentalRequestForm({
                     onSelect={handleDateRangeSelect}
                     numberOfMonths={2}
                     disabled={disabledMatcher}
-                    modifiers={{ booked: bookedRanges }}
+                    modifiers={{ booked: bookedRanges, blocked: blockedRanges }}
                     modifiersClassNames={{
                       booked: "bg-red-100 text-red-400 line-through",
+                      blocked: "bg-red-100 text-red-700 line-through",
                     }}
                   />
                 </PopoverContent>

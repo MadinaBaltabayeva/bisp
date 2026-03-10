@@ -5,7 +5,9 @@ import { routing } from "@/i18n/routing";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/features/auth/queries";
 import { getListingById } from "@/features/listings/queries";
+import { getAvailabilityBlocks } from "@/features/availability/queries";
 import { ListingForm } from "@/components/listings/listing-form";
+import { AvailabilityCalendar } from "@/components/listings/availability-calendar";
 
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -47,10 +49,13 @@ export default async function EditListingPage({ params }: PageProps) {
     redirect(`/listings/${id}`);
   }
 
-  const categories = await prisma.category.findMany({
-    orderBy: { sortOrder: "asc" },
-    select: { id: true, name: true, slug: true },
-  });
+  const [categories, blocks] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { sortOrder: "asc" },
+      select: { id: true, name: true, slug: true },
+    }),
+    getAvailabilityBlocks(id),
+  ]);
 
   const listingData = {
     id: listing.id,
@@ -87,6 +92,7 @@ export default async function EditListingPage({ params }: PageProps) {
         listing={listingData}
         categories={categories}
       />
+      <AvailabilityCalendar listingId={id} blocks={blocks} />
     </div>
   );
 }

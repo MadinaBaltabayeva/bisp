@@ -789,5 +789,15 @@
     "activeRenter": "Faol ijarachi",
     "topRated": "Yuqori reytingli",
     "newMember": "Yangi a'zo"
+  },
+  "Availability": {
+    "title": "Mavjudlik taqvimi",
+    "description": "Bu buyum ijaraga berilmaydigan sanalarni belgilang.",
+    "reasonPlaceholder": "Sabab (ixtiyoriy)",
+    "addBlock": "Sanalarni bloklash",
+    "blockAdded": "Sanalar muvaffaqiyatli bloklandi",
+    "blockRemoved": "Blok olib tashlandi",
+    "existingBlocks": "Bloklangan sanalar",
+    "blockedDates": "Mavjud emas"
   }
 }

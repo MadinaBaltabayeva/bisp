@@ -76,6 +76,21 @@ export async function createRentalRequest(data: unknown) {
     };
   }
 
+  // Check availability blocks
+  const blockedOverlap = await prisma.availabilityBlock.findFirst({
+    where: {
+      listingId,
+      startDate: { lt: endDate },
+      endDate: { gt: startDate },
+    },
+  });
+
+  if (blockedOverlap) {
+    return {
+      error: "The owner has blocked these dates. Please choose different dates.",
+    };
+  }
+
   // Calculate period-aware pricing
   const diffMs = endDate.getTime() - startDate.getTime();
   let totalPrice: number;

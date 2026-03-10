@@ -789,5 +789,15 @@
     "activeRenter": "Active Renter",
     "topRated": "Top Rated",
     "newMember": "New Member"
+  },
+  "Availability": {
+    "title": "Availability Calendar",
+    "description": "Block dates when this item is not available for rental.",
+    "reasonPlaceholder": "Reason (optional)",
+    "addBlock": "Block Dates",
+    "blockAdded": "Dates blocked successfully",
+    "blockRemoved": "Block removed",
+    "existingBlocks": "Blocked Dates",
+    "blockedDates": "Unavailable"
   }
 }
