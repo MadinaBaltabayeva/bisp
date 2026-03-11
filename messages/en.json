@@ -51,6 +51,10 @@
     "favorites": {
       "title": "My Favorites - RentHub",
       "description": "View and manage your saved favorite listings."
+    },
+    "dashboard": {
+      "title": "My Dashboard - RentHub",
+      "description": "Track your rental performance, revenue, and top listings."
     }
   },
   "Navigation": {
@@ -65,7 +69,8 @@
     "myProfile": "My Profile",
     "settings": "Settings",
     "backToRentHub": "Back to RentHub",
-    "favorites": "Favorites"
+    "favorites": "Favorites",
+    "dashboard": "Dashboard"
   },
   "BottomNav": {
     "home": "Home",
@@ -800,6 +805,19 @@
     "blockRemoved": "Block removed",
     "existingBlocks": "Blocked Dates",
     "blockedDates": "Unavailable"
+  },
+  "Dashboard": {
+    "title": "My Dashboard",
+    "subtitle": "Track your rental business performance",
+    "revenue": "Total Revenue",
+    "activeListings": "Active Listings",
+    "completedRentals": "Completed Rentals",
+    "bookingRate": "Booking Rate",
+    "revenueOverTime": "Revenue Over Time",
+    "topListings": "Top Performing Listings",
+    "rentals": "rentals",
+    "favorites": "favorites",
+    "noListingsYet": "No listings yet. Create your first listing!"
   },
   "Handoff": {
     "pickupTitle": "Pickup Handoff",

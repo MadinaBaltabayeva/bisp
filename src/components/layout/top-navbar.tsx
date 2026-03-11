@@ -13,6 +13,7 @@ import {
   User,
   Settings,
   Shield,
+  BarChart3,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { Logo } from "./logo";
@@ -34,6 +35,7 @@ import {
 const NAV_LINKS = [
   { href: "/", labelKey: "browse", icon: Search },
   { href: "/favorites", labelKey: "favorites", icon: Heart },
+  { href: "/dashboard", labelKey: "dashboard", icon: BarChart3 },
   { href: "/listings/new", labelKey: "listItem", icon: PlusCircle },
   { href: "/rentals", labelKey: "myRentals", icon: Calendar },
   { href: "/messages", labelKey: "messages", icon: MessageCircle },
@@ -143,6 +145,12 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                     <Link href={`/profiles/${session.user.id}`}>
                       <User className="size-4" />
                       {t("myProfile")}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/dashboard">
+                      <BarChart3 className="size-4" />
+                      {t("dashboard")}
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>

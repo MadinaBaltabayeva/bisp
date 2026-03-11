@@ -51,6 +51,10 @@
     "favorites": {
       "title": "Sevimlilar - RentHub",
       "description": "Sevimli eʼlonlaringizni koʻring va boshqaring."
+    },
+    "dashboard": {
+      "title": "Boshqaruv paneli - RentHub",
+      "description": "Ijara samaradorligingizni, daromadingizni va eng yaxshi eʼlonlarni kuzating."
     }
   },
   "Navigation": {
@@ -65,7 +69,8 @@
     "myProfile": "Profilim",
     "settings": "Sozlamalar",
     "backToRentHub": "RentHubga qaytish",
-    "favorites": "Sevimlilar"
+    "favorites": "Sevimlilar",
+    "dashboard": "Panel"
   },
   "BottomNav": {
     "home": "Bosh sahifa",
@@ -800,6 +805,19 @@
     "blockRemoved": "Blok olib tashlandi",
     "existingBlocks": "Bloklangan sanalar",
     "blockedDates": "Mavjud emas"
+  },
+  "Dashboard": {
+    "title": "Mening boshqaruv panelim",
+    "subtitle": "Ijara biznesingiz samaradorligini kuzating",
+    "revenue": "Umumiy daromad",
+    "activeListings": "Faol eʼlonlar",
+    "completedRentals": "Yakunlangan ijaralar",
+    "bookingRate": "Bron qilish darajasi",
+    "revenueOverTime": "Vaqt boʻyicha daromad",
+    "topListings": "Eng yaxshi eʼlonlar",
+    "rentals": "ijaralar",
+    "favorites": "sevimlilar",
+    "noListingsYet": "Hali eʼlonlar yoʻq. Birinchi eʼloningizni yarating!"
   },
   "Handoff": {
     "pickupTitle": "Topshirish",

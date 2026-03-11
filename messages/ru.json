@@ -51,6 +51,10 @@
     "favorites": {
       "title": "Избранное - RentHub",
       "description": "Просмотр и управление вашими избранными объявлениями."
+    },
+    "dashboard": {
+      "title": "Панель управления - RentHub",
+      "description": "Отслеживайте эффективность аренды, доход и лучшие объявления."
     }
   },
   "Navigation": {
@@ -65,7 +69,8 @@
     "myProfile": "Мой профиль",
     "settings": "Настройки",
     "backToRentHub": "Вернуться на RentHub",
-    "favorites": "Избранное"
+    "favorites": "Избранное",
+    "dashboard": "Панель"
   },
   "BottomNav": {
     "home": "Главная",
@@ -800,6 +805,19 @@
     "blockRemoved": "Блок удалён",
     "existingBlocks": "Заблокированные даты",
     "blockedDates": "Недоступно"
+  },
+  "Dashboard": {
+    "title": "Моя панель",
+    "subtitle": "Отслеживайте эффективность вашего арендного бизнеса",
+    "revenue": "Общий доход",
+    "activeListings": "Активные объявления",
+    "completedRentals": "Завершённые аренды",
+    "bookingRate": "Коэффициент бронирования",
+    "revenueOverTime": "Доход по месяцам",
+    "topListings": "Лучшие объявления",
+    "rentals": "аренды",
+    "favorites": "избранное",
+    "noListingsYet": "Пока нет объявлений. Создайте первое!"
   },
   "Handoff": {
     "pickupTitle": "Передача",
