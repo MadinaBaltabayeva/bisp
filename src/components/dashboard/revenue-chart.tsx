@@ -40,7 +40,7 @@ export function RevenueChart({ data }: RevenueChartProps) {
                 tickFormatter={(v) => `$${v}`}
               />
               <Tooltip
-                formatter={(value: number) => [`$${value}`, t("revenue")]}
+                formatter={(value) => [`$${value}`, t("revenue")]}
                 contentStyle={{
                   borderRadius: "8px",
                   border: "1px solid hsl(var(--border))",
