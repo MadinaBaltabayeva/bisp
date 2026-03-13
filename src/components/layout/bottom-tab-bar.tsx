@@ -21,7 +21,7 @@ export function BottomTabBar() {
   const badgeCounts = useBadgeCounts();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white md:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 shadow-[0_-2px_8px_rgba(180,83,9,0.06)] bg-white/95 backdrop-blur-md md:hidden">
       <div className="flex h-16 items-center justify-around">
         {TAB_ITEMS.map((item) => {
           const isActive =
@@ -43,7 +43,7 @@ export function BottomTabBar() {
               className={cn(
                 "flex flex-1 flex-col items-center gap-1 py-2 text-xs font-medium transition-colors",
                 isActive
-                  ? "text-primary-600"
+                  ? "text-amber-600"
                   : "text-gray-500 hover:text-gray-700"
               )}
             >
@@ -51,7 +51,7 @@ export function BottomTabBar() {
                 <item.icon
                   className={cn(
                     "size-5",
-                    isActive ? "text-primary-600" : "text-gray-400"
+                    isActive ? "text-amber-500" : "text-gray-400"
                   )}
                 />
                 <NavBadgeIndicator count={badgeCount} />
