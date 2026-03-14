@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { MapPin, ShieldCheck } from "lucide-react";
+import { MapPin, ShieldCheck, ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
 import { ReputationBadgeIcon } from "@/components/profile/reputation-badge";
@@ -90,79 +90,93 @@ export function ListingCard({
   const priceLabel = formatPrice();
 
   return (
-    <div className={cn("rounded-xl bg-white shadow-warm hover:shadow-warm-lg transition-all duration-300 overflow-hidden", isUnavailable && "opacity-60")}>
-      <Link href={`/listings/${listing.id}`} className="group block">
-        <div className="overflow-hidden">
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
-            {coverImage ? (
-              <Image
-                src={coverImage.url}
-                alt={listing.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-gray-400">
-                {t("noPhoto")}
-              </div>
-            )}
-            {/* Favorite heart overlay (top-left) */}
-            {showFavoriteButton && (
-              <div className="absolute left-2 top-2 z-10 rounded-full bg-white/70 shadow-sm backdrop-blur-sm">
+    <div className={cn(
+      "group relative rounded-2xl bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-900/10",
+      isUnavailable && "opacity-60"
+    )}>
+      <Link href={`/listings/${listing.id}`} className="block">
+        {/* Image section — taller, with overlays */}
+        <div className="relative aspect-[3/2] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
+          {coverImage ? (
+            <Image
+              src={coverImage.url}
+              alt={listing.title}
+              fill
+              className="object-cover transition-transform duration-500 group-hover:scale-110"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-stone-300">
+              <ShoppingBag className="size-12" />
+            </div>
+          )}
+
+          {/* Gradient overlay at bottom of image */}
+          <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black/40 to-transparent" />
+
+          {/* Price badge on image */}
+          <div className="absolute bottom-3 left-3 rounded-lg bg-white/95 px-2.5 py-1 text-sm font-bold text-amber-700 shadow-sm backdrop-blur-sm">
+            {t("from", { price: priceLabel })}
+          </div>
+
+          {/* Favorite heart (top-right) */}
+          {showFavoriteButton && (
+            <div className="absolute right-3 top-3 z-10">
+              <div className="rounded-full bg-white/80 shadow-sm backdrop-blur-sm">
                 <FavoriteButton
                   listingId={listing.id}
                   isFavorited={isFavorited}
                   isAuthenticated={isAuthenticated}
                 />
               </div>
-            )}
-            {/* AI Verified badge (top-right) */}
-            {listing.aiVerified && (
-              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-                <ShieldCheck className="size-3" />
-                {t("aiVerified")}
-              </div>
-            )}
-            {/* Unavailable badge overlay */}
-            {isUnavailable && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Badge variant="secondary" className="bg-gray-900/70 text-white text-sm px-3 py-1">
-                  {ta("unavailable")}
-                </Badge>
-              </div>
-            )}
-          </div>
+            </div>
+          )}
+
+          {/* AI Verified badge (top-left) */}
+          {listing.aiVerified && (
+            <div className="absolute left-3 top-3 flex items-center gap-1 rounded-lg bg-amber-500 px-2 py-1 text-xs font-semibold text-white shadow-sm">
+              <ShieldCheck className="size-3" />
+              {t("aiVerified")}
+            </div>
+          )}
+
+          {/* Unavailable overlay */}
+          {isUnavailable && (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px]">
+              <Badge variant="secondary" className="bg-white/90 text-stone-700 text-sm px-4 py-1.5 font-medium">
+                {ta("unavailable")}
+              </Badge>
+            </div>
+          )}
         </div>
 
-        <div className="p-3 space-y-1">
-          <div className="flex items-center gap-1.5">
-            <h3 className="truncate font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
+        {/* Content section */}
+        <div className="p-4 space-y-2">
+          <div className="flex items-start gap-1.5">
+            <h3 className="flex-1 truncate text-base font-semibold text-stone-800 group-hover:text-amber-700 transition-colors">
               {highlightText(listing.title, highlightTerms)}
             </h3>
-            {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
+            {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0 mt-0.5" />}
             {ownerBadges?.map((badge) => (
-              <ReputationBadgeIcon key={badge.type} badge={badge} className="shrink-0" />
+              <ReputationBadgeIcon key={badge.type} badge={badge} className="shrink-0 mt-0.5" />
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">{listing.category.name}</p>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0" />
-            <span className="truncate">{listing.location}</span>
+
+          <div className="flex items-center gap-2 text-sm text-stone-500">
+            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-medium text-stone-600">
+              {listing.category.name}
+            </span>
+            <span className="flex items-center gap-1">
+              <MapPin className="size-3" />
+              <span className="truncate">{listing.location}</span>
+            </span>
           </div>
-          <p className="font-semibold text-amber-700">
-            {t("from", { price: priceLabel })}
-          </p>
         </div>
       </Link>
 
-      {/* Availability toggle for owner's listings */}
       {showAvailabilityToggle && (
-        <div className="px-3 pb-3">
-          <AvailabilityToggle
-            listingId={listing.id}
-            isAvailable={!isUnavailable}
-          />
+        <div className="border-t border-stone-100 px-4 py-2.5">
+          <AvailabilityToggle listingId={listing.id} isAvailable={!isUnavailable} />
         </div>
       )}
     </div>

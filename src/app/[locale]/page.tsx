@@ -61,16 +61,16 @@ export default async function Home({
       <CategoryGrid />
 
       {/* Popular Items */}
-      <div className="bg-gradient-to-b from-stone-50/50 to-transparent">
-        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+        <div className="rounded-3xl bg-stone-50 p-6 sm:p-10">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-stone-800 sm:text-3xl">
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-stone-800">
               {t("popular.title")}
             </h2>
             {listings.length > 0 && (
               <Link
                 href="/browse"
-                className="text-sm font-medium text-amber-600 hover:text-amber-700 hover:underline"
+                className="rounded-full bg-amber-50 px-4 py-1.5 text-sm font-semibold text-amber-700 hover:bg-amber-100 transition-colors"
               >
                 {t("popular.viewAll")}
               </Link>
@@ -89,13 +89,13 @@ export default async function Home({
               ))}
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-amber-200/50 py-16 text-stone-400">
+            <div className="mt-8 flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-amber-200 bg-amber-50/50 py-16 text-stone-400">
               <ShoppingBag className="size-10" />
               <p className="text-sm">{t("popular.comingSoon")}</p>
             </div>
           )}
-        </section>
-      </div>
+        </div>
+      </section>
     </>
   );
 }
