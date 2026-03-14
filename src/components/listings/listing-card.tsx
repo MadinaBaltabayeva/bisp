@@ -47,7 +47,7 @@ function highlightText(text: string, terms?: string[]): ReactNode {
 
   return parts.map((part, i) =>
     regex.test(part) ? (
-      <mark key={i} className="rounded bg-yellow-200 px-0.5 text-gray-900">
+      <mark key={i} className="rounded bg-amber-200 px-0.5 text-gray-900">
         {part}
       </mark>
     ) : (
@@ -90,9 +90,9 @@ export function ListingCard({
   const priceLabel = formatPrice();
 
   return (
-    <div className={cn(isUnavailable && "opacity-60")}>
+    <div className={cn("rounded-xl bg-white shadow-warm hover:shadow-warm-lg transition-all duration-300 overflow-hidden", isUnavailable && "opacity-60")}>
       <Link href={`/listings/${listing.id}`} className="group block">
-        <div className="overflow-hidden rounded-lg">
+        <div className="overflow-hidden">
           <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
             {coverImage ? (
               <Image
@@ -109,7 +109,7 @@ export function ListingCard({
             )}
             {/* Favorite heart overlay (top-left) */}
             {showFavoriteButton && (
-              <div className="absolute left-2 top-2 z-10 rounded-full bg-black/30 backdrop-blur-sm">
+              <div className="absolute left-2 top-2 z-10 rounded-full bg-white/70 shadow-sm backdrop-blur-sm">
                 <FavoriteButton
                   listingId={listing.id}
                   isFavorited={isFavorited}
@@ -119,7 +119,7 @@ export function ListingCard({
             )}
             {/* AI Verified badge (top-right) */}
             {listing.aiVerified && (
-              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-green-600/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
+              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-amber-500/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
                 <ShieldCheck className="size-3" />
                 {t("aiVerified")}
               </div>
@@ -135,9 +135,9 @@ export function ListingCard({
           </div>
         </div>
 
-        <div className="mt-2 space-y-1">
+        <div className="p-3 space-y-1">
           <div className="flex items-center gap-1.5">
-            <h3 className="truncate font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+            <h3 className="truncate font-semibold text-gray-900 group-hover:text-amber-600 transition-colors">
               {highlightText(listing.title, highlightTerms)}
             </h3>
             {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
@@ -150,7 +150,7 @@ export function ListingCard({
             <MapPin className="size-3.5 shrink-0" />
             <span className="truncate">{listing.location}</span>
           </div>
-          <p className="font-semibold text-primary-600">
+          <p className="font-semibold text-amber-700">
             {t("from", { price: priceLabel })}
           </p>
         </div>
@@ -158,7 +158,7 @@ export function ListingCard({
 
       {/* Availability toggle for owner's listings */}
       {showAvailabilityToggle && (
-        <div className="mt-2">
+        <div className="px-3 pb-3">
           <AvailabilityToggle
             listingId={listing.id}
             isAvailable={!isUnavailable}
