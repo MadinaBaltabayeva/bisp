@@ -27,6 +27,17 @@ const ICON_MAP: Record<string, LucideIcon> = {
   home: Home,
 };
 
+const CATEGORY_COLORS: Record<string, { bg: string; icon: string }> = {
+  tools: { bg: "bg-amber-50", icon: "text-amber-600" },
+  electronics: { bg: "bg-sky-50", icon: "text-sky-600" },
+  sports: { bg: "bg-green-50", icon: "text-green-600" },
+  outdoor: { bg: "bg-emerald-50", icon: "text-emerald-600" },
+  vehicles: { bg: "bg-red-50", icon: "text-red-600" },
+  clothing: { bg: "bg-pink-50", icon: "text-pink-600" },
+  music: { bg: "bg-purple-50", icon: "text-purple-600" },
+  "home-garden": { bg: "bg-orange-50", icon: "text-orange-600" },
+};
+
 // Map category slugs to translation keys (slugs use kebab-case, translations use camelCase)
 const SLUG_TO_KEY: Record<string, string> = {
   "tools": "tools",
@@ -46,10 +57,10 @@ export function CategoryGrid() {
   return (
     <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-stone-800 sm:text-3xl">
           {tHome("categories.title")}
         </h2>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-stone-500">
           {tHome("categories.subtitle")}
         </p>
       </div>
@@ -58,13 +69,14 @@ export function CategoryGrid() {
         {CATEGORIES.map((category) => {
           const IconComponent = ICON_MAP[category.icon] || Home;
           const translationKey = SLUG_TO_KEY[category.slug] || category.slug;
+          const colors = CATEGORY_COLORS[category.slug] || { bg: "bg-amber-50", icon: "text-amber-600" };
 
           return (
             <Link key={category.slug} href={`/browse?category=${category.slug}`}>
-              <Card className="h-full transition-all hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5">
+              <Card className="h-full border-0 shadow-warm hover:shadow-warm-md hover:-translate-y-1 transition-all duration-200">
                 <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary-50">
-                    <IconComponent className="size-6 text-primary-600" />
+                  <div className={`flex size-14 items-center justify-center rounded-2xl ${colors.bg}`}>
+                    <IconComponent className={`size-7 ${colors.icon}`} />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">

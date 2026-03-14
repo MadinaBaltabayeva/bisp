@@ -8,7 +8,7 @@ import { Search, PlusCircle } from "lucide-react";
 export function HeroSection() {
   const t = useTranslations("HomePage");
   return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
+    <section className="relative overflow-hidden bg-gradient-to-br from-amber-500 via-amber-600 to-orange-700">
       {/* Decorative background circles */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute -top-24 -right-24 size-96 rounded-full bg-white" />
@@ -20,14 +20,14 @@ export function HeroSection() {
           <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
             {t("hero.title")}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-primary-100 sm:text-xl">
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-amber-100 sm:text-xl">
             {t("hero.subtitle")}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Button
               asChild
               size="lg"
-              className="bg-white text-primary-700 hover:bg-primary-50 shadow-lg"
+              className="bg-white text-amber-700 hover:bg-amber-50 shadow-lg"
             >
               <Link href="/#categories">
                 <Search className="size-5" />

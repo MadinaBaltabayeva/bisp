@@ -61,39 +61,41 @@ export default async function Home({
       <CategoryGrid />
 
       {/* Popular Items */}
-      <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
-            {t("popular.title")}
-          </h2>
-          {listings.length > 0 && (
-            <Link
-              href="/browse"
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              {t("popular.viewAll")}
-            </Link>
-          )}
-        </div>
+      <div className="bg-gradient-to-b from-stone-50/50 to-transparent">
+        <section className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-stone-800 sm:text-3xl">
+              {t("popular.title")}
+            </h2>
+            {listings.length > 0 && (
+              <Link
+                href="/browse"
+                className="text-sm font-medium text-amber-600 hover:text-amber-700 hover:underline"
+              >
+                {t("popular.viewAll")}
+              </Link>
+            )}
+          </div>
 
-        {listings.length > 0 ? (
-          <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {listings.map((listing) => (
-              <ListingCard
-                key={listing.id}
-                listing={listing}
-                isFavorited={favoriteIds.has(listing.id)}
-                isAuthenticated={!!session}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-gray-300 py-16 text-gray-400">
-            <ShoppingBag className="size-10" />
-            <p className="text-sm">{t("popular.comingSoon")}</p>
-          </div>
-        )}
-      </section>
+          {listings.length > 0 ? (
+            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+              {listings.map((listing) => (
+                <ListingCard
+                  key={listing.id}
+                  listing={listing}
+                  isFavorited={favoriteIds.has(listing.id)}
+                  isAuthenticated={!!session}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-amber-200/50 py-16 text-stone-400">
+              <ShoppingBag className="size-10" />
+              <p className="text-sm">{t("popular.comingSoon")}</p>
+            </div>
+          )}
+        </section>
+      </div>
     </>
   );
 }
