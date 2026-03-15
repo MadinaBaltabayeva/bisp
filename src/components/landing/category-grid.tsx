@@ -71,12 +71,9 @@ export function CategoryGrid() {
 
           return (
             <Link key={category.slug} href={`/browse?category=${category.slug}`}>
-              <div className="group relative overflow-hidden rounded-2xl bg-gradient-to-br p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg"
-                style={{ backgroundImage: `linear-gradient(135deg, var(--tw-gradient-from), var(--tw-gradient-to))` }}
-              >
-                <div className={`absolute inset-0 bg-gradient-to-br ${style.gradient} opacity-100`} />
+              <div className={`group relative overflow-hidden rounded-2xl bg-gradient-to-br ${style.gradient} p-5 transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}>
                 <div className="relative">
-                  <div className={`mb-3 inline-flex size-12 items-center justify-center rounded-xl ${style.iconBg} backdrop-blur-sm`}>
+                  <div className={`mb-3 inline-flex size-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm`}>
                     <IconComponent className="size-6 text-white" />
                   </div>
                   <h3 className="text-sm font-semibold text-white sm:text-base">

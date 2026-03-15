@@ -91,7 +91,7 @@ export function ListingCard({
 
   return (
     <div className={cn(
-      "group relative rounded-2xl bg-white overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-900/10",
+      "group relative rounded-2xl bg-white shadow-sm shadow-stone-200/80 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-900/10",
       isUnavailable && "opacity-60"
     )}>
       <Link href={`/listings/${listing.id}`} className="block">
