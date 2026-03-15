@@ -21,8 +21,8 @@ export function BottomTabBar() {
   const badgeCounts = useBadgeCounts();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/80 backdrop-blur-xl border-t border-stone-100 md:hidden">
-      <div className="mx-auto flex h-16 items-center justify-around px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t bg-white md:hidden">
+      <div className="flex h-16 items-center justify-around">
         {TAB_ITEMS.map((item) => {
           const isActive =
             item.href === "/"
@@ -41,17 +41,17 @@ export function BottomTabBar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex flex-col items-center gap-0.5 rounded-xl px-3 py-1.5 text-[10px] font-semibold transition-all",
+                "flex flex-1 flex-col items-center gap-1 py-2 text-xs font-medium transition-colors",
                 isActive
-                  ? "text-amber-700 bg-amber-50"
-                  : "text-stone-400 hover:text-stone-600"
+                  ? "text-primary-600"
+                  : "text-gray-500 hover:text-gray-700"
               )}
             >
               <span className="relative">
                 <item.icon
                   className={cn(
                     "size-5",
-                    isActive ? "text-amber-600" : "text-stone-400"
+                    isActive ? "text-primary-600" : "text-gray-400"
                   )}
                 />
                 <NavBadgeIndicator count={badgeCount} />
