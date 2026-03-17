@@ -68,51 +68,53 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+    <header className="sticky top-0 z-40 w-full border-b border-stone-200/60 bg-white/80 backdrop-blur-xl shadow-warm-sm">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         {/* Logo */}
         <Logo />
 
         {/* Desktop nav links */}
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_LINKS.map((link) => {
-            const badgeCount =
-              link.href === "/rentals"
-                ? badgeCounts.rentals
-                : link.href === "/messages"
-                  ? badgeCounts.messages
-                  : 0;
+          <div className="flex items-center gap-0.5 rounded-full bg-stone-100/80 px-1.5 py-1">
+            {NAV_LINKS.map((link) => {
+              const badgeCount =
+                link.href === "/rentals"
+                  ? badgeCounts.rentals
+                  : link.href === "/messages"
+                    ? badgeCounts.messages
+                    : 0;
 
-            return (
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition-colors hover:bg-white hover:text-primary-700 hover:shadow-warm-xs"
+                >
+                  <span className="relative">
+                    <link.icon className="size-4" />
+                    <NavBadgeIndicator count={badgeCount} />
+                  </span>
+                  {t(link.labelKey)}
+                </Link>
+              );
+            })}
+            {mounted && session?.user?.role === "admin" && (
               <Link
-                key={link.href}
-                href={link.href}
-                className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
+                href="/admin/dashboard"
+                className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition-colors hover:bg-white hover:text-primary-700 hover:shadow-warm-xs"
               >
-                <span className="relative">
-                  <link.icon className="size-4" />
-                  <NavBadgeIndicator count={badgeCount} />
-                </span>
-                {t(link.labelKey)}
+                <Shield className="size-4" />
+                {t("admin")}
               </Link>
-            );
-          })}
-          {mounted && session?.user?.role === "admin" && (
-            <Link
-              href="/admin/dashboard"
-              className="relative flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-primary-50 hover:text-primary-700"
-            >
-              <Shield className="size-4" />
-              {t("admin")}
-            </Link>
-          )}
+            )}
+          </div>
         </nav>
 
         {/* Right side: language + auth state */}
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           {!mounted ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-gray-200" />
+            <div className="h-8 w-8 animate-pulse rounded-full bg-stone-200" />
           ) : session ? (
             <>
             <NotificationBell />
