@@ -14,7 +14,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { CATEGORIES } from "@/features/seed/categories";
-import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   wrench: Wrench,
@@ -39,6 +39,17 @@ const SLUG_TO_KEY: Record<string, string> = {
   "home-garden": "homeGarden",
 };
 
+const CATEGORY_GRADIENTS: Record<string, string> = {
+  tools: "from-orange-500 to-amber-600",
+  electronics: "from-blue-500 to-indigo-600",
+  sports: "from-green-500 to-emerald-600",
+  outdoor: "from-teal-500 to-cyan-600",
+  vehicles: "from-red-500 to-rose-600",
+  clothing: "from-pink-500 to-fuchsia-600",
+  music: "from-purple-500 to-violet-600",
+  "home-garden": "from-lime-500 to-green-600",
+};
+
 export function CategoryGrid() {
   const tHome = useTranslations("HomePage");
   const tCat = useTranslations("Categories");
@@ -46,10 +57,10 @@ export function CategoryGrid() {
   return (
     <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 sm:text-3xl">
+        <h2 className="text-2xl font-bold text-stone-800 sm:text-3xl">
           {tHome("categories.title")}
         </h2>
-        <p className="mt-2 text-gray-600">
+        <p className="mt-2 text-stone-500">
           {tHome("categories.subtitle")}
         </p>
       </div>
@@ -61,18 +72,17 @@ export function CategoryGrid() {
 
           return (
             <Link key={category.slug} href={`/browse?category=${category.slug}`}>
-              <Card className="h-full transition-all hover:shadow-md hover:border-primary-200 hover:-translate-y-0.5">
-                <CardContent className="flex flex-col items-center gap-3 py-6 text-center">
-                  <div className="flex size-12 items-center justify-center rounded-xl bg-primary-50">
-                    <IconComponent className="size-6 text-primary-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">
-                      {tCat(translationKey as Parameters<typeof tCat>[0])}
-                    </h3>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className={cn(
+                "group relative flex h-32 flex-col items-center justify-center gap-2 rounded-2xl bg-gradient-to-br p-4 text-center transition-all hover:-translate-y-1 hover:shadow-warm-lg sm:h-36",
+                CATEGORY_GRADIENTS[category.slug] || "from-stone-500 to-stone-600"
+              )}>
+                <div className="flex size-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm transition-transform group-hover:scale-110">
+                  <IconComponent className="size-6 text-white" />
+                </div>
+                <h3 className="text-sm font-semibold text-white">
+                  {tCat(translationKey as Parameters<typeof tCat>[0])}
+                </h3>
+              </div>
             </Link>
           );
         })}
