@@ -2,8 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Search, PlusCircle, ShieldCheck, Users, Star } from "lucide-react";
+import { Search, ShieldCheck, Users, Star } from "lucide-react";
 
 export function HeroSection() {
   const t = useTranslations("HomePage");
