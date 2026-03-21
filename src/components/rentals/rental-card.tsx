@@ -71,13 +71,13 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
     : `${format.dateTime(startDate, { month: "short", day: "numeric", year: "numeric" })} - ${format.dateTime(endDate, { month: "short", day: "numeric", year: "numeric" })}`;
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="overflow-hidden rounded-2xl shadow-warm-sm hover:shadow-warm-md transition-shadow duration-300 border-stone-200/80">
       <CardContent className="p-0">
         <div className="flex gap-4 p-4">
           {/* Listing thumbnail */}
           <Link
             href={`/listings/${rental.listing.id}`}
-            className="relative size-20 shrink-0 overflow-hidden rounded-md bg-muted"
+            className="relative size-24 shrink-0 overflow-hidden rounded-xl bg-stone-100"
           >
             {coverImage ? (
               <Image
@@ -88,7 +88,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 sizes="80px"
               />
             ) : (
-              <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
+              <div className="flex h-full w-full items-center justify-center text-xs text-stone-400">
                 {t("card.noImage")}
               </div>
             )}
@@ -99,7 +99,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
             <div className="flex items-start justify-between gap-2">
               <Link
                 href={`/listings/${rental.listing.id}`}
-                className="truncate font-medium text-sm hover:underline"
+                className="truncate font-medium text-sm text-stone-900 hover:underline"
               >
                 {rental.listing.title}
               </Link>
@@ -108,8 +108,8 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
 
             {/* Other party */}
             {otherParty && (
-              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-muted">
+              <div className="flex items-center gap-1.5 text-xs text-stone-500">
+                <div className="relative size-4 shrink-0 overflow-hidden rounded-full bg-stone-200">
                   {otherParty.image ? (
                     <Image
                       src={otherParty.image}
@@ -131,19 +131,19 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
             )}
 
             {/* Date range and pricing */}
-            <p className="text-xs text-muted-foreground">{dateDisplay}</p>
+            <p className="text-xs text-stone-500">{dateDisplay}</p>
             <div className="flex items-center gap-3 text-xs">
-              <span className="font-medium">
+              <span className="font-semibold text-stone-900">
                 ${rental.totalPrice.toFixed(2)}
               </span>
-              <span className="text-muted-foreground">
+              <span className="text-stone-400">
                 {t("card.deposit", { amount: `$${rental.securityDeposit.toFixed(2)}` })}
               </span>
             </div>
 
             {/* Message preview */}
             {rental.message && (
-              <p className="mt-1 text-xs text-muted-foreground line-clamp-1 italic">
+              <p className="mt-1 text-xs text-stone-400 line-clamp-1 italic">
                 &ldquo;{rental.message}&rdquo;
               </p>
             )}
@@ -161,12 +161,12 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
 
         {/* Action buttons */}
         {role === "owner" && (
-          <div className="border-t px-4 py-2">
+          <div className="border-stone-100 border-t px-4 py-3 bg-stone-50/50">
             {rental.status === "requested" && (
               <div className="flex gap-2">
                 <Button
                   size="sm"
-                  className="flex-1 bg-green-600 hover:bg-green-700"
+                  className="flex-1 bg-green-600 hover:bg-green-700 shadow-warm-xs"
                   onClick={() =>
                     handleAction(approveRental, t("card.approved"))
                   }
@@ -182,7 +182,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
                 <Button
                   size="sm"
                   variant="outline"
-                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                  className="flex-1 border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700 shadow-warm-xs"
                   onClick={() =>
                     handleAction(declineRental, t("card.declined"))
                   }
@@ -202,7 +202,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
               <Button
                 size="sm"
                 variant="outline"
-                className="w-full"
+                className="w-full shadow-warm-xs"
                 onClick={() =>
                   handleAction(markReturned, t("card.markedReturned"))
                 }
@@ -220,7 +220,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
             {rental.status === "returned" && (
               <Button
                 size="sm"
-                className="w-full"
+                className="w-full shadow-warm-xs"
                 onClick={() =>
                   handleAction(completeRental, t("card.completed"))
                 }
@@ -239,7 +239,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
 
         {/* QR Handoff button */}
         {(rental.status === "approved" || rental.status === "active") && (
-          <div className="border-t px-4 py-2">
+          <div className="border-stone-100 border-t px-4 py-3 bg-stone-50/50">
             <Button variant="outline" size="sm" className="w-full" asChild>
               <Link href={`/rentals/${rental.id}/handoff`}>
                 <QrCode className="mr-1 size-3.5" />
@@ -251,7 +251,7 @@ export function RentalCard({ rental, role, hasReviewedByUser }: RentalCardProps)
 
         {/* Review section for completed rentals */}
         {rental.status === "completed" && (
-          <div className="border-t px-4 py-2 flex items-center justify-between">
+          <div className="border-stone-100 border-t px-4 py-3 bg-stone-50/50 flex items-center justify-between">
             {hasReviewedByUser ? (
               <Badge variant="secondary" className="gap-1">
                 <CheckCheck className="size-3" />
