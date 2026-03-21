@@ -90,54 +90,49 @@ export function ListingCard({
   const priceLabel = formatPrice();
 
   return (
-    <div className={cn(isUnavailable && "opacity-60")}>
+    <div className={cn("rounded-2xl shadow-warm-sm hover:shadow-warm-md transition-shadow duration-300 bg-white overflow-hidden", isUnavailable && "opacity-60")}>
       <Link href={`/listings/${listing.id}`} className="group block">
-        <div className="overflow-hidden rounded-lg">
-          <div className="relative aspect-[4/3] bg-gradient-to-br from-gray-100 to-gray-200">
-            {coverImage ? (
-              <Image
-                src={coverImage.url}
-                alt={listing.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-gray-400">
-                {t("noPhoto")}
-              </div>
-            )}
-            {/* Favorite heart overlay (top-left) */}
-            {showFavoriteButton && (
-              <div className="absolute left-2 top-2 z-10 rounded-full bg-black/30 backdrop-blur-sm">
-                <FavoriteButton
-                  listingId={listing.id}
-                  isFavorited={isFavorited}
-                  isAuthenticated={isAuthenticated}
-                />
-              </div>
-            )}
-            {/* AI Verified badge (top-right) */}
-            {listing.aiVerified && (
-              <div className="absolute right-2 top-2 flex items-center gap-1 rounded-full bg-green-600/90 px-2 py-0.5 text-xs font-medium text-white backdrop-blur-sm">
-                <ShieldCheck className="size-3" />
-                {t("aiVerified")}
-              </div>
-            )}
-            {/* Unavailable badge overlay */}
-            {isUnavailable && (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Badge variant="secondary" className="bg-gray-900/70 text-white text-sm px-3 py-1">
-                  {ta("unavailable")}
-                </Badge>
-              </div>
-            )}
+        <div className="relative aspect-[3/2] bg-gradient-to-br from-stone-100 to-stone-200">
+          {coverImage ? (
+            <Image
+              src={coverImage.url}
+              alt={listing.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center text-stone-400">
+              {t("noPhoto")}
+            </div>
+          )}
+          {/* Price badge overlay (bottom-left) */}
+          <div className="absolute bottom-2.5 left-2.5 z-10 rounded-full bg-white/95 backdrop-blur-sm px-3 py-1 shadow-warm-xs">
+            <span className="text-sm font-bold text-stone-900">{priceLabel}</span>
           </div>
+          {/* Favorite heart overlay (top-right) */}
+          {showFavoriteButton && (
+            <div className="absolute right-2 top-2 z-10 rounded-full bg-white/80 shadow-warm-xs backdrop-blur-sm">
+              <FavoriteButton
+                listingId={listing.id}
+                isFavorited={isFavorited}
+                isAuthenticated={isAuthenticated}
+              />
+            </div>
+          )}
+          {/* Unavailable badge overlay */}
+          {isUnavailable && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <Badge variant="secondary" className="bg-gray-900/70 text-white text-sm px-3 py-1">
+                {ta("unavailable")}
+              </Badge>
+            </div>
+          )}
         </div>
 
-        <div className="mt-2 space-y-1">
+        <div className="p-3 space-y-1.5">
           <div className="flex items-center gap-1.5">
-            <h3 className="truncate font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
+            <h3 className="truncate font-semibold text-stone-900 group-hover:text-primary-600 transition-colors">
               {highlightText(listing.title, highlightTerms)}
             </h3>
             {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
@@ -145,20 +140,27 @@ export function ListingCard({
               <ReputationBadgeIcon key={badge.type} badge={badge} className="shrink-0" />
             ))}
           </div>
-          <p className="text-sm text-muted-foreground">{listing.category.name}</p>
-          <div className="flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="size-3.5 shrink-0" />
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="inline-block rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
+              {listing.category.name}
+            </span>
+            {listing.aiVerified && (
+              <span className="inline-flex items-center gap-0.5 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                <ShieldCheck className="size-3" />
+                {t("aiVerified")}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1 text-sm text-stone-500">
+            <MapPin className="size-3.5 shrink-0 text-stone-400" />
             <span className="truncate">{listing.location}</span>
           </div>
-          <p className="font-semibold text-primary-600">
-            {t("from", { price: priceLabel })}
-          </p>
         </div>
       </Link>
 
       {/* Availability toggle for owner's listings */}
       {showAvailabilityToggle && (
-        <div className="mt-2">
+        <div className="px-3 pb-3 mt-0">
           <AvailabilityToggle
             listingId={listing.id}
             isAvailable={!isUnavailable}
