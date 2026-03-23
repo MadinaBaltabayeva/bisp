@@ -1,0 +1,9 @@
+node_modules
+.next
+.planning
+.superpowers
+docs/superpowers
+*.db
+*.db-journal
+.env
+.git
