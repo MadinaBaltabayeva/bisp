@@ -92,7 +92,7 @@ export function ListingCard({
   return (
     <div className={cn("rounded-2xl shadow-warm-sm hover:shadow-warm-md transition-shadow duration-300 bg-white overflow-hidden", isUnavailable && "opacity-60")}>
       <Link href={`/listings/${listing.id}`} className="group block">
-        <div className="relative aspect-[3/2] bg-gradient-to-br from-stone-100 to-stone-200">
+        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
           {coverImage ? (
             <Image
               src={coverImage.url}
