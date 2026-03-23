@@ -7,10 +7,13 @@ RUN npm install
 
 COPY . .
 
+ENV DATABASE_URL="file:./dev.db"
+
 RUN npx prisma generate
-RUN npx prisma migrate dev --name init || true
-RUN npx tsx prisma/seed.ts || true
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+ENTRYPOINT ["/entrypoint.sh"]
