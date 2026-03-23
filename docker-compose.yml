@@ -5,11 +5,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
-    environment:
-      - DATABASE_URL=file:/app/data/dev.db
-      - NEXT_PUBLIC_BASE_URL=http://localhost:3000
     volumes:
-      - db-data:/app/data
+      - db-data:/app/prisma
 
 volumes:
   db-data:

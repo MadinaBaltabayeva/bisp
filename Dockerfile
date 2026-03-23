@@ -7,8 +7,6 @@ RUN npm install
 
 COPY . .
 
-ENV DATABASE_URL="file:./dev.db"
-
 RUN npx prisma generate
 
 COPY entrypoint.sh /entrypoint.sh
