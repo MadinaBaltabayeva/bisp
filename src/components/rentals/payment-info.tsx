@@ -54,12 +54,10 @@ export function PaymentInfo({ payment }: PaymentInfoProps) {
           <div className="col-span-2">
             <p className="text-muted-foreground">{t("paymentDate")}</p>
             <p className="font-medium">
-              {format.dateTime(new Date(payment.createdAt), {
+              {new Date(payment.createdAt).toLocaleDateString("en-US", {
                 month: "short",
                 day: "numeric",
                 year: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
               })}
             </p>
           </div>
