@@ -55,6 +55,10 @@
     "dashboard": {
       "title": "Boshqaruv paneli - RentHub",
       "description": "Ijara samaradorligingizni, daromadingizni va eng yaxshi eʼlonlarni kuzating."
+    },
+    "adminAnalytics": {
+      "title": "Analitika - RentHub",
+      "description": "Platforma koʻrsatkichlari va analitikasi."
     }
   },
   "Navigation": {
@@ -518,11 +522,47 @@
   "Admin": {
     "sidebar": {
       "dashboard": "Boshqaruv paneli",
+      "analytics": "Analitika",
       "users": "Foydalanuvchilar",
       "moderation": "Moderatsiya",
       "disputes": "Bahslashishlar",
       "panelLabel": "Administrator paneli",
       "backToRentHub": "RentHubga qaytish"
+    },
+    "analytics": {
+      "title": "Analitika",
+      "subtitle": "Platforma samaradorligi va tahlillar",
+      "7d": "7 kun",
+      "30d": "30 kun",
+      "6m": "6 oy",
+      "all": "Barchasi",
+      "custom": "Tanlash",
+      "apply": "Qoʻllash",
+      "vsPrevious": "oldingi davrga",
+      "newUsers": "Yangi foydalanuvchilar",
+      "newListings": "Yangi eʼlonlar",
+      "totalRentals": "Jami ijaralar",
+      "revenue": "Daromad",
+      "avgRating": "Oʻrt. reyting",
+      "completionRate": "Yakunlanish",
+      "userGrowth": "Foydalanuvchilar oʻsishi",
+      "totalUsers": "Jami foydalanuvchilar",
+      "rentalVolume": "Ijara hajmi",
+      "completed": "Yakunlangan",
+      "active": "Faol",
+      "declinedCancelled": "Rad etilgan / Bekor qilingan",
+      "revenueTrend": "Daromad dinamikasi",
+      "categoryBreakdown": "Kategoriyalar boʻyicha",
+      "topEarners": "Eng koʻp daromad olganlar",
+      "user": "Foydalanuvchi",
+      "rentals": "Ijaralar",
+      "rating": "Reyting",
+      "conversionFunnel": "Konversiya voronkasi",
+      "listingsCreated": "Yaratilgan eʼlonlar",
+      "rentalRequests": "Ijara soʻrovlari",
+      "approved": "Tasdiqlangan",
+      "ofPrevious": "oldingi bosqichdan",
+      "noData": "Bu davr uchun maʼlumot yoʻq"
     },
     "dashboard": {
       "title": "Boshqaruv paneli",
@@ -788,7 +828,14 @@
     "paymentSuccess": "Toʻlov muvaffaqiyatli yakunlandi!",
     "cardPlaceholder": "1234567890123456",
     "expiryPlaceholder": "OO/YY",
-    "cvcPlaceholder": "123"
+    "cvcPlaceholder": "123",
+    "securePayment": "Xavfsiz toʻlov",
+    "stripeDescription": "Toʻlovni yakunlash uchun Stripe xavfsiz sahifasiga yoʻnaltirilasiz.",
+    "payWithStripe": "Stripe orqali toʻlash",
+    "redirecting": "Stripega yoʻnaltirilmoqda...",
+    "testMode": "Test rejimi — 4242 4242 4242 4242 kartasini, istalgan kelajak muddatni, istalgan CVC ni kiriting",
+    "successDescription": "Toʻlov amalga oshirildi. Ijara endi faol.",
+    "viewRental": "Ijarani koʻrish"
   },
   "Badges": {
     "trustedOwner": "Ishonchli egasi",
@@ -817,7 +864,35 @@
     "topListings": "Eng yaxshi eʼlonlar",
     "rentals": "ijaralar",
     "favorites": "sevimlilar",
-    "noListingsYet": "Hali eʼlonlar yoʻq. Birinchi eʼloningizni yarating!"
+    "noListingsYet": "Hali eʼlonlar yoʻq. Birinchi eʼloningizni yarating!",
+    "detailedAnalytics": "Batafsil analitika"
+  },
+  "UserAnalytics": {
+    "pageTitle": "Mening analitikam - RentHub",
+    "pageDescription": "Eʼlonlaringiz samaradorligining batafsil tahlili.",
+    "title": "Mening analitikam",
+    "subtitle": "Eʼlonlaringiz qanday ishlashini bilib oling",
+    "backToDashboard": "Boshqaruv paneliga",
+    "totalViews": "Jami koʻrishlar",
+    "searchAppearances": "Qidiruvda koʻrinishlar",
+    "profileViews": "Profil koʻrishlari",
+    "totalFavorites": "Sevimlilarda",
+    "clickThrough": "Bosish darajasi",
+    "conversionRate": "Koʻrish → Ijara",
+    "avgResponseTime": "Oʻrt. javob vaqti",
+    "minutes": "daq",
+    "noData": "Hali maʼlumot yoʻq",
+    "viewsOverTime": "Koʻrishlar va koʻrinishlar (30 kun)",
+    "views": "Koʻrishlar",
+    "mostPopular": "Eng mashhur eʼlon",
+    "listingPerformance": "Eʼlonlar samaradorligi",
+    "listing": "Eʼlon",
+    "appearances": "Koʻrinishlar",
+    "ctr": "CTR",
+    "favorites": "Sevimlilar",
+    "rentals": "Ijaralar",
+    "inquiries": "Soʻrovlar",
+    "noListings": "Hali eʼlonlar yoʻq"
   },
   "Handoff": {
     "pickupTitle": "Topshirish",

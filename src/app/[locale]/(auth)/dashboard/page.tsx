@@ -11,6 +11,9 @@ import {
 import { StatsOverview } from "@/components/dashboard/stats-overview";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { TopListings } from "@/components/dashboard/top-listings";
+import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/navigation";
+import { BarChart3 } from "lucide-react";
 
 interface PageProps {
   params: Promise<{ locale: string }>;
@@ -46,9 +49,17 @@ export default async function DashboardPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">{t("title")}</h1>
-        <p className="text-muted-foreground">{t("subtitle")}</p>
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground">{t("subtitle")}</p>
+        </div>
+        <Button variant="outline" asChild>
+          <Link href="/dashboard/analytics">
+            <BarChart3 className="mr-2 size-4" />
+            {t("detailedAnalytics")}
+          </Link>
+        </Button>
       </div>
 
       <div className="space-y-6">

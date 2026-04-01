@@ -14,6 +14,7 @@ import { ListingGrid } from "@/components/browse/listing-grid";
 import { DidYouMean } from "@/components/browse/did-you-mean";
 import { LazyMapView } from "@/components/map/lazy-map-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { TrackSearchImpressions } from "@/components/analytics/track-impressions";
 
 export const metadata: Metadata = {
   title: "Browse Listings - RentHub",
@@ -112,6 +113,9 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
         <Suspense>
           <FilterSidebar {...filterProps} />
         </Suspense>
+
+        {/* Search impression tracking */}
+        <TrackSearchImpressions listingIds={listings.map((l) => l.id)} />
 
         {/* Grid + Map tabs */}
         <div className="min-w-0 flex-1">

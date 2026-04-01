@@ -43,6 +43,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { TrackListingView } from "@/components/analytics/track-event";
 
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -229,6 +230,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {!isOwner && <TrackListingView listingId={listing.id} />}
       {/* Rejected banner (owner only) */}
       {isRejected && isOwner && (
         <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-800 shadow-warm-xs">

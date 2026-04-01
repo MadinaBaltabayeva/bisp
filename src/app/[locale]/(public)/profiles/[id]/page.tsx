@@ -9,6 +9,7 @@ import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { getUserBadges } from "@/features/badges/queries";
 import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileSections } from "@/components/profile/profile-sections";
+import { TrackProfileView } from "@/components/analytics/track-event";
 
 interface ProfilePageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -57,6 +58,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+      {!isOwnProfile && <TrackProfileView userId={user.id} />}
       <ProfileHeader user={user} isOwnProfile={isOwnProfile} badges={badges} />
       <ProfileSections
         user={user}

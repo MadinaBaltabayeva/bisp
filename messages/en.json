@@ -55,6 +55,10 @@
     "dashboard": {
       "title": "My Dashboard - RentHub",
       "description": "Track your rental performance, revenue, and top listings."
+    },
+    "adminAnalytics": {
+      "title": "Analytics - RentHub",
+      "description": "Platform-wide analytics and performance metrics."
     }
   },
   "Navigation": {
@@ -518,11 +522,47 @@
   "Admin": {
     "sidebar": {
       "dashboard": "Dashboard",
+      "analytics": "Analytics",
       "users": "Users",
       "moderation": "Moderation",
       "disputes": "Disputes",
       "panelLabel": "Admin Panel",
       "backToRentHub": "Back to RentHub"
+    },
+    "analytics": {
+      "title": "Analytics",
+      "subtitle": "Platform performance and insights",
+      "7d": "7 Days",
+      "30d": "30 Days",
+      "6m": "6 Months",
+      "all": "All Time",
+      "custom": "Custom",
+      "apply": "Apply",
+      "vsPrevious": "vs prev. period",
+      "newUsers": "New Users",
+      "newListings": "New Listings",
+      "totalRentals": "Total Rentals",
+      "revenue": "Revenue",
+      "avgRating": "Avg Rating",
+      "completionRate": "Completion Rate",
+      "userGrowth": "User Growth",
+      "totalUsers": "Total Users",
+      "rentalVolume": "Rental Volume",
+      "completed": "Completed",
+      "active": "Active",
+      "declinedCancelled": "Declined / Cancelled",
+      "revenueTrend": "Revenue Trend",
+      "categoryBreakdown": "Category Breakdown",
+      "topEarners": "Top Earners",
+      "user": "User",
+      "rentals": "Rentals",
+      "rating": "Rating",
+      "conversionFunnel": "Conversion Funnel",
+      "listingsCreated": "Listings Created",
+      "rentalRequests": "Rental Requests",
+      "approved": "Approved",
+      "ofPrevious": "of prev. step",
+      "noData": "No data for this period"
     },
     "dashboard": {
       "title": "Dashboard",
@@ -788,7 +828,14 @@
     "paymentSuccess": "Payment completed successfully!",
     "cardPlaceholder": "1234567890123456",
     "expiryPlaceholder": "MM/YY",
-    "cvcPlaceholder": "123"
+    "cvcPlaceholder": "123",
+    "securePayment": "Secure Payment",
+    "stripeDescription": "You will be redirected to Stripe's secure checkout page to complete your payment.",
+    "payWithStripe": "Pay with Stripe",
+    "redirecting": "Redirecting to Stripe...",
+    "testMode": "Test mode — use card 4242 4242 4242 4242, any future expiry, any CVC",
+    "successDescription": "Your payment has been processed. The rental is now active.",
+    "viewRental": "View Rental"
   },
   "Badges": {
     "trustedOwner": "Trusted Owner",
@@ -817,7 +864,35 @@
     "topListings": "Top Performing Listings",
     "rentals": "rentals",
     "favorites": "favorites",
-    "noListingsYet": "No listings yet. Create your first listing!"
+    "noListingsYet": "No listings yet. Create your first listing!",
+    "detailedAnalytics": "Detailed Analytics"
+  },
+  "UserAnalytics": {
+    "pageTitle": "My Analytics - RentHub",
+    "pageDescription": "Detailed performance analytics for your listings.",
+    "title": "My Analytics",
+    "subtitle": "Understand how your listings perform",
+    "backToDashboard": "Back to Dashboard",
+    "totalViews": "Total Views",
+    "searchAppearances": "Search Appearances",
+    "profileViews": "Profile Views",
+    "totalFavorites": "Total Favorites",
+    "clickThrough": "Click-Through Rate",
+    "conversionRate": "View to Rental",
+    "avgResponseTime": "Avg Response Time",
+    "minutes": "min",
+    "noData": "No data yet",
+    "viewsOverTime": "Views & Impressions (30 days)",
+    "views": "Views",
+    "mostPopular": "Most Popular Listing",
+    "listingPerformance": "Listing Performance",
+    "listing": "Listing",
+    "appearances": "Appearances",
+    "ctr": "CTR",
+    "favorites": "Favorites",
+    "rentals": "Rentals",
+    "inquiries": "Inquiries",
+    "noListings": "No listings yet"
   },
   "Handoff": {
     "pickupTitle": "Pickup Handoff",

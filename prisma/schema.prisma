@@ -340,3 +340,18 @@ model AvailabilityBlock {
 
   @@index([listingId])
 }
+
+// === User Analytics Event Tracking ===
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  type      String   // "listing_view", "search_impression", "profile_view"
+  listingId String?
+  userId    String?  // the profile/listing owner being observed
+  viewerId  String?  // who triggered it (null if anonymous)
+  createdAt DateTime @default(now())
+
+  @@index([listingId, type])
+  @@index([userId, type])
+  @@index([createdAt])
+}

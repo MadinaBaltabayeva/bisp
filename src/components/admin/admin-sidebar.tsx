@@ -4,6 +4,7 @@ import { Link, usePathname } from "@/i18n/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
+  BarChart3,
   LayoutDashboard,
   Users,
   ShieldAlert,
@@ -18,6 +19,7 @@ export function AdminSidebar() {
 
   const NAV_ITEMS = [
     { href: "/admin/dashboard", labelKey: "dashboard" as const, icon: LayoutDashboard },
+    { href: "/admin/analytics", labelKey: "analytics" as const, icon: BarChart3 },
     { href: "/admin/users", labelKey: "users" as const, icon: Users },
     { href: "/admin/moderation", labelKey: "moderation" as const, icon: ShieldAlert },
     { href: "/admin/disputes", labelKey: "disputes" as const, icon: AlertTriangle },
