@@ -55,6 +55,10 @@
     "dashboard": {
       "title": "Панель управления - RentHub",
       "description": "Отслеживайте эффективность аренды, доход и лучшие объявления."
+    },
+    "adminAnalytics": {
+      "title": "Аналитика - RentHub",
+      "description": "Аналитика и показатели эффективности платформы."
     }
   },
   "Navigation": {
@@ -518,11 +522,47 @@
   "Admin": {
     "sidebar": {
       "dashboard": "Панель управления",
+      "analytics": "Аналитика",
       "users": "Пользователи",
       "moderation": "Модерация",
       "disputes": "Споры",
       "panelLabel": "Панель администратора",
       "backToRentHub": "Вернуться на RentHub"
+    },
+    "analytics": {
+      "title": "Аналитика",
+      "subtitle": "Показатели и аналитика платформы",
+      "7d": "7 дней",
+      "30d": "30 дней",
+      "6m": "6 месяцев",
+      "all": "Всё время",
+      "custom": "Период",
+      "apply": "Применить",
+      "vsPrevious": "к пред. периоду",
+      "newUsers": "Новые пользователи",
+      "newListings": "Новые объявления",
+      "totalRentals": "Всего аренд",
+      "revenue": "Доход",
+      "avgRating": "Ср. рейтинг",
+      "completionRate": "Завершённость",
+      "userGrowth": "Рост пользователей",
+      "totalUsers": "Всего пользователей",
+      "rentalVolume": "Объём аренд",
+      "completed": "Завершено",
+      "active": "Активно",
+      "declinedCancelled": "Отклонено / Отменено",
+      "revenueTrend": "Динамика дохода",
+      "categoryBreakdown": "По категориям",
+      "topEarners": "Лучшие арендодатели",
+      "user": "Пользователь",
+      "rentals": "Аренды",
+      "rating": "Рейтинг",
+      "conversionFunnel": "Воронка конверсии",
+      "listingsCreated": "Создано объявлений",
+      "rentalRequests": "Запросы на аренду",
+      "approved": "Одобрено",
+      "ofPrevious": "от пред. шага",
+      "noData": "Нет данных за этот период"
     },
     "dashboard": {
       "title": "Панель управления",
@@ -788,7 +828,14 @@
     "paymentSuccess": "Оплата прошла успешно!",
     "cardPlaceholder": "1234567890123456",
     "expiryPlaceholder": "ММ/ГГ",
-    "cvcPlaceholder": "123"
+    "cvcPlaceholder": "123",
+    "securePayment": "Безопасная оплата",
+    "stripeDescription": "Вы будете перенаправлены на безопасную страницу оплаты Stripe.",
+    "payWithStripe": "Оплатить через Stripe",
+    "redirecting": "Перенаправление на Stripe...",
+    "testMode": "Тестовый режим — используйте карту 4242 4242 4242 4242, любой будущий срок, любой CVC",
+    "successDescription": "Оплата обработана. Аренда теперь активна.",
+    "viewRental": "Посмотреть аренду"
   },
   "Badges": {
     "trustedOwner": "Надежный владелец",
@@ -817,7 +864,35 @@
     "topListings": "Лучшие объявления",
     "rentals": "аренды",
     "favorites": "избранное",
-    "noListingsYet": "Пока нет объявлений. Создайте первое!"
+    "noListingsYet": "Пока нет объявлений. Создайте первое!",
+    "detailedAnalytics": "Подробная аналитика"
+  },
+  "UserAnalytics": {
+    "pageTitle": "Моя аналитика - RentHub",
+    "pageDescription": "Подробная аналитика эффективности ваших объявлений.",
+    "title": "Моя аналитика",
+    "subtitle": "Узнайте, как работают ваши объявления",
+    "backToDashboard": "Назад к панели",
+    "totalViews": "Всего просмотров",
+    "searchAppearances": "Показы в поиске",
+    "profileViews": "Просмотры профиля",
+    "totalFavorites": "В избранном",
+    "clickThrough": "Кликабельность",
+    "conversionRate": "Просмотр → Аренда",
+    "avgResponseTime": "Ср. время ответа",
+    "minutes": "мин",
+    "noData": "Пока нет данных",
+    "viewsOverTime": "Просмотры и показы (30 дней)",
+    "views": "Просмотры",
+    "mostPopular": "Самое популярное объявление",
+    "listingPerformance": "Эффективность объявлений",
+    "listing": "Объявление",
+    "appearances": "Показы",
+    "ctr": "CTR",
+    "favorites": "Избранное",
+    "rentals": "Аренды",
+    "inquiries": "Запросы",
+    "noListings": "Пока нет объявлений"
   },
   "Handoff": {
     "pickupTitle": "Передача",

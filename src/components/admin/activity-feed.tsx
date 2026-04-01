@@ -49,7 +49,7 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
                   <div className="min-w-0 flex-1">
                     <p className="text-sm">{item.description}</p>
                     <p className="text-xs text-muted-foreground">
-                      {format.relativeTime(new Date(item.timestamp))}
+                      {format.relativeTime(new Date(item.timestamp), new Date())}
                     </p>
                   </div>
                 </div>

@@ -175,6 +175,74 @@ async function main() {
 
   console.log("\nAdmin account: admin@renthub.com / password123");
 
+  // === Generate 120 extra users spread over 12 months ===
+  const FIRST_NAMES = [
+    "Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Quinn", "Avery",
+    "Blake", "Cameron", "Dakota", "Emery", "Finley", "Harper", "Indigo", "Jesse",
+    "Kelly", "Logan", "Madison", "Noel", "Oakley", "Parker", "Reagan", "Sage",
+    "Tatum", "Val", "Winter", "Zion", "Aria", "Bryce", "Cody", "Diana",
+    "Evan", "Fiona", "Grant", "Hazel", "Ivan", "Julia", "Kyle", "Luna",
+    "Max", "Nora", "Oscar", "Penny", "Reed", "Sofia", "Troy", "Uma",
+    "Victor", "Wendy", "Xavier", "Yara", "Zack", "Amber", "Ben", "Clara",
+    "Derek", "Emma", "Frank", "Grace", "Henry", "Iris", "Jack", "Karen",
+    "Leo", "Mia", "Nick", "Olive", "Paul", "Rose", "Sam", "Tina",
+    "Uri", "Vera", "Will", "Xena", "Yuri", "Zara", "Adam", "Beth",
+  ];
+  const LAST_NAMES = [
+    "Smith", "Lee", "Garcia", "Kim", "Brown", "Davis", "Wilson", "Moore",
+    "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Clark",
+    "Lewis", "Walker", "Hall", "Young", "Allen", "King", "Wright", "Scott",
+    "Green", "Adams", "Nelson", "Hill", "Baker", "Carter", "Mitchell", "Roberts",
+    "Turner", "Phillips", "Campbell", "Parker", "Evans", "Edwards", "Collins", "Stewart",
+  ];
+  const CITIES = [
+    "Los Angeles, CA", "Chicago, IL", "Houston, TX", "Phoenix, AZ", "Philadelphia, PA",
+    "San Antonio, TX", "San Diego, CA", "Dallas, TX", "Miami, FL", "Atlanta, GA",
+    "Boston, MA", "Las Vegas, NV", "Detroit, MI", "Memphis, TN", "Baltimore, MD",
+    "Milwaukee, WI", "Tucson, AZ", "Fresno, CA", "Sacramento, CA", "Kansas City, MO",
+    "Charlotte, NC", "Omaha, NE", "Raleigh, NC", "Minneapolis, MN", "Tampa, FL",
+  ];
+  const BIOS = [
+    "Love sharing my stuff with the community!",
+    "Renting out gear I rarely use. Win-win!",
+    "Always happy to help neighbors save money.",
+    "Quality items at fair prices.",
+    "Minimalist lifestyle — rent, don't buy!",
+  ];
+
+  const now = new Date();
+  let bulkUsersCreated = 0;
+  for (let i = 0; i < 120; i++) {
+    const first = FIRST_NAMES[i % FIRST_NAMES.length];
+    const last = LAST_NAMES[Math.floor(i / FIRST_NAMES.length) % LAST_NAMES.length];
+    const suffix = i >= FIRST_NAMES.length ? `${Math.floor(i / FIRST_NAMES.length) + 1}` : "";
+    const name = `${first} ${last}${suffix}`;
+    const email = `${first.toLowerCase()}.${last.toLowerCase()}${suffix}@example.com`;
+    const city = CITIES[i % CITIES.length];
+
+    const created = await createUser({
+      email,
+      password: "password123",
+      name,
+      bio: BIOS[i % BIOS.length],
+      location: city,
+    });
+    if (created) {
+      // Backdate user creation to spread across 12 months
+      const monthsAgo = Math.floor(Math.random() * 12);
+      const daysInMonth = Math.floor(Math.random() * 28) + 1;
+      const createdAt = new Date(now);
+      createdAt.setMonth(createdAt.getMonth() - monthsAgo);
+      createdAt.setDate(daysInMonth);
+      await prisma.user.update({
+        where: { email },
+        data: { createdAt },
+      });
+      bulkUsersCreated++;
+    }
+  }
+  console.log(`Seeded ${bulkUsersCreated} bulk users (120 target)`);
+
   // Seed listings (delete and recreate for idempotency)
   await prisma.listingImage.deleteMany();
   await prisma.listing.deleteMany();
@@ -232,6 +300,116 @@ async function main() {
   }
 
   console.log(`\nSeeded ${listingsCreated} listings with ${imagesCreated} images`);
+
+  // === Generate ~1000 bulk listings ===
+  const LISTING_TEMPLATES: Record<string, { titles: string[]; descriptions: string[] }> = {
+    tools: {
+      titles: ["Cordless Drill Set", "Circular Saw", "Pressure Washer", "Angle Grinder", "Jigsaw", "Impact Driver", "Table Saw", "Rotary Hammer", "Belt Sander", "Nail Gun", "Heat Gun", "Tile Cutter", "Pipe Wrench Set", "Welding Machine", "Air Compressor"],
+      descriptions: ["Professional grade, well maintained. Perfect for home projects and renovations.", "Heavy duty model with carrying case. Barely used, works like new.", "Complete kit with accessories. Great for DIY and professional use."],
+    },
+    electronics: {
+      titles: ["4K Projector", "Drone with Camera", "DSLR Camera Body", "GoPro Hero", "VR Headset", "Portable Speaker", "Ring Light Kit", "Gimbal Stabilizer", "Wireless Microphone", "Studio Monitor", "Podcast Kit", "Action Camera", "Tablet Pro", "Gaming Console", "Smart Display"],
+      descriptions: ["Latest model, comes with all accessories and original packaging.", "Perfect condition, ideal for events, content creation, or personal use.", "Professional quality equipment at a fraction of the purchase price."],
+    },
+    sports: {
+      titles: ["Mountain Bike", "Tennis Racket Set", "Kayak", "Ski Equipment Set", "Golf Club Set", "Surfboard", "Boxing Gloves Set", "Yoga Mat Kit", "Camping Hammock", "Rock Climbing Gear", "Skateboard Pro", "Paddleboard", "Volleyball Net", "Weightlifting Set", "Cycling Trainer"],
+      descriptions: ["Top brand, excellent condition. Perfect for weekend adventures.", "Complete set ready to use. Regularly maintained and cleaned.", "Great for beginners and experienced athletes alike."],
+    },
+    outdoor: {
+      titles: ["4-Person Tent", "Camping Stove", "Hiking Backpack 65L", "Sleeping Bag -20°C", "Portable Grill", "Folding Kayak", "Binoculars Pro", "Fishing Rod Set", "Camping Chair Set", "Cooler 50L", "Headlamp Set", "Trekking Poles", "Camp Shower", "Fire Pit", "Outdoor Projector"],
+      descriptions: ["Weatherproof and durable. Used for a few trips, in great shape.", "Perfect for family camping or solo adventures.", "Lightweight yet rugged. Ideal for any outdoor activity."],
+    },
+    vehicles: {
+      titles: ["Electric Scooter", "Mountain Bike Pro", "Cargo Trailer", "Roof Rack System", "Electric Skateboard", "Bike Trailer", "Moped", "Go-Kart", "Canoe", "Snowmobile", "ATV", "Jet Ski", "Pontoon Boat", "Motorcycle", "RV Camper"],
+      descriptions: ["Well maintained, fully charged and ready to ride.", "Perfect for getting around the city or weekend getaways.", "Reliable and fun. All safety gear included."],
+    },
+    clothing: {
+      titles: ["Tuxedo Set", "Evening Gown", "Ski Jacket", "Halloween Costume Set", "Wedding Dress", "Leather Jacket", "Rain Gear Set", "Formal Suit", "Cosplay Outfit", "Winter Coat", "Hiking Boots", "Wet Suit", "Dance Costume", "Vintage Dress", "Snow Pants"],
+      descriptions: ["Dry cleaned and ready to wear. Multiple sizes available.", "Perfect condition, worn only once. Looks brand new.", "High quality garment, great for special occasions."],
+    },
+    music: {
+      titles: ["Acoustic Guitar", "Electric Keyboard", "Drum Kit", "Violin", "DJ Controller", "PA System", "Bass Guitar", "Saxophone", "Ukulele", "Flute", "Trumpet", "Cello", "Banjo", "Harmonica Set", "Cajon"],
+      descriptions: ["Beautiful tone, well maintained. Perfect for practice or performance.", "Professional quality instrument in excellent condition.", "Includes case and basic accessories. Ready to play."],
+    },
+    "home-garden": {
+      titles: ["Lawn Mower", "Leaf Blower", "Patio Heater", "Garden Tiller", "Hedge Trimmer", "Snow Blower", "Dehumidifier", "Stand Mixer", "Carpet Cleaner", "Power Washer", "Chain Saw", "Wood Chipper", "Portable AC", "Generator", "Irrigation System"],
+      descriptions: ["Powerful and reliable. Makes yard work a breeze.", "Like new condition, used only a few times.", "Professional grade for home and garden maintenance."],
+    },
+  };
+
+  const LATS_LNGS: [number, number][] = [
+    [34.0522, -118.2437], [41.8781, -87.6298], [29.7604, -95.3698], [33.4484, -112.074],
+    [39.9526, -75.1652], [29.4241, -98.4936], [32.7157, -117.1611], [32.7767, -96.797],
+    [25.7617, -80.1918], [33.749, -84.388], [42.3601, -71.0589], [36.1699, -115.1398],
+    [42.3314, -83.0458], [35.1495, -90.049], [39.2904, -76.6122], [43.0389, -87.9065],
+    [32.2226, -110.9747], [36.7378, -119.7871], [38.5816, -121.4944], [39.0997, -94.5786],
+    [35.2271, -80.8431], [41.2565, -95.9345], [35.7796, -78.6382], [44.9778, -93.265],
+    [27.9506, -82.4572],
+  ];
+
+  const allCategories = await prisma.category.findMany();
+  const categoryBySlug = new Map(allCategories.map((c) => [c.slug, c]));
+  const allBulkUsers = await prisma.user.findMany({ select: { id: true } });
+  const CONDITIONS = ["new", "like_new", "good", "good", "fair"];
+
+  let bulkListingsCreated = 0;
+  let bulkImagesCreated = 0;
+  const categorySlugs = Object.keys(LISTING_TEMPLATES);
+
+  for (let i = 0; i < 1000; i++) {
+    const slug = categorySlugs[i % categorySlugs.length];
+    const templates = LISTING_TEMPLATES[slug];
+    const category = categoryBySlug.get(slug)!;
+    const titleBase = templates.titles[i % templates.titles.length];
+    const suffix = Math.floor(i / categorySlugs.length / templates.titles.length);
+    const title = suffix > 0 ? `${titleBase} #${suffix + 1}` : titleBase;
+    const description = templates.descriptions[i % templates.descriptions.length];
+    const owner = allBulkUsers[i % allBulkUsers.length];
+    const [lat, lng] = LATS_LNGS[i % LATS_LNGS.length];
+    const condition = CONDITIONS[i % CONDITIONS.length];
+    const cityName = CITIES[i % CITIES.length];
+
+    const priceDaily = Math.floor(Math.random() * 80) + 10;
+    const monthsAgo = Math.floor(Math.random() * 12);
+    const createdAt = new Date(now);
+    createdAt.setMonth(createdAt.getMonth() - monthsAgo);
+    createdAt.setDate(Math.floor(Math.random() * 28) + 1);
+
+    const imageCount = Math.floor(Math.random() * 3) + 1;
+    const images = Array.from({ length: imageCount }, (_, j) => ({
+      url: `https://picsum.photos/seed/${slug}${i}img${j}/800/600`,
+      isCover: j === 0,
+      sortOrder: j,
+    }));
+
+    await prisma.listing.create({
+      data: {
+        title,
+        description,
+        condition,
+        priceHourly: Math.random() > 0.5 ? Math.floor(priceDaily / 4) : null,
+        priceDaily,
+        priceWeekly: priceDaily * 5,
+        priceMonthly: Math.random() > 0.3 ? priceDaily * 18 : null,
+        location: cityName,
+        region: "US",
+        latitude: lat + (Math.random() - 0.5) * 0.1,
+        longitude: lng + (Math.random() - 0.5) * 0.1,
+        status: "active",
+        aiVerified: Math.random() > 0.3,
+        tags: "",
+        ownerId: owner.id,
+        categoryId: category.id,
+        createdAt,
+        images: { create: images },
+      },
+    });
+
+    bulkListingsCreated++;
+    bulkImagesCreated += imageCount;
+  }
+
+  console.log(`Seeded ${bulkListingsCreated} bulk listings with ${bulkImagesCreated} images`);
 
   // === FTS5 search index backfill ===
   // Ensure FTS5 virtual table exists
@@ -511,6 +689,254 @@ async function main() {
     }
   }
   console.log(`Marked ${verifiedEmails.length} users as ID-verified`);
+
+  // === Seed 12 months of rich analytics data ===
+  await prisma.analyticsEvent.deleteMany();
+
+  const allListingsForAnalytics = await prisma.listing.findMany({
+    select: { id: true, ownerId: true },
+  });
+  const allUsersForAnalytics = await prisma.user.findMany({
+    select: { id: true },
+  });
+
+  const YEAR_DAYS = 365;
+
+  // Growth curve: traffic increases over 12 months (simulates platform growth)
+  function growthMultiplier(daysAgo: number): number {
+    // Recent days get more traffic (exponential-ish growth)
+    const age = 1 - daysAgo / YEAR_DAYS; // 0 = oldest, 1 = today
+    return 0.3 + age * 0.7; // ranges from 0.3x to 1x
+  }
+
+  // Seasonal bump: summer months get more rentals
+  function seasonalMultiplier(date: Date): number {
+    const month = date.getMonth();
+    // Jun-Aug peak, Dec-Jan dip
+    const seasonal: Record<number, number> = {
+      0: 0.7, 1: 0.75, 2: 0.85, 3: 0.95, 4: 1.1, 5: 1.3,
+      6: 1.4, 7: 1.35, 8: 1.15, 9: 1.0, 10: 0.8, 11: 0.65,
+    };
+    return seasonal[month] ?? 1;
+  }
+
+  function randomDate(daysAgo: number): Date {
+    const d = new Date(now);
+    d.setDate(d.getDate() - daysAgo);
+    d.setHours(Math.floor(Math.random() * 14) + 8, Math.floor(Math.random() * 60));
+    return d;
+  }
+
+  // Generate events in streaming batches to avoid OOM
+  // Sample 100 listings instead of all 1000+ to keep it manageable
+  const sampledListings = allListingsForAnalytics
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 100);
+
+  let totalEvents = 0;
+  const BATCH_SIZE = 2000;
+  let batch: {
+    type: string;
+    listingId: string | null;
+    userId: string | null;
+    viewerId: string | null;
+    createdAt: Date;
+  }[] = [];
+
+  async function flushBatch() {
+    if (batch.length === 0) return;
+    await prisma.analyticsEvent.createMany({ data: batch });
+    totalEvents += batch.length;
+    batch = [];
+  }
+
+  for (const listing of sampledListings) {
+    for (let daysAgo = 0; daysAgo < YEAR_DAYS; daysAgo++) {
+      const date = randomDate(daysAgo);
+      const gm = growthMultiplier(daysAgo);
+      const sm = seasonalMultiplier(date);
+      const multiplier = gm * sm;
+
+      const dailyImpressions = Math.floor((Math.random() * 5 + 2) * multiplier);
+      const dailyViews = Math.floor((Math.random() * 2 + 1) * multiplier);
+
+      for (let i = 0; i < dailyImpressions; i++) {
+        const d = new Date(date);
+        d.setMinutes(d.getMinutes() + Math.floor(Math.random() * 60 * 14));
+        batch.push({ type: "search_impression", listingId: listing.id, userId: listing.ownerId, viewerId: null, createdAt: d });
+      }
+
+      for (let i = 0; i < dailyViews; i++) {
+        const viewer = allUsersForAnalytics[Math.floor(Math.random() * allUsersForAnalytics.length)];
+        const d = new Date(date);
+        d.setMinutes(d.getMinutes() + Math.floor(Math.random() * 60 * 14));
+        batch.push({ type: "listing_view", listingId: listing.id, userId: listing.ownerId, viewerId: viewer.id !== listing.ownerId ? viewer.id : null, createdAt: d });
+      }
+
+      if (batch.length >= BATCH_SIZE) await flushBatch();
+    }
+  }
+
+  // Profile views
+  for (const user of allUsersForAnalytics) {
+    for (let daysAgo = 0; daysAgo < YEAR_DAYS; daysAgo += 3) {
+      const count = Math.random() < 0.5 ? Math.floor(Math.random() * 3) + 1 : 0;
+      for (let i = 0; i < count; i++) {
+        const viewer = allUsersForAnalytics[Math.floor(Math.random() * allUsersForAnalytics.length)];
+        batch.push({ type: "profile_view", listingId: null, userId: user.id, viewerId: viewer.id !== user.id ? viewer.id : null, createdAt: randomDate(daysAgo) });
+      }
+      if (batch.length >= BATCH_SIZE) await flushBatch();
+    }
+  }
+
+  await flushBatch();
+  console.log(`Seeded ${totalEvents} analytics events (12-month history)`);
+
+  // === Seed 300+ rentals spread across 12 months ===
+  const RENTAL_STATUSES = ["completed", "completed", "completed", "completed", "active", "returned", "declined", "cancelled"];
+  const allListingsForRentals = await prisma.listing.findMany({
+    select: { id: true, ownerId: true, priceDaily: true },
+  });
+  let extraRentals = 0;
+  const RENTAL_MESSAGES = [
+    "Would love to rent this!", "Is this still available?", "Need it for the weekend.",
+    "Planning a project, this would be perfect.", "How soon can I pick it up?",
+  ];
+
+  // Get demo user IDs to ensure they get good rental data
+  const demoEmails = DEMO_USERS.map((u) => u.email);
+  const demoUserRecords = await prisma.user.findMany({
+    where: { email: { in: demoEmails } },
+    select: { id: true },
+  });
+  const demoUserIds = new Set(demoUserRecords.map((u) => u.id));
+
+  // Split listings: demo user listings get more rentals
+  const demoListings = allListingsForRentals.filter((l) => demoUserIds.has(l.ownerId));
+  const otherListings = allListingsForRentals.filter((l) => !demoUserIds.has(l.ownerId));
+
+  async function createRentalForListing(listing: typeof allListingsForRentals[0], monthsAgo: number) {
+    const baseDate = new Date(now);
+    baseDate.setMonth(baseDate.getMonth() - monthsAgo);
+    const renterPool = allUsersForAnalytics.filter((u) => u.id !== listing.ownerId);
+    const renter = renterPool[Math.floor(Math.random() * renterPool.length)];
+
+    const dayOffset = Math.floor(Math.random() * 28);
+    const startDate = new Date(baseDate);
+    startDate.setDate(dayOffset + 1);
+    const rentalDays = Math.floor(Math.random() * 7) + 1;
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + rentalDays);
+
+    const dailyRate = listing.priceDaily ?? 25;
+    const totalPrice = rentalDays * dailyRate;
+    const status = RENTAL_STATUSES[Math.floor(Math.random() * RENTAL_STATUSES.length)];
+
+    await prisma.rental.create({
+      data: {
+        startDate,
+        endDate,
+        status,
+        message: RENTAL_MESSAGES[Math.floor(Math.random() * RENTAL_MESSAGES.length)],
+        totalPrice,
+        securityDeposit: totalPrice * 0.2,
+        listingId: listing.id,
+        renterId: renter.id,
+        ownerId: listing.ownerId,
+        createdAt: startDate,
+      },
+    });
+    extraRentals++;
+  }
+
+  // Demo user listings: 3-6 rentals per listing per month = very rich dashboards
+  for (let monthsAgo = 11; monthsAgo >= 0; monthsAgo--) {
+    for (const listing of demoListings) {
+      const count = Math.floor(Math.random() * 4) + 3;
+      for (let i = 0; i < count; i++) {
+        await createRentalForListing(listing, monthsAgo);
+      }
+    }
+  }
+
+  // Other listings: general platform rentals with growth
+  for (let monthsAgo = 11; monthsAgo >= 0; monthsAgo--) {
+    const baseDate = new Date(now);
+    baseDate.setMonth(baseDate.getMonth() - monthsAgo);
+    const sm = seasonalMultiplier(baseDate);
+    const gm = 1 - monthsAgo * 0.05;
+    const rentalsThisMonth = Math.floor((Math.random() * 15 + 18) * sm * gm);
+
+    for (let i = 0; i < rentalsThisMonth; i++) {
+      const listing = otherListings[Math.floor(Math.random() * otherListings.length)];
+      await createRentalForListing(listing, monthsAgo);
+    }
+  }
+  console.log(`Seeded ${extraRentals} extra rentals (12-month history)`);
+
+  // === Seed extra reviews for completed rentals ===
+  const completedRentals = await prisma.rental.findMany({
+    where: { status: "completed" },
+    select: { id: true, renterId: true, ownerId: true, createdAt: true },
+  });
+  const REVIEW_COMMENTS = [
+    "Great experience! Item was exactly as described.",
+    "Very helpful owner, quick responses.",
+    "Item was in perfect condition. Would rent again!",
+    "Smooth pickup and return process.",
+    "Good value for the price. Recommended!",
+    "Everything went smoothly. Five stars!",
+    "The item worked perfectly for my project.",
+    "Excellent communication throughout the rental.",
+    "Fair price, great quality. Happy customer!",
+    "Quick and easy. Will definitely come back.",
+  ];
+  let extraReviews = 0;
+
+  for (const rental of completedRentals) {
+    // 70% chance of review
+    if (Math.random() > 0.7) continue;
+    // Check if review already exists
+    const existing = await prisma.review.findUnique({
+      where: { rentalId_reviewerId: { rentalId: rental.id, reviewerId: rental.renterId } },
+    });
+    if (existing) continue;
+
+    const rating = Math.random() > 0.15 ? Math.floor(Math.random() * 2) + 4 : Math.floor(Math.random() * 3) + 2; // mostly 4-5
+    await prisma.review.create({
+      data: {
+        rating,
+        comment: REVIEW_COMMENTS[Math.floor(Math.random() * REVIEW_COMMENTS.length)],
+        rentalId: rental.id,
+        reviewerId: rental.renterId,
+        revieweeId: rental.ownerId,
+        createdAt: new Date(rental.createdAt.getTime() + 3 * 24 * 60 * 60 * 1000),
+      },
+    });
+    extraReviews++;
+  }
+  console.log(`Seeded ${extraReviews} extra reviews`);
+
+  // Recalculate ratings for all reviewed users
+  const allReviewedUsers = await prisma.review.findMany({
+    select: { revieweeId: true },
+    distinct: ["revieweeId"],
+  });
+  for (const { revieweeId } of allReviewedUsers) {
+    const agg = await prisma.review.aggregate({
+      where: { revieweeId },
+      _avg: { rating: true },
+      _count: { rating: true },
+    });
+    await prisma.user.update({
+      where: { id: revieweeId },
+      data: {
+        averageRating: Math.round((agg._avg.rating ?? 0) * 10) / 10,
+        reviewCount: agg._count.rating,
+      },
+    });
+  }
+  console.log(`Recalculated ratings for ${allReviewedUsers.length} users`);
 
   // Print summary
   const totalCategories = await prisma.category.count();
