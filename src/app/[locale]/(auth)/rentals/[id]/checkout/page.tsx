@@ -8,7 +8,9 @@ import {
   getRentalWithEvents,
   getPaymentForRental,
 } from "@/features/rentals/queries";
+import { isStripeEnabled } from "@/lib/stripe";
 import { CheckoutForm } from "@/components/rentals/checkout-form";
+import { StripeCheckoutButton } from "@/components/rentals/stripe-checkout-button";
 
 interface PageProps {
   params: Promise<{ locale: string; id: string }>;
@@ -66,13 +68,23 @@ export default async function CheckoutPage({ params }: PageProps) {
         <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <CheckoutForm
-        rentalId={id}
-        totalPrice={rental.totalPrice}
-        securityDeposit={rental.securityDeposit}
-        dailyRate={dailyRate}
-        days={days}
-      />
+      {isStripeEnabled() ? (
+        <StripeCheckoutButton
+          rentalId={id}
+          totalPrice={rental.totalPrice}
+          securityDeposit={rental.securityDeposit}
+          dailyRate={dailyRate}
+          days={days}
+        />
+      ) : (
+        <CheckoutForm
+          rentalId={id}
+          totalPrice={rental.totalPrice}
+          securityDeposit={rental.securityDeposit}
+          dailyRate={dailyRate}
+          days={days}
+        />
+      )}
     </div>
   );
 }

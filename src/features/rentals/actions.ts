@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { nanoid } from "nanoid";
 import { prisma } from "@/lib/db";
+import { stripe, isStripeEnabled } from "@/lib/stripe";
 import { rentalRequestSchema } from "@/lib/validations/rental";
 import type { PaymentFormValues } from "@/lib/validations/payment";
 import { getSession } from "@/features/auth/queries";
@@ -411,6 +412,66 @@ export async function completeRental(rentalId: string) {
  * Process a simulated payment for an approved rental.
  * Creates a Payment record, transitions rental to "active", creates RentalEvent, and notifies owner.
  */
+/**
+ * Create a Stripe Checkout Session for paying a rental.
+ * Returns a URL to redirect the user to Stripe's hosted checkout page.
+ */
+export async function createCheckoutSession(rentalId: string, locale: string) {
+  const session = await getSession();
+  if (!session) return { error: "You must be logged in." };
+
+  if (!isStripeEnabled() || !stripe) {
+    return { error: "Stripe is not configured." };
+  }
+
+  const rental = await prisma.rental.findUnique({
+    where: { id: rentalId },
+    select: {
+      renterId: true,
+      status: true,
+      totalPrice: true,
+      securityDeposit: true,
+      listing: { select: { title: true } },
+    },
+  });
+
+  if (!rental) return { error: "Rental not found." };
+  if (rental.renterId !== session.user.id) return { error: "Only the renter can make payment." };
+  if (rental.status !== "approved") return { error: "This rental cannot be paid in its current state." };
+
+  const existingPayment = await prisma.payment.findUnique({ where: { rentalId } });
+  if (existingPayment) return { error: "Payment already exists." };
+
+  const amount = Math.round((rental.totalPrice + rental.securityDeposit) * 100); // cents
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "payment",
+    payment_method_types: ["card"],
+    line_items: [
+      {
+        price_data: {
+          currency: "usd",
+          product_data: {
+            name: `Rental: ${rental.listing.title}`,
+            description: `Rental fee + security deposit`,
+          },
+          unit_amount: amount,
+        },
+        quantity: 1,
+      },
+    ],
+    metadata: {
+      rentalId,
+      userId: session.user.id,
+    },
+    success_url: `${baseUrl}/${locale}/rentals/${rentalId}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/${locale}/rentals/${rentalId}/checkout`,
+  });
+
+  return { url: checkoutSession.url };
+}
+
 export async function processPayment(
   rentalId: string,
   cardData: PaymentFormValues
