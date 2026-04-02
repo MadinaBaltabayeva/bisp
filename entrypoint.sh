@@ -10,4 +10,8 @@ if [ ! -f /app/prisma/.seeded ]; then
   NODE_OPTIONS="--max-old-space-size=512" npx tsx prisma/seed.ts && touch /app/prisma/.seeded
 fi
 
-exec npm run dev
+echo "Building app..."
+npm run build
+
+echo "Starting app..."
+exec npm start
