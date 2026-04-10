@@ -84,6 +84,67 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Run with Docker Compose
+
+If you do not want to install Node.js and the database tooling on your machine, you can run the whole app with Docker Compose. This is the easiest way to try the project.
+
+### Prerequisites
+
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (Mac, Windows) or Docker Engine + Docker Compose plugin (Linux)
+
+### Steps
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/MadinaBaltabayeva/bisp.git
+   cd bisp
+   ```
+
+2. Create a `.env` file in the project root:
+
+   ```env
+   DATABASE_URL="file:./prisma/dev.db"
+   OPENAI_API_KEY="your-openai-api-key"
+   NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+   ```
+
+   > The `OPENAI_API_KEY` is optional. The app works without it, AI features will be disabled.
+
+3. Build and start the container:
+
+   ```bash
+   docker compose up --build
+   ```
+
+   On the first run this will:
+   - build the Docker image from the `Dockerfile`
+   - install all Node dependencies
+   - generate the Prisma client
+   - run database migrations
+   - seed the database with demo data
+   - start the Next.js dev server on port 3000
+
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+### Useful Docker commands
+
+| Command | Description |
+|---------|-------------|
+| `docker compose up` | Start the app (uses cached image) |
+| `docker compose up --build` | Rebuild the image and start |
+| `docker compose up -d` | Start in the background (detached) |
+| `docker compose logs -f app` | Follow the app logs |
+| `docker compose down` | Stop and remove the container |
+| `docker compose down -v` | Stop and remove the container **and the database volume** (wipes all data) |
+| `docker compose exec app sh` | Open a shell inside the running container |
+
+### Notes
+
+- The SQLite database is persisted in a named Docker volume called `db-data`, so your data will survive container restarts.
+- If you change dependencies in `package.json`, run `docker compose up --build` to rebuild the image.
+- If you want a clean slate (fresh database), run `docker compose down -v` and start again.
+
 ## Project Structure
 
 ```
