@@ -1,4 +1,4 @@
-# Madina — Peer-to-Peer Rental Marketplace
+# RentHub — Peer-to-Peer Rental Marketplace
 
 A full-stack web application where university students and local communities can list, discover, and rent items from each other. Built as a BISP (Bachelor of Information Systems Project).
 
