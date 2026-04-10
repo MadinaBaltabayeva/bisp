@@ -76,6 +76,23 @@ npx prisma migrate dev
 npx tsx prisma/seed.ts
 ```
 
+### Demo accounts
+
+After running the seed script, you can log in with any of these accounts. All of them use the same password: **`password123`**.
+
+| Role | Name | Email |
+|------|------|-------|
+| Admin | Admin | `admin@renthub.com` |
+| User | Sarah Chen | `sarah.chen@example.com` |
+| User | Marcus Johnson | `marcus.johnson@example.com` |
+| User | Elena Rodriguez | `elena.rodriguez@example.com` |
+| User | James O'Connor | `james.oconnor@example.com` |
+| User | Priya Patel | `priya.patel@example.com` |
+| User | Tom Baker | `tom.baker@example.com` |
+| User | Lisa Nakamura | `lisa.nakamura@example.com` |
+
+> The seed script also creates additional random demo users with `@example.com` emails and the same `password123` password. These are used to populate the marketplace with listings, rentals and reviews.
+
 ### Run the App
 
 ```bash
