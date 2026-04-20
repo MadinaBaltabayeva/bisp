@@ -40,6 +40,14 @@ const CONDITION_KEYS: Record<string, string> = {
   poor: "poor",
 };
 
+function SectionKicker({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-stone-500">
+      {children}
+    </div>
+  );
+}
+
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
 }
@@ -361,82 +369,92 @@ export default async function ListingDetailPage({ params }: PageProps) {
       )}
 
       {/* Description */}
-      <div className="mt-16 max-w-2xl">
-        <p className="whitespace-pre-line text-[17px] leading-relaxed text-stone-800 sm:text-[18px]">
+      <div className="mt-16 max-w-3xl border-t border-stone-200 pt-10">
+        <SectionKicker>{t("description")}</SectionKicker>
+        <p className="mt-5 whitespace-pre-line text-[17px] leading-relaxed text-stone-700 sm:text-[18px]">
           {displayDescription}
         </p>
         {tags.length > 0 && (
-          <p className="mt-8 text-[13px] text-stone-400">
-            {tags.join(" · ")}
+          <p className="mt-8 text-[13px] text-stone-500">
+            {tags.map((tag) => `#${tag}`).join("  ·  ")}
           </p>
         )}
       </div>
 
       {/* Owner */}
-      <div className="mt-16 flex max-w-2xl items-center gap-4 border-t border-stone-200 pt-10">
-        <div className="relative size-10 overflow-hidden rounded-full bg-stone-200 shrink-0">
-          {listing.owner.image ? (
-            <Image
-              src={listing.owner.image}
-              alt={listing.owner.name}
-              fill
-              className="object-cover"
-              sizes="40px"
-            />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-[14px] font-medium text-stone-500">
-              {listing.owner.name.charAt(0).toUpperCase()}
-            </div>
-          )}
-        </div>
-        <div>
-          <div className="flex items-center gap-1.5">
-            <Link
-              href={`/profiles/${listing.owner.id}`}
-              className="text-[15px] font-medium text-stone-900 hover:underline underline-offset-4"
-            >
-              {listing.owner.name}
-            </Link>
-            {listing.owner.idVerified && <VerificationBadge />}
-          </div>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-stone-500">
-            <span>{t("memberSince", { date: memberSince })}</span>
-            {listing.owner.reviewCount > 0 && (
-              <>
-                <span aria-hidden>·</span>
-                <span className="inline-flex items-center gap-1">
-                  <Star className="size-3 fill-stone-700 text-stone-700" />
-                  {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
-                  {listing.owner.reviewCount === 1 ? "review" : "reviews"})
-                </span>
-              </>
+      <div className="mt-16 max-w-3xl border-t border-stone-200 pt-10">
+        <SectionKicker>{t("listedBy")}</SectionKicker>
+        <div className="mt-5 flex items-center gap-4">
+          <div className="relative size-14 overflow-hidden rounded-full bg-stone-200 shrink-0">
+            {listing.owner.image ? (
+              <Image
+                src={listing.owner.image}
+                alt={listing.owner.name}
+                fill
+                className="object-cover"
+                sizes="56px"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-[18px] font-medium text-stone-500">
+                {listing.owner.name.charAt(0).toUpperCase()}
+              </div>
             )}
           </div>
-          {ownerBadges.length > 0 && (
-            <div className="mt-1.5">
-              <ReputationBadges badges={ownerBadges} />
+          <div>
+            <div className="flex items-center gap-1.5">
+              <Link
+                href={`/profiles/${listing.owner.id}`}
+                className="text-[16px] font-medium text-stone-900 hover:underline underline-offset-4"
+              >
+                {listing.owner.name}
+              </Link>
+              {listing.owner.idVerified && <VerificationBadge />}
             </div>
-          )}
+            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-stone-500">
+              <span>{t("memberSince", { date: memberSince })}</span>
+              {listing.owner.reviewCount > 0 && (
+                <>
+                  <span aria-hidden>·</span>
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="size-3 fill-stone-700 text-stone-700" />
+                    {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
+                    {listing.owner.reviewCount === 1 ? "review" : "reviews"})
+                  </span>
+                </>
+              )}
+            </div>
+            {ownerBadges.length > 0 && (
+              <div className="mt-2">
+                <ReputationBadges badges={ownerBadges} />
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Reviews */}
       {listingReviews.length > 0 && (
-        <div className="mt-12 max-w-2xl border-t border-stone-200 pt-10 space-y-8">
-          {listingReviews.slice(0, 5).map((review) => (
-            <figure key={review.id}>
-              <blockquote className="font-serif text-[17px] leading-relaxed text-stone-900 sm:text-[18px]">
-                &ldquo;{review.comment}&rdquo;
-              </blockquote>
-              <figcaption className="mt-2 text-[12px] text-stone-500">
-                — {review.reviewer?.name ?? "Anonymous"},{" "}
-                {new Date(review.createdAt).toLocaleDateString(locale, { month: "long", year: "numeric" })}
-              </figcaption>
-            </figure>
-          ))}
-          {listingReviews.length > 5 && (
-            <p className="text-[13px] text-stone-500">+ {listingReviews.length - 5} more reviews</p>
-          )}
+        <div className="mt-12 max-w-3xl border-t border-stone-200 pt-10">
+          <div className="flex items-baseline gap-3">
+            <SectionKicker>{t("ownerReviews")}</SectionKicker>
+            <span className="text-[12px] text-stone-400">{listingReviews.length}</span>
+          </div>
+          <div className="mt-6 space-y-8">
+            {listingReviews.slice(0, 5).map((review) => (
+              <figure key={review.id}>
+                <blockquote className="font-serif text-[17px] leading-relaxed text-stone-900 sm:text-[18px]">
+                  &ldquo;{review.comment}&rdquo;
+                </blockquote>
+                <figcaption className="mt-2 text-[12px] text-stone-500">
+                  — {review.reviewer?.name ?? "Anonymous"},{" "}
+                  {new Date(review.createdAt).toLocaleDateString(locale, { month: "long", year: "numeric" })}
+                </figcaption>
+              </figure>
+            ))}
+            {listingReviews.length > 5 && (
+              <p className="text-[13px] text-stone-500">+ {listingReviews.length - 5} more reviews</p>
+            )}
+          </div>
         </div>
       )}
 
