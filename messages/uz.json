@@ -282,7 +282,8 @@
       "underReview": "Bu eʼlon hozirda koʻrib chiqilmoqda",
       "notFound": "Eʼlon topilmadi",
       "noPhotos": "Rasmlar yoʻq",
-      "messageOwner": "Egasiga xabar yuborish"
+      "messageOwner": "Egasiga xabar yuborish",
+      "offeredBy": "Egasi —"
     },
     "status": {
       "active": "Faol",

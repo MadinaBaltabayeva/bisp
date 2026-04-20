@@ -282,7 +282,8 @@
       "underReview": "This listing is currently under review",
       "notFound": "Listing Not Found",
       "noPhotos": "No photos",
-      "messageOwner": "Message Owner"
+      "messageOwner": "Message Owner",
+      "offeredBy": "Offered by"
     },
     "status": {
       "active": "Active",
