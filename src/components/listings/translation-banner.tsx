@@ -29,7 +29,6 @@ export function TranslationBanner({
   locale,
   originalTitle,
   originalDescription,
-  descriptionHeading,
   cachedTranslation,
   aiEnabled,
   children,
@@ -83,92 +82,75 @@ export function TranslationBanner({
 
   return (
     <>
-      {/* Banner / link area */}
+      {/* Title — magazine serif */}
+      {isPending ? (
+        <div>
+          <Skeleton className="h-12 w-3/4" />
+        </div>
+      ) : (
+        <h1 className="font-serif text-4xl font-medium tracking-tight text-stone-900 sm:text-5xl lg:text-6xl">
+          {displayTitle}
+        </h1>
+      )}
+
+      {/* Children slot (byline, action row, tags, etc. from page.tsx) */}
+      {children}
+
+      {/* Translate prompt — quiet inline stone row, not a colored banner */}
       {!sameLanguage && !showTranslated && !isPending && (
-        <div className="mt-6 flex items-center justify-between rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          <div className="flex items-center gap-2">
-            <Languages className="size-4 shrink-0" />
-            {translation ? (
-              <span>
-                {t("banner", {
-                  language: getLanguageName(translation.detectedLanguage),
-                })}
-              </span>
-            ) : (
-              <span>
-                {t("translateTo", {
-                  targetLanguage: getLocaleLanguageName(),
-                })}
-              </span>
-            )}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
+        <div className="mt-8 flex items-center gap-3 text-[13px] text-stone-500">
+          <Languages className="size-3.5 shrink-0" />
+          <span>
+            {translation
+              ? t("banner", { language: getLanguageName(translation.detectedLanguage) })
+              : t("translateTo", { targetLanguage: getLocaleLanguageName() })}
+          </span>
+          <button
+            type="button"
             onClick={handleTranslate}
-            className="ml-3 shrink-0 border-blue-300 text-blue-800 hover:bg-blue-100"
+            className="text-stone-900 hover:underline underline-offset-4"
           >
             {t("translate")}
-          </Button>
+          </button>
         </div>
       )}
 
-      {/* Loading banner */}
+      {/* Loading row */}
       {isPending && (
-        <div className="mt-6 flex items-center gap-2 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800">
-          <Languages className="size-4 shrink-0 animate-pulse" />
+        <div className="mt-8 flex items-center gap-3 text-[13px] text-stone-500">
+          <Languages className="size-3.5 shrink-0 animate-pulse" />
           <span>{t("translating")}</span>
         </div>
       )}
 
-      {/* Translated from link */}
+      {/* Translated-from row with "Show original" toggle */}
       {showTranslated && translation && !sameLanguage && (
-        <div className="mt-6 flex items-center gap-1 text-xs text-muted-foreground">
+        <div className="mt-8 flex items-center gap-2 text-[12px] text-stone-400">
           <Languages className="size-3 shrink-0" />
           <span>
-            {t("translatedFrom", {
-              language: getLanguageName(translation.detectedLanguage),
-            })}
+            {t("translatedFrom", { language: getLanguageName(translation.detectedLanguage) })}
           </span>
-          <span>&mdash;</span>
+          <span aria-hidden>·</span>
           <button
             type="button"
             onClick={handleShowOriginal}
-            className="underline hover:text-foreground transition-colors"
+            className="hover:text-stone-700 hover:underline underline-offset-4"
           >
             {t("showOriginal")}
           </button>
         </div>
       )}
 
-      {/* Title */}
+      {/* Description — magazine prose, no heading */}
       {isPending ? (
-        <div className="mt-6">
-          <Skeleton className="h-8 w-3/4" />
+        <div className="mt-10 space-y-3">
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-full" />
+          <Skeleton className="h-5 w-3/4" />
         </div>
       ) : (
-        <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl">
-          {displayTitle}
-        </h1>
-      )}
-
-      {/* Children slot (badges, tags, mobile price card) */}
-      {children}
-
-      {/* Description */}
-      {isPending ? (
-        <div className="mt-8 space-y-3">
-          <Skeleton className="h-5 w-32" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-full" />
-          <Skeleton className="h-4 w-3/4" />
-        </div>
-      ) : (
-        <div className="mt-8">
-          <h2 className="text-lg font-semibold text-gray-900">
-            {descriptionHeading}
-          </h2>
-          <p className="mt-2 whitespace-pre-line text-gray-600 leading-relaxed">
+        <div className="mt-10">
+          <p className="whitespace-pre-line text-[17px] leading-relaxed text-stone-800 sm:text-[18px]">
             {displayDescription}
           </p>
         </div>
