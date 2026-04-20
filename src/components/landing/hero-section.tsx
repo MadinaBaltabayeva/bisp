@@ -1,60 +1,58 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Search, ShieldCheck, Users, Star } from "lucide-react";
+import { Search } from "lucide-react";
+import { LANDING_HERO } from "./assets";
 
 export function HeroSection() {
-  const t = useTranslations("HomePage");
-  return (
-    <section className="relative overflow-hidden bg-gradient-to-br from-amber-600 via-primary-700 to-orange-800">
-      {/* Decorative background circles */}
-      <div className="absolute inset-0 opacity-15">
-        <div className="absolute -top-24 -right-24 size-96 rounded-full bg-white" />
-        <div className="absolute -bottom-32 -left-32 size-80 rounded-full bg-white" />
-      </div>
+  const t = useTranslations("HomePage.hero");
 
-      <div className="relative mx-auto max-w-7xl px-4 py-16 sm:px-6 sm:py-24 lg:px-8 lg:py-28">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
-            {t("hero.title")}
+  return (
+    <section className="relative h-[440px] w-full overflow-hidden sm:h-[520px]">
+      <Image
+        src={LANDING_HERO}
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
+      />
+
+      {/* Dark overlay for text legibility */}
+      <div
+        aria-hidden
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(to bottom right, rgba(20,20,18,0.55) 0%, rgba(20,20,18,0.15) 55%, rgba(20,20,18,0) 100%)",
+        }}
+      />
+
+      <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="max-w-xl text-white">
+          <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary-200/90">
+            {t("kicker")}
+          </div>
+          <h1 className="mt-3 font-serif text-4xl font-normal leading-[1.05] tracking-tight sm:text-5xl lg:text-[52px]">
+            {t("title")}
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-amber-100 sm:text-xl">
-            {t("hero.subtitle")}
+          <p className="mt-5 max-w-md text-base leading-relaxed text-white/90 sm:text-[15px]">
+            {t("subtitle")}
           </p>
 
-          {/* Search bar */}
-          <div className="mx-auto mt-10 max-w-2xl">
+          <div className="mt-8 max-w-md">
             <Link
               href="/#categories"
-              className="flex items-center gap-3 rounded-2xl bg-white/95 px-5 py-4 shadow-warm-lg backdrop-blur-sm transition-all hover:bg-white hover:shadow-warm-xl"
+              className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-sm text-stone-600 shadow-warm-lg transition-shadow hover:shadow-warm-xl"
             >
-              <Search className="size-5 shrink-0 text-primary-600" />
-              <span className="text-left text-base text-stone-400">
-                {t("hero.browseItems")}
-              </span>
-              <span className="ml-auto hidden shrink-0 rounded-lg bg-primary-50 px-3 py-1.5 text-xs font-semibold text-primary-700 sm:inline-block">
-                {t("hero.listYourItem")}
+              <Search className="size-4 shrink-0 text-stone-500" />
+              <span className="truncate">{t("searchPlaceholder")}</span>
+              <span className="ml-auto shrink-0 rounded-sm bg-stone-900 px-2.5 py-1 text-xs font-medium text-white">
+                {t("browseItems")}
               </span>
             </Link>
-          </div>
-
-          {/* Trust indicators */}
-          <div className="mx-auto mt-8 flex flex-wrap items-center justify-center gap-6 text-sm text-amber-100">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="size-4" />
-              <span>Verified Users</span>
-            </div>
-            <div className="hidden h-4 w-px bg-amber-200/30 sm:block" />
-            <div className="flex items-center gap-2">
-              <Users className="size-4" />
-              <span>Active Community</span>
-            </div>
-            <div className="hidden h-4 w-px bg-amber-200/30 sm:block" />
-            <div className="flex items-center gap-2">
-              <Star className="size-4" />
-              <span>Top Rated</span>
-            </div>
           </div>
         </div>
       </div>
