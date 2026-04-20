@@ -269,7 +269,21 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
         {/* Facts column */}
         <div className="md:col-span-2">
-          <h1 className="font-serif text-3xl font-medium tracking-tight text-stone-900 sm:text-[32px]">
+          <div className="flex items-center justify-end gap-2 text-stone-500">
+            <FavoriteButton
+              listingId={listing.id}
+              isFavorited={isFavorited}
+              isAuthenticated={!!session}
+              className="text-stone-500 hover:text-red-500"
+            />
+            <ShareButton
+              title={displayTitle}
+              text={shareText}
+              url={shareUrl}
+            />
+          </div>
+
+          <h1 className="mt-3 font-serif text-3xl font-medium tracking-tight text-stone-900 sm:text-[32px]">
             {displayTitle}
           </h1>
 
@@ -335,21 +349,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             )}
           </dl>
 
-          <div className="mt-6 flex items-center gap-2 text-stone-500">
-            <FavoriteButton
-              listingId={listing.id}
-              isFavorited={isFavorited}
-              isAuthenticated={!!session}
-              className="text-stone-500 hover:text-red-500"
-            />
-            <ShareButton
-              title={displayTitle}
-              text={shareText}
-              url={shareUrl}
-            />
-          </div>
-
-          <div className="mt-6 border-t border-stone-200 pt-6">
+          <div className="mt-6">
             <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-stone-500">
               {t("listedBy")}
             </div>
