@@ -5,11 +5,8 @@ import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import {
-  MapPin,
   ShieldCheck,
-  Tag,
   AlertTriangle,
-  Calendar,
   Star,
   Pencil,
   XCircle,
@@ -32,17 +29,10 @@ import { MessageOwnerButton } from "@/components/messages/message-owner-button";
 import { FavoriteButton } from "@/components/favorites/favorite-button";
 import { ShareButton } from "@/components/listings/share-button";
 import { SimilarListings } from "@/components/listings/similar-listings";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { VerificationBadge } from "@/components/profile/verification-badge";
 import { ReputationBadges } from "@/components/profile/reputation-badge";
 import { getUserBadges } from "@/features/badges/queries";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
 import { TrackListingView } from "@/components/analytics/track-event";
 
 interface PageProps {
@@ -77,6 +67,14 @@ const CONDITION_KEYS: Record<string, string> = {
   fair: "fair",
   poor: "poor",
 };
+
+function SectionKicker({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-stone-500">
+      {children}
+    </div>
+  );
+}
 
 export default async function ListingDetailPage({ params }: PageProps) {
   const { id, locale: rawLocale } = await params;
@@ -172,20 +170,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
       return (
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-md text-center">
-            <Card className="shadow-warm-md border-stone-200/80 rounded-2xl">
-              <CardContent className="py-12">
-                <AlertTriangle className="mx-auto size-12 text-yellow-500" />
-                <h1 className="mt-4 text-xl font-semibold text-stone-900">
-                  {listing.title}
-                </h1>
-                <p className="mt-2 text-muted-foreground">
-                  {ta("unavailableBanner")}
-                </p>
-                <Button asChild className="mt-6" variant="outline">
-                  <Link href="/browse">{t("requestRental")}</Link>
-                </Button>
-              </CardContent>
-            </Card>
+            <AlertTriangle className="mx-auto size-10 text-stone-500" />
+            <h1 className="mt-4 font-serif text-2xl font-medium tracking-tight text-stone-900">
+              {listing.title}
+            </h1>
+            <p className="mt-2 text-[14px] text-stone-600">
+              {ta("unavailableBanner")}
+            </p>
+            <Button asChild className="mt-6" variant="outline">
+              <Link href="/browse">{t("requestRental")}</Link>
+            </Button>
           </div>
         </div>
       );
@@ -231,15 +225,16 @@ export default async function ListingDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {!isOwner && <TrackListingView listingId={listing.id} />}
+
       {/* Rejected banner (owner only) */}
       {isRejected && isOwner && (
-        <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-800 shadow-warm-xs">
+        <div className="mb-6 border-l-2 border-stone-900 bg-stone-100/80 px-4 py-3 text-[14px] text-stone-800">
           <div className="flex items-center gap-2 font-medium">
             <XCircle className="size-4 shrink-0" />
             {t("rejected")}
           </div>
           {rejectionReason && (
-            <p className="mt-1 ml-6 text-red-700">
+            <p className="mt-1 ml-6 text-stone-600">
               {t("rejectionReason", { reason: rejectionReason })}
             </p>
           )}
@@ -248,17 +243,21 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       {/* Under review banner */}
       {isUnderReview && (
-        <div className="mb-6 flex items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50/80 px-4 py-3 text-sm text-yellow-800 shadow-warm-xs">
-          <AlertTriangle className="size-4 shrink-0" />
-          {t("underReview")}
+        <div className="mb-6 border-l-2 border-stone-900 bg-stone-100/80 px-4 py-3 text-[14px] text-stone-800">
+          <div className="flex items-center gap-2 font-medium">
+            <AlertTriangle className="size-4 shrink-0" />
+            {t("underReview")}
+          </div>
         </div>
       )}
 
       {/* Unavailable banner (for owner/participants who can still view) */}
       {isUnavailable && (
-        <div className="mb-6 flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50/80 px-4 py-3 text-sm text-orange-800 shadow-warm-xs">
-          <AlertTriangle className="size-4 shrink-0" />
-          {ta("unavailableBanner")}
+        <div className="mb-6 border-l-2 border-stone-900 bg-stone-100/80 px-4 py-3 text-[14px] text-stone-800">
+          <div className="flex items-center gap-2 font-medium">
+            <AlertTriangle className="size-4 shrink-0" />
+            {ta("unavailableBanner")}
+          </div>
         </div>
       )}
 
@@ -275,7 +274,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
             title={listing.title}
           />
 
-          {/* Title + Favorite + Share buttons */}
+          {/* Title + meta + actions */}
           {aiEnabled ? (
             <TranslationBanner
               listingId={listing.id}
@@ -287,48 +286,43 @@ export default async function ListingDetailPage({ params }: PageProps) {
               aiEnabled={aiEnabled}
             >
               {/* Action buttons row */}
-              <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full bg-gray-100">
-                  <FavoriteButton
-                    listingId={listing.id}
-                    isFavorited={isFavorited}
-                    isAuthenticated={!!session}
-                    className="text-gray-600 hover:text-red-500"
-                  />
-                </div>
+              <div className="mt-4 flex items-center gap-2">
+                <FavoriteButton
+                  listingId={listing.id}
+                  isFavorited={isFavorited}
+                  isAuthenticated={!!session}
+                  className="text-stone-600 hover:text-red-500"
+                />
                 <ShareButton
                   title={listing.title}
                   text={shareText}
                   url={shareUrl}
                 />
               </div>
-              {/* Badges row */}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="bg-primary-50 text-primary-700 border-0">{listing.category.name}</Badge>
-                <Badge variant="outline">
-                  {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm text-stone-500">
-                  <MapPin className="size-3.5" />
-                  {listing.location}
-                </div>
+              {/* Meta row */}
+              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-stone-500">
+                <span>{listing.category.name}</span>
+                <span aria-hidden>·</span>
+                <span>{tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}</span>
+                <span aria-hidden>·</span>
+                <span>{listing.location}</span>
                 {listing.aiVerified && (
-                  <Badge className="bg-green-600 text-white hover:bg-green-700">
-                    <ShieldCheck className="size-3" />
-                    {t("aiVerified")}
-                  </Badge>
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="inline-flex items-center gap-1 text-stone-700">
+                      <ShieldCheck className="size-3.5" />
+                      {t("aiVerified")}
+                    </span>
+                  </>
                 )}
               </div>
               {/* Tags */}
               {tags.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600"
-                    >
-                      <Tag className="size-3" />
-                      {tag}
+                <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-stone-500">
+                  {tags.map((tag, i) => (
+                    <span key={tag} className="inline-flex items-center">
+                      {i > 0 && <span aria-hidden className="mr-3 text-stone-300">/</span>}
+                      <span>#{tag}</span>
                     </span>
                   ))}
                 </div>
@@ -341,52 +335,47 @@ export default async function ListingDetailPage({ params }: PageProps) {
           ) : (
             <>
               {/* Title */}
-              <h1 className="mt-6 text-2xl font-bold text-stone-900 sm:text-3xl">
+              <h1 className="mt-6 font-serif text-3xl font-medium tracking-tight text-stone-900 sm:text-4xl">
                 {listing.title}
               </h1>
+              {/* Meta row */}
+              <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-[14px] text-stone-500">
+                <span>{listing.category.name}</span>
+                <span aria-hidden>·</span>
+                <span>{tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}</span>
+                <span aria-hidden>·</span>
+                <span>{listing.location}</span>
+                {listing.aiVerified && (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span className="inline-flex items-center gap-1 text-stone-700">
+                      <ShieldCheck className="size-3.5" />
+                      {t("aiVerified")}
+                    </span>
+                  </>
+                )}
+              </div>
               {/* Action buttons row */}
-              <div className="mt-3 flex items-center gap-2">
-                <div className="rounded-full bg-gray-100">
-                  <FavoriteButton
-                    listingId={listing.id}
-                    isFavorited={isFavorited}
-                    isAuthenticated={!!session}
-                    className="text-gray-600 hover:text-red-500"
-                  />
-                </div>
+              <div className="mt-4 flex items-center gap-2">
+                <FavoriteButton
+                  listingId={listing.id}
+                  isFavorited={isFavorited}
+                  isAuthenticated={!!session}
+                  className="text-stone-600 hover:text-red-500"
+                />
                 <ShareButton
                   title={listing.title}
                   text={shareText}
                   url={shareUrl}
                 />
               </div>
-              {/* Badges row */}
-              <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary" className="bg-primary-50 text-primary-700 border-0">{listing.category.name}</Badge>
-                <Badge variant="outline">
-                  {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
-                </Badge>
-                <div className="flex items-center gap-1 text-sm text-stone-500">
-                  <MapPin className="size-3.5" />
-                  {listing.location}
-                </div>
-                {listing.aiVerified && (
-                  <Badge className="bg-green-600 text-white hover:bg-green-700">
-                    <ShieldCheck className="size-3" />
-                    {t("aiVerified")}
-                  </Badge>
-                )}
-              </div>
               {/* Tags */}
               {tags.length > 0 && (
-                <div className="mt-4 flex flex-wrap gap-1.5">
-                  {tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600"
-                    >
-                      <Tag className="size-3" />
-                      {tag}
+                <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-[13px] text-stone-500">
+                  {tags.map((tag, i) => (
+                    <span key={tag} className="inline-flex items-center">
+                      {i > 0 && <span aria-hidden className="mr-3 text-stone-300">/</span>}
+                      <span>#{tag}</span>
                     </span>
                   ))}
                 </div>
@@ -396,11 +385,9 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} blockedDates={blockedDates} existingRental={existingRental} />
               </div>
               {/* Description */}
-              <div className="mt-8">
-                <h2 className="text-lg font-semibold text-stone-900">
-                  {t("description")}
-                </h2>
-                <p className="mt-2 whitespace-pre-line text-stone-600 leading-relaxed">
+              <div className="mt-10">
+                <SectionKicker>{t("description")}</SectionKicker>
+                <p className="mt-4 whitespace-pre-line text-[16px] leading-relaxed text-stone-700">
                   {listing.description}
                 </p>
               </div>
@@ -408,11 +395,9 @@ export default async function ListingDetailPage({ params }: PageProps) {
           )}
 
           {/* Owner section */}
-          <div className="mt-8 border-stone-200 border-t pt-8">
-            <h2 className="text-lg font-semibold text-stone-900">
-              {t("listedBy")}
-            </h2>
-            <div className="mt-4 flex items-center gap-4">
+          <div className="mt-12 border-t border-stone-200 pt-10">
+            <SectionKicker>{t("listedBy")}</SectionKicker>
+            <div className="mt-5 flex items-center gap-4">
               <div className="relative size-12 overflow-hidden rounded-full bg-stone-200">
                 {listing.owner.image ? (
                   <Image
@@ -432,28 +417,28 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 <div className="flex items-center gap-1.5">
                   <Link
                     href={`/profiles/${listing.owner.id}`}
-                    className="font-medium text-stone-800 hover:text-primary transition-colors hover:underline"
+                    className="text-[16px] font-medium text-stone-900 hover:underline underline-offset-4"
                   >
                     {listing.owner.name}
                   </Link>
                   {listing.owner.idVerified && <VerificationBadge />}
                 </div>
                 {ownerBadges.length > 0 && (
-                  <div className="mt-1">
+                  <div className="mt-1.5">
                     <ReputationBadges badges={ownerBadges} />
                   </div>
                 )}
-                <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="size-3.5" />
-                    {t("memberSince", { date: memberSince })}
-                  </span>
+                <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-stone-500">
+                  <span>{t("memberSince", { date: memberSince })}</span>
                   {listing.owner.reviewCount > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
-                      {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
-                      {listing.owner.reviewCount === 1 ? "review" : "reviews"})
-                    </span>
+                    <>
+                      <span aria-hidden>·</span>
+                      <span className="inline-flex items-center gap-1">
+                        <Star className="size-3 fill-stone-700 text-stone-700" />
+                        {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
+                        {listing.owner.reviewCount === 1 ? "review" : "reviews"})
+                      </span>
+                    </>
                   )}
                 </div>
               </div>
@@ -461,35 +446,33 @@ export default async function ListingDetailPage({ params }: PageProps) {
           </div>
 
           {/* Owner Reviews section */}
-          <div className="mt-8 border-stone-200 border-t pt-8">
-            <h2 className="text-lg font-semibold text-stone-900">
-              {t("ownerReviews")}
+          <div className="mt-12 border-t border-stone-200 pt-10">
+            <div className="flex items-baseline gap-3">
+              <SectionKicker>{t("ownerReviews")}</SectionKicker>
               {listingReviews.length > 0 && (
-                <span className="ml-2 text-sm font-normal text-muted-foreground">
-                  ({listingReviews.length})
-                </span>
+                <span className="text-[12px] text-stone-400">{listingReviews.length}</span>
               )}
-            </h2>
+            </div>
             {listingReviews.length > 0 ? (
-              <div className="mt-2 divide-y">
+              <div className="mt-6 divide-y divide-stone-200">
                 {listingReviews.map((review) => (
                   <ReviewCard key={review.id} review={review} />
                 ))}
               </div>
             ) : (
-              <p className="mt-4 text-sm text-muted-foreground">
-                {t("noReviews")}
-              </p>
+              <p className="mt-4 text-[14px] text-stone-500">{t("noReviews")}</p>
             )}
           </div>
 
           {/* Similar listings section */}
-          <SimilarListings
-            listingId={listing.id}
-            categoryId={listing.categoryId}
-            favoriteIds={favoriteIds}
-            isAuthenticated={!!session}
-          />
+          <div className="mt-16">
+            <SimilarListings
+              listingId={listing.id}
+              categoryId={listing.categoryId}
+              favoriteIds={favoriteIds}
+              isAuthenticated={!!session}
+            />
+          </div>
         </div>
 
         {/* === Right column (desktop only) - sticky price card === */}
@@ -543,16 +526,16 @@ async function PriceCard({
   const t = await getTranslations("Listings.detail");
 
   return (
-    <Card className="shadow-warm-md border-stone-200/80 rounded-2xl overflow-hidden">
-      <CardHeader className="bg-gradient-to-br from-primary-50/50 to-stone-50 pb-4">
+    <div className="rounded-md border border-stone-200 bg-white">
+      <div className="border-b border-stone-200 p-6">
         <PriceDisplay
           priceHourly={listing.priceHourly}
           priceDaily={listing.priceDaily}
           priceWeekly={listing.priceWeekly}
           priceMonthly={listing.priceMonthly}
         />
-      </CardHeader>
-      <CardContent>
+      </div>
+      <div className="p-6">
         {isOwner ? (
           <Button asChild className="w-full" size="lg">
             <Link href={`/listings/${listing.id}/edit`}>
@@ -561,7 +544,7 @@ async function PriceCard({
             </Link>
           </Button>
         ) : hideRentalForm ? (
-          <p className="text-center text-sm text-muted-foreground">
+          <p className="text-center text-[13px] text-stone-500">
             {t("notChargedYet")}
           </p>
         ) : (
@@ -579,14 +562,10 @@ async function PriceCard({
             <MessageOwnerButton listingId={listing.id} />
           </div>
         )}
-      </CardContent>
-      <CardFooter className="justify-center">
-        <p className="text-xs text-muted-foreground">
-          {isOwner
-            ? t("youOwnThis")
-            : t("notChargedYet")}
-        </p>
-      </CardFooter>
-    </Card>
+      </div>
+      <div className="border-t border-stone-200 px-6 py-3 text-center text-[12px] text-stone-500">
+        {isOwner ? t("youOwnThis") : t("notChargedYet")}
+      </div>
+    </div>
   );
 }
