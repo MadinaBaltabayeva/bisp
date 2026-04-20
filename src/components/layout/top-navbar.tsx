@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link, useRouter } from "@/i18n/navigation";
+import { Link, useRouter, usePathname } from "@/i18n/navigation";
 import {
   LogOut,
   User,
@@ -17,6 +17,7 @@ import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -44,6 +45,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
   const t = useTranslations("Navigation");
   const { data: session } = authClient.useSession();
   const router = useRouter();
+  const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
   const badgeCounts = useBadgeCounts();
 
@@ -62,12 +64,15 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
     });
   };
 
+  const isActive = (href: string) =>
+    href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(href + "/");
+
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-stone-200 bg-white">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+    <header className="sticky top-0 z-40 w-full border-b border-stone-200 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
         <Logo />
 
-        <nav className="hidden md:flex items-center gap-6 text-[13px] text-stone-600">
+        <nav className="hidden md:flex items-center gap-7 text-[13.5px] text-stone-600">
           {NAV_LINKS.filter((link) => link.public || (mounted && session)).map((link) => {
             const badgeCount =
               "badgeKey" in link && link.badgeKey === "rentals"
@@ -75,14 +80,26 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                 : "badgeKey" in link && link.badgeKey === "messages"
                   ? badgeCounts.messages
                   : 0;
+            const active = isActive(link.href);
 
             return (
               <Link
                 key={link.href}
                 href={link.href}
-                className="relative hover:text-stone-900 hover:underline underline-offset-4"
+                className={cn(
+                  "relative inline-block py-1 transition-colors",
+                  active
+                    ? "font-medium text-stone-900"
+                    : "text-stone-600 hover:text-stone-900"
+                )}
               >
                 {t(link.labelKey)}
+                {active && (
+                  <span
+                    aria-hidden
+                    className="absolute inset-x-0 -bottom-[18px] h-[2px] bg-stone-900"
+                  />
+                )}
                 {badgeCount > 0 && (
                   <span className="absolute -right-2 -top-1">
                     <NavBadgeIndicator count={badgeCount} />
@@ -94,10 +111,18 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
           {mounted && session?.user?.role === "admin" && (
             <Link
               href="/admin/dashboard"
-              className="flex items-center gap-1 hover:text-stone-900 hover:underline underline-offset-4"
+              className={cn(
+                "relative inline-flex items-center gap-1 py-1 transition-colors",
+                isActive("/admin")
+                  ? "font-medium text-stone-900"
+                  : "text-stone-600 hover:text-stone-900"
+              )}
             >
               <Shield className="size-3.5" />
               {t("admin")}
+              {isActive("/admin") && (
+                <span aria-hidden className="absolute inset-x-0 -bottom-[18px] h-[2px] bg-stone-900" />
+              )}
             </Link>
           )}
         </nav>
@@ -162,22 +187,21 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
               </DropdownMenu>
             </>
           ) : (
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
                 onClick={() => onOpenAuthModal("login")}
+                className="rounded-full px-3.5 py-1.5 text-[13px] font-medium text-stone-700 hover:bg-stone-100 hover:text-stone-900 transition-colors"
               >
                 {t("logIn")}
-              </Button>
-              <Button
-                variant="default"
-                size="sm"
-                className="hidden sm:inline-flex"
+              </button>
+              <button
+                type="button"
                 onClick={() => onOpenAuthModal("signup")}
+                className="hidden sm:inline-flex rounded-full bg-stone-900 px-4 py-1.5 text-[13px] font-medium text-white hover:bg-stone-800 transition-colors"
               >
                 {t("signUp")}
-              </Button>
+              </button>
             </div>
           )}
         </div>
