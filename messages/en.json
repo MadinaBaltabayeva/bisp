@@ -123,7 +123,12 @@
     }
   },
   "Footer": {
-    "tagline": "Rentals, nearby."
+    "tagline": "A rental marketplace for the stuff you only need sometimes.",
+    "browse": "Browse",
+    "about": "About",
+    "allItems": "All items",
+    "howItWorks": "How it works",
+    "madeFor": "Made for neighbors."
   },
   "Auth": {
     "login": {
