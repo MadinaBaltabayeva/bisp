@@ -285,7 +285,8 @@
       "messageOwner": "Написать владельцу",
       "offeredBy": "Владелец —",
       "category": "Категория",
-      "verified": "Проверено"
+      "verified": "Проверено",
+      "ownerRating": "Рейтинг"
     },
     "status": {
       "active": "Активно",

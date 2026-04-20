@@ -285,7 +285,8 @@
       "messageOwner": "Egasiga xabar yuborish",
       "offeredBy": "Egasi —",
       "category": "Kategoriya",
-      "verified": "Tasdiqlangan"
+      "verified": "Tasdiqlangan",
+      "ownerRating": "Reyting"
     },
     "status": {
       "active": "Faol",

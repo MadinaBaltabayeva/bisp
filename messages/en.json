@@ -285,7 +285,8 @@
       "messageOwner": "Message Owner",
       "offeredBy": "Offered by",
       "category": "Category",
-      "verified": "Verified"
+      "verified": "Verified",
+      "ownerRating": "Rating"
     },
     "status": {
       "active": "Active",
