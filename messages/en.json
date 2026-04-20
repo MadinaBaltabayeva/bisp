@@ -283,7 +283,9 @@
       "notFound": "Listing Not Found",
       "noPhotos": "No photos",
       "messageOwner": "Message Owner",
-      "offeredBy": "Offered by"
+      "offeredBy": "Offered by",
+      "category": "Category",
+      "verified": "Verified"
     },
     "status": {
       "active": "Active",

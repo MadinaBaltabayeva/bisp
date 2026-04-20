@@ -283,7 +283,9 @@
       "notFound": "Eʼlon topilmadi",
       "noPhotos": "Rasmlar yoʻq",
       "messageOwner": "Egasiga xabar yuborish",
-      "offeredBy": "Egasi —"
+      "offeredBy": "Egasi —",
+      "category": "Kategoriya",
+      "verified": "Tasdiqlangan"
     },
     "status": {
       "active": "Faol",

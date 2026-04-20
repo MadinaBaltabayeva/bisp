@@ -283,7 +283,9 @@
       "notFound": "Объявление не найдено",
       "noPhotos": "Нет фотографий",
       "messageOwner": "Написать владельцу",
-      "offeredBy": "Владелец —"
+      "offeredBy": "Владелец —",
+      "category": "Категория",
+      "verified": "Проверено"
     },
     "status": {
       "active": "Активно",
