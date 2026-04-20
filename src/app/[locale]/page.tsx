@@ -69,7 +69,7 @@ export default async function Home({
             {listings.length > 0 && (
               <Link
                 href="/browse"
-                className="text-xs text-stone-600 underline-offset-4 hover:underline"
+                className="text-[14px] text-stone-600 underline-offset-4 hover:underline"
               >
                 {t("popular.viewAll")}
               </Link>
@@ -90,7 +90,7 @@ export default async function Home({
           ) : (
             <div className="flex flex-col items-center gap-3 py-16 text-stone-400">
               <ShoppingBag className="size-10" />
-              <p className="text-sm">{t("popular.comingSoon")}</p>
+              <p className="text-base">{t("popular.comingSoon")}</p>
             </div>
           )}
         </div>

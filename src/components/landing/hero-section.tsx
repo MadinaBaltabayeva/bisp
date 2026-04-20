@@ -41,18 +41,18 @@ export function HeroSection() {
 
       <div className="relative mx-auto flex h-full max-w-7xl items-center px-4 sm:px-6 lg:px-8">
         <div className="max-w-xl text-white">
-          <div className="text-[11px] font-medium uppercase tracking-[0.2em] text-primary-200/90">
+          <div className="text-[13px] font-medium uppercase tracking-[0.2em] text-primary-200/90">
             {t("kicker")}
           </div>
           <h1 className="mt-3 font-serif text-4xl font-normal leading-[1.05] tracking-tight sm:text-5xl lg:text-[52px]">
             {t("title")}
           </h1>
-          <p className="mt-5 max-w-md text-base leading-relaxed text-white/90 sm:text-[15px]">
+          <p className="mt-5 max-w-md text-[17px] leading-relaxed text-white/90 sm:text-lg">
             {t("subtitle")}
           </p>
 
           <form onSubmit={handleSubmit} className="mt-8 max-w-md" role="search">
-            <div className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-sm text-stone-600 shadow-warm-lg transition-shadow focus-within:shadow-warm-xl hover:shadow-warm-xl">
+            <div className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-base text-stone-600 shadow-warm-lg transition-shadow focus-within:shadow-warm-xl hover:shadow-warm-xl">
               <Search aria-hidden className="size-4 shrink-0 text-stone-500" />
               <input
                 type="search"
@@ -65,7 +65,7 @@ export function HeroSection() {
               />
               <button
                 type="submit"
-                className="ml-auto shrink-0 rounded-sm bg-stone-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-stone-800"
+                className="ml-auto shrink-0 rounded-sm bg-stone-900 px-2.5 py-1 text-[13px] font-medium text-white hover:bg-stone-800"
               >
                 {t("browseItems")}
               </button>

@@ -20,13 +20,13 @@ export function HowItWorks() {
         <div className="grid gap-10 sm:grid-cols-3 sm:gap-8">
           {steps.map((step) => (
             <div key={step.num}>
-              <div className="font-serif text-2xl font-medium text-primary-700">
+              <div className="font-serif text-3xl font-medium text-primary-700">
                 {step.num}
               </div>
-              <h3 className="mt-2 text-[14px] font-semibold text-stone-900">
+              <h3 className="mt-2 text-[17px] font-semibold text-stone-900">
                 {t(step.titleKey as Parameters<typeof t>[0])}
               </h3>
-              <p className="mt-1 text-[13px] leading-relaxed text-stone-600">
+              <p className="mt-1 text-[15px] leading-relaxed text-stone-600">
                 {t(step.bodyKey as Parameters<typeof t>[0])}
               </p>
             </div>

@@ -28,7 +28,7 @@ export function CategoryGrid() {
         <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 sm:text-[26px]">
           {tHome("title")}
         </h2>
-        <span className="text-xs text-stone-500">{tHome("meta")}</span>
+        <span className="text-[13px] text-stone-500">{tHome("meta")}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
@@ -58,7 +58,7 @@ export function CategoryGrid() {
                     "linear-gradient(to top, rgba(20,20,18,0.65) 0%, rgba(20,20,18,0) 100%)",
                 }}
               />
-              <span className="absolute left-3 bottom-2.5 text-[13px] font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
+              <span className="absolute left-3 bottom-2.5 text-[15px] font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
                 {tCat(translationKey as Parameters<typeof tCat>[0])}
               </span>
             </Link>
