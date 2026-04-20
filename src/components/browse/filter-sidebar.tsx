@@ -294,10 +294,8 @@ export function FilterSidebar(props: FilterSidebarProps) {
 
   return (
     <>
-      <aside className="hidden w-56 shrink-0 lg:block">
-        <div className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2">
-          <FilterContent {...props} />
-        </div>
+      <aside className="hidden w-56 shrink-0 self-start sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 lg:block">
+        <FilterContent {...props} />
       </aside>
 
       <div className="lg:hidden">
