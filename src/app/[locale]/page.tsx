@@ -5,6 +5,7 @@ import { routing } from "@/i18n/routing";
 
 import { HeroSection } from "@/components/landing/hero-section";
 import { CategoryGrid } from "@/components/landing/category-grid";
+import { HowItWorks } from "@/components/landing/how-it-works";
 import { ListingCard } from "@/components/listings/listing-card";
 import { prisma } from "@/lib/db";
 import { getSession } from "@/features/auth/queries";
@@ -49,7 +50,6 @@ export default async function Home({
     getSession(),
   ]);
 
-  // Fetch favorite IDs for the current user
   let favoriteIds: Set<string> = new Set();
   if (session) {
     favoriteIds = await getUserFavoriteIds(session.user.id);
@@ -60,17 +60,16 @@ export default async function Home({
       <HeroSection />
       <CategoryGrid />
 
-      {/* Popular Items */}
-      <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-stone-50 p-6 sm:p-8 lg:p-10">
-          <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-stone-800 sm:text-3xl">
+      <section className="mx-auto max-w-7xl px-4 pt-6 pb-16 sm:px-6 lg:px-8">
+        <div className="border-t border-stone-200 pt-10">
+          <div className="mb-8 flex items-baseline justify-between">
+            <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 sm:text-[26px]">
               {t("popular.title")}
             </h2>
             {listings.length > 0 && (
               <Link
                 href="/browse"
-                className="text-sm font-medium text-primary-600 hover:text-primary-700 hover:underline"
+                className="text-xs text-stone-600 underline-offset-4 hover:underline"
               >
                 {t("popular.viewAll")}
               </Link>
@@ -78,7 +77,7 @@ export default async function Home({
           </div>
 
           {listings.length > 0 ? (
-            <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {listings.map((listing) => (
                 <ListingCard
                   key={listing.id}
@@ -89,13 +88,15 @@ export default async function Home({
               ))}
             </div>
           ) : (
-            <div className="mt-8 flex flex-col items-center gap-3 rounded-xl border border-dashed border-stone-300 py-16 text-stone-400">
+            <div className="flex flex-col items-center gap-3 py-16 text-stone-400">
               <ShoppingBag className="size-10" />
               <p className="text-sm">{t("popular.comingSoon")}</p>
             </div>
           )}
         </div>
       </section>
+
+      <HowItWorks />
     </>
   );
 }
