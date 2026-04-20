@@ -95,12 +95,11 @@
       "title": "Kerakli narsangizni — qoʻshningizdan ijaraga oling.",
       "subtitle": "Drellardan barabanlargacha. Qoʻshningizdan olib turing, ishlatgach qaytaring.",
       "searchPlaceholder": "Drel, kolonka, chodir qidiring…",
-      "browseItems": "Koʻrish",
-      "listYourItem": "Buyumingizni joylashtiring"
+      "browseItems": "Koʻrish"
     },
     "categories": {
       "title": "Kategoriya boʻyicha",
-      "meta": "{count, plural, =0 {8 kategoriya} other {8 kategoriya · # ta buyum}}"
+      "meta": "8 kategoriya"
     },
     "popular": {
       "title": "Yaqin atrofda mashhur",

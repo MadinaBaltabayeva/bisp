@@ -95,12 +95,11 @@
       "title": "Rent what you need, nearby.",
       "subtitle": "From drills to drum kits. Pick it up from someone on your street, return it when you're done.",
       "searchPlaceholder": "Search drills, speakers, tents…",
-      "browseItems": "Browse",
-      "listYourItem": "List your item"
+      "browseItems": "Browse"
     },
     "categories": {
       "title": "Browse by category",
-      "meta": "{count, plural, =0 {8 categories} one {8 categories · # item} other {8 categories · # items}}"
+      "meta": "8 categories"
     },
     "popular": {
       "title": "Popular nearby",
