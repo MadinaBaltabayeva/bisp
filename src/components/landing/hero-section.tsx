@@ -2,12 +2,21 @@
 
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { Search } from "lucide-react";
+import { type FormEvent, useState } from "react";
 import { LANDING_HERO } from "./assets";
 
 export function HeroSection() {
   const t = useTranslations("HomePage.hero");
+  const router = useRouter();
+  const [query, setQuery] = useState("");
+
+  function handleSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const trimmed = query.trim();
+    router.push(trimmed ? `/browse?q=${encodeURIComponent(trimmed)}` : "/browse");
+  }
 
   return (
     <section className="relative h-[440px] w-full overflow-hidden sm:h-[520px]">
@@ -42,19 +51,26 @@ export function HeroSection() {
             {t("subtitle")}
           </p>
 
-          <div className="mt-8 max-w-md">
-            <Link
-              href="/#categories"
-              aria-label={t("browseItems")}
-              className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-sm text-stone-600 shadow-warm-lg transition-shadow hover:shadow-warm-xl"
-            >
-              <Search className="size-4 shrink-0 text-stone-500" />
-              <span className="truncate">{t("searchPlaceholder")}</span>
-              <span className="ml-auto shrink-0 rounded-sm bg-stone-900 px-2.5 py-1 text-xs font-medium text-white">
+          <form onSubmit={handleSubmit} className="mt-8 max-w-md" role="search">
+            <div className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-sm text-stone-600 shadow-warm-lg transition-shadow focus-within:shadow-warm-xl hover:shadow-warm-xl">
+              <Search aria-hidden className="size-4 shrink-0 text-stone-500" />
+              <input
+                type="search"
+                name="q"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={t("searchPlaceholder")}
+                aria-label={t("searchPlaceholder")}
+                className="min-w-0 flex-1 bg-transparent text-stone-900 placeholder:text-stone-400 outline-none"
+              />
+              <button
+                type="submit"
+                className="ml-auto shrink-0 rounded-sm bg-stone-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-stone-800"
+              >
                 {t("browseItems")}
-              </span>
-            </Link>
-          </div>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </section>

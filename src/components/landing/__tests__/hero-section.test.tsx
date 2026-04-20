@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import { HeroSection } from "../hero-section";
 
 vi.mock("next-intl", () => ({
@@ -15,12 +15,14 @@ vi.mock("next-intl", () => ({
   },
 }));
 
+const pushMock = vi.fn();
 vi.mock("@/i18n/navigation", () => ({
   Link: ({ children, href, ...props }: React.PropsWithChildren<{ href: string }>) => (
     <a href={href} {...props}>
       {children}
     </a>
   ),
+  useRouter: () => ({ push: pushMock }),
 }));
 
 vi.mock("next/image", () => ({
@@ -61,5 +63,22 @@ describe("HeroSection", () => {
     render(<HeroSection />);
     const h1 = screen.getByRole("heading", { level: 1 });
     expect(h1.className).toMatch(/font-serif/);
+  });
+
+  it("submits search to /browse?q=... when user types and submits", async () => {
+    pushMock.mockClear();
+    render(<HeroSection />);
+    const input = screen.getByRole("searchbox");
+    fireEvent.change(input, { target: { value: "  power drill  " } });
+    fireEvent.submit(input.closest("form")!);
+    expect(pushMock).toHaveBeenCalledWith("/browse?q=power%20drill");
+  });
+
+  it("submits to /browse with no query when input is empty", () => {
+    pushMock.mockClear();
+    render(<HeroSection />);
+    const form = screen.getByRole("search");
+    form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
+    expect(pushMock).toHaveBeenCalledWith("/browse");
   });
 });
