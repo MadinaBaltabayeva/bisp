@@ -3,8 +3,8 @@
 import { useOptimistic, useTransition } from "react";
 import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/navigation";
 import { toggleFavorite } from "@/features/favorites/actions";
+import { useAuthModal } from "@/components/auth/auth-modal-context";
 import { cn } from "@/lib/utils";
 
 interface FavoriteButtonProps {
@@ -21,7 +21,7 @@ export function FavoriteButton({
   className,
 }: FavoriteButtonProps) {
   const t = useTranslations("Favorites");
-  const router = useRouter();
+  const authModal = useAuthModal();
   const [isPending, startTransition] = useTransition();
   const [optimisticFavorited, setOptimisticFavorited] =
     useOptimistic(isFavorited);
@@ -31,7 +31,7 @@ export function FavoriteButton({
     e.stopPropagation();
 
     if (!isAuthenticated) {
-      router.push("/login");
+      authModal?.open("login");
       return;
     }
 
