@@ -19,7 +19,6 @@ import { getListingById, getCachedTranslation } from "@/features/listings/querie
 import { getSession } from "@/features/auth/queries";
 import { getReviewsForListing } from "@/features/reviews/queries";
 import { getBookedDates, getExistingRentalForListing } from "@/features/rentals/queries";
-import { getBlockedDatesForListing } from "@/features/availability/queries";
 import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { isAIEnabled } from "@/lib/openai";
 import { prisma } from "@/lib/db";
@@ -82,12 +81,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const locale = rawLocale as (typeof routing.locales)[number];
   setRequestLocale(locale);
 
-  const [listing, session, listingReviews, bookedDatesRaw, blockedDatesRaw, t, tc, ta] = await Promise.all([
+  const [listing, session, listingReviews, bookedDatesRaw, t, tc, ta] = await Promise.all([
     getListingById(id),
     getSession(),
     getReviewsForListing(id),
     getBookedDates(id),
-    getBlockedDatesForListing(id),
     getTranslations("Listings.detail"),
     getTranslations("Conditions"),
     getTranslations("Listings.availability"),
@@ -103,11 +101,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
     startDate: bd.startDate.toISOString(),
     endDate: bd.endDate.toISOString(),
     status: bd.status,
-  }));
-
-  const blockedDates = blockedDatesRaw.map((bd) => ({
-    startDate: bd.startDate.toISOString(),
-    endDate: bd.endDate.toISOString(),
   }));
 
   const existingRental = existingRentalRaw
@@ -333,7 +326,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} blockedDates={blockedDates} existingRental={existingRental} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
               </div>
             </TranslationBanner>
           ) : (
@@ -391,7 +384,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} blockedDates={blockedDates} existingRental={existingRental} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
               </div>
               {/* Description */}
               <div className="mt-8">
@@ -498,7 +491,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
               isOwner={isOwner}
               hideRentalForm={hideRentalForm}
               bookedDates={bookedDates}
-              blockedDates={blockedDates}
               existingRental={existingRental}
             />
           </div>
@@ -515,7 +507,6 @@ async function PriceCard({
   isOwner,
   hideRentalForm = false,
   bookedDates,
-  blockedDates,
   existingRental,
 }: {
   listing: {
@@ -528,7 +519,6 @@ async function PriceCard({
   isOwner: boolean;
   hideRentalForm?: boolean;
   bookedDates: { startDate: string; endDate: string; status: string }[];
-  blockedDates: { startDate: string; endDate: string }[];
   existingRental: {
     id: string;
     status: string;
@@ -571,7 +561,6 @@ async function PriceCard({
               priceWeekly={listing.priceWeekly}
               priceMonthly={listing.priceMonthly}
               bookedDates={bookedDates}
-              blockedDates={blockedDates}
               existingRental={existingRental}
             />
             <MessageOwnerButton listingId={listing.id} />
