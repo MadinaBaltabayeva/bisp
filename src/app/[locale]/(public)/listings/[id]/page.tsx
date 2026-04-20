@@ -19,6 +19,7 @@ import { getListingById, getCachedTranslation } from "@/features/listings/querie
 import { getSession } from "@/features/auth/queries";
 import { getReviewsForListing } from "@/features/reviews/queries";
 import { getBookedDates, getExistingRentalForListing } from "@/features/rentals/queries";
+import { getBlockedDatesForListing } from "@/features/availability/queries";
 import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { isAIEnabled } from "@/lib/openai";
 import { prisma } from "@/lib/db";
@@ -42,6 +43,7 @@ import {
   CardFooter,
   CardHeader,
 } from "@/components/ui/card";
+import { TrackListingView } from "@/components/analytics/track-event";
 
 interface PageProps {
   params: Promise<{ id: string; locale: string }>;
@@ -81,11 +83,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
   const locale = rawLocale as (typeof routing.locales)[number];
   setRequestLocale(locale);
 
-  const [listing, session, listingReviews, bookedDatesRaw, t, tc, ta] = await Promise.all([
+  const [listing, session, listingReviews, bookedDatesRaw, blockedDatesRaw, t, tc, ta] = await Promise.all([
     getListingById(id),
     getSession(),
     getReviewsForListing(id),
     getBookedDates(id),
+    getBlockedDatesForListing(id),
     getTranslations("Listings.detail"),
     getTranslations("Conditions"),
     getTranslations("Listings.availability"),
@@ -101,6 +104,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
     startDate: bd.startDate.toISOString(),
     endDate: bd.endDate.toISOString(),
     status: bd.status,
+  }));
+
+  const blockedDates = blockedDatesRaw.map((bd) => ({
+    startDate: bd.startDate.toISOString(),
+    endDate: bd.endDate.toISOString(),
   }));
 
   const existingRental = existingRentalRaw
@@ -164,10 +172,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
       return (
         <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-md text-center">
-            <Card>
+            <Card className="shadow-warm-md border-stone-200/80 rounded-2xl">
               <CardContent className="py-12">
                 <AlertTriangle className="mx-auto size-12 text-yellow-500" />
-                <h1 className="mt-4 text-xl font-semibold text-gray-900">
+                <h1 className="mt-4 text-xl font-semibold text-stone-900">
                   {listing.title}
                 </h1>
                 <p className="mt-2 text-muted-foreground">
@@ -222,9 +230,10 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+      {!isOwner && <TrackListingView listingId={listing.id} />}
       {/* Rejected banner (owner only) */}
       {isRejected && isOwner && (
-        <div className="mb-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+        <div className="mb-6 rounded-xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-800 shadow-warm-xs">
           <div className="flex items-center gap-2 font-medium">
             <XCircle className="size-4 shrink-0" />
             {t("rejected")}
@@ -239,7 +248,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       {/* Under review banner */}
       {isUnderReview && (
-        <div className="mb-6 flex items-center gap-2 rounded-lg border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800">
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-yellow-200 bg-yellow-50/80 px-4 py-3 text-sm text-yellow-800 shadow-warm-xs">
           <AlertTriangle className="size-4 shrink-0" />
           {t("underReview")}
         </div>
@@ -247,7 +256,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       {/* Unavailable banner (for owner/participants who can still view) */}
       {isUnavailable && (
-        <div className="mb-6 flex items-center gap-2 rounded-lg border border-orange-300 bg-orange-50 px-4 py-3 text-sm text-orange-800">
+        <div className="mb-6 flex items-center gap-2 rounded-xl border border-orange-200 bg-orange-50/80 px-4 py-3 text-sm text-orange-800 shadow-warm-xs">
           <AlertTriangle className="size-4 shrink-0" />
           {ta("unavailableBanner")}
         </div>
@@ -295,11 +304,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
               {/* Badges row */}
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{listing.category.name}</Badge>
+                <Badge variant="secondary" className="bg-primary-50 text-primary-700 border-0">{listing.category.name}</Badge>
                 <Badge variant="outline">
                   {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
                 </Badge>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 text-sm text-stone-500">
                   <MapPin className="size-3.5" />
                   {listing.location}
                 </div>
@@ -316,7 +325,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-muted-foreground"
+                      className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600"
                     >
                       <Tag className="size-3" />
                       {tag}
@@ -326,13 +335,13 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} blockedDates={blockedDates} existingRental={existingRental} />
               </div>
             </TranslationBanner>
           ) : (
             <>
               {/* Title */}
-              <h1 className="mt-6 text-2xl font-bold text-gray-900 sm:text-3xl">
+              <h1 className="mt-6 text-2xl font-bold text-stone-900 sm:text-3xl">
                 {listing.title}
               </h1>
               {/* Action buttons row */}
@@ -353,11 +362,11 @@ export default async function ListingDetailPage({ params }: PageProps) {
               </div>
               {/* Badges row */}
               <div className="mt-3 flex flex-wrap items-center gap-2">
-                <Badge variant="secondary">{listing.category.name}</Badge>
+                <Badge variant="secondary" className="bg-primary-50 text-primary-700 border-0">{listing.category.name}</Badge>
                 <Badge variant="outline">
                   {tc(CONDITION_KEYS[listing.condition] as Parameters<typeof tc>[0]) || listing.condition}
                 </Badge>
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                <div className="flex items-center gap-1 text-sm text-stone-500">
                   <MapPin className="size-3.5" />
                   {listing.location}
                 </div>
@@ -374,7 +383,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                   {tags.map((tag) => (
                     <span
                       key={tag}
-                      className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs text-muted-foreground"
+                      className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-2.5 py-0.5 text-xs text-stone-600"
                     >
                       <Tag className="size-3" />
                       {tag}
@@ -384,14 +393,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
               )}
               {/* Mobile price card */}
               <div className="mt-6 lg:hidden">
-                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} existingRental={existingRental} />
+                <PriceCard listing={listing} isOwner={isOwner} hideRentalForm={hideRentalForm} bookedDates={bookedDates} blockedDates={blockedDates} existingRental={existingRental} />
               </div>
               {/* Description */}
               <div className="mt-8">
-                <h2 className="text-lg font-semibold text-gray-900">
+                <h2 className="text-lg font-semibold text-stone-900">
                   {t("description")}
                 </h2>
-                <p className="mt-2 whitespace-pre-line text-gray-600 leading-relaxed">
+                <p className="mt-2 whitespace-pre-line text-stone-600 leading-relaxed">
                   {listing.description}
                 </p>
               </div>
@@ -399,12 +408,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
           )}
 
           {/* Owner section */}
-          <div className="mt-8 border-t pt-8">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="mt-8 border-stone-200 border-t pt-8">
+            <h2 className="text-lg font-semibold text-stone-900">
               {t("listedBy")}
             </h2>
             <div className="mt-4 flex items-center gap-4">
-              <div className="relative size-12 overflow-hidden rounded-full bg-gray-200">
+              <div className="relative size-12 overflow-hidden rounded-full bg-stone-200">
                 {listing.owner.image ? (
                   <Image
                     src={listing.owner.image}
@@ -414,7 +423,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                     sizes="48px"
                   />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-lg font-medium text-gray-500">
+                  <div className="flex h-full w-full items-center justify-center text-lg font-medium text-stone-500">
                     {listing.owner.name.charAt(0).toUpperCase()}
                   </div>
                 )}
@@ -423,7 +432,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 <div className="flex items-center gap-1.5">
                   <Link
                     href={`/profiles/${listing.owner.id}`}
-                    className="font-medium text-gray-900 hover:text-primary transition-colors hover:underline"
+                    className="font-medium text-stone-800 hover:text-primary transition-colors hover:underline"
                   >
                     {listing.owner.name}
                   </Link>
@@ -452,8 +461,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
           </div>
 
           {/* Owner Reviews section */}
-          <div className="mt-8 border-t pt-8">
-            <h2 className="text-lg font-semibold text-gray-900">
+          <div className="mt-8 border-stone-200 border-t pt-8">
+            <h2 className="text-lg font-semibold text-stone-900">
               {t("ownerReviews")}
               {listingReviews.length > 0 && (
                 <span className="ml-2 text-sm font-normal text-muted-foreground">
@@ -491,6 +500,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
               isOwner={isOwner}
               hideRentalForm={hideRentalForm}
               bookedDates={bookedDates}
+              blockedDates={blockedDates}
               existingRental={existingRental}
             />
           </div>
@@ -507,6 +517,7 @@ async function PriceCard({
   isOwner,
   hideRentalForm = false,
   bookedDates,
+  blockedDates,
   existingRental,
 }: {
   listing: {
@@ -519,6 +530,7 @@ async function PriceCard({
   isOwner: boolean;
   hideRentalForm?: boolean;
   bookedDates: { startDate: string; endDate: string; status: string }[];
+  blockedDates: { startDate: string; endDate: string }[];
   existingRental: {
     id: string;
     status: string;
@@ -531,8 +543,8 @@ async function PriceCard({
   const t = await getTranslations("Listings.detail");
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="shadow-warm-md border-stone-200/80 rounded-2xl overflow-hidden">
+      <CardHeader className="bg-gradient-to-br from-primary-50/50 to-stone-50 pb-4">
         <PriceDisplay
           priceHourly={listing.priceHourly}
           priceDaily={listing.priceDaily}
@@ -561,6 +573,7 @@ async function PriceCard({
               priceWeekly={listing.priceWeekly}
               priceMonthly={listing.priceMonthly}
               bookedDates={bookedDates}
+              blockedDates={blockedDates}
               existingRental={existingRental}
             />
             <MessageOwnerButton listingId={listing.id} />
