@@ -248,8 +248,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
         </div>
       )}
 
-      <div className="md:grid md:grid-cols-5 md:gap-8 lg:gap-10">
-        <div className="md:col-span-3">
+      <div className="sm:grid sm:grid-cols-5 sm:gap-6 lg:gap-10">
+        <div className="sm:col-span-3">
           <div className="overflow-hidden rounded-[4px] bg-stone-100">
             <PhotoCarousel
               images={sortedImages.map((img) => ({ id: img.id, url: img.url }))}
@@ -365,8 +365,8 @@ export default async function ListingDetailPage({ params }: PageProps) {
           )}
         </div>
 
-        <aside className="mt-8 md:col-span-2 md:mt-0">
-          <div className="md:sticky md:top-20">
+        <aside className="mt-8 sm:col-span-2 sm:mt-0">
+          <div className="sm:sticky sm:top-20">
             <PriceCard
               listing={listing}
               isOwner={isOwner}
