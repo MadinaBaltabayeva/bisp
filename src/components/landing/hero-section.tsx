@@ -45,6 +45,7 @@ export function HeroSection() {
           <div className="mt-8 max-w-md">
             <Link
               href="/#categories"
+              aria-label="Browse categories"
               className="flex items-center gap-3 rounded-md bg-white px-4 py-3 text-sm text-stone-600 shadow-warm-lg transition-shadow hover:shadow-warm-xl"
             >
               <Search className="size-4 shrink-0 text-stone-500" />

@@ -25,10 +25,14 @@ vi.mock("@/i18n/navigation", () => ({
 
 vi.mock("next/image", () => ({
   __esModule: true,
-  default: (props: React.ImgHTMLAttributes<HTMLImageElement>) => {
+  default: ({
+    fill: _fill,
+    priority: _priority,
+    ...props
+  }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => (
     // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-    return <img {...props} />;
-  },
+    <img {...props} />
+  ),
 }));
 
 describe("HeroSection", () => {
