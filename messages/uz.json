@@ -122,6 +122,9 @@
       }
     }
   },
+  "Footer": {
+    "tagline": "Yaqin atrofdagi ijaralar."
+  },
   "Auth": {
     "login": {
       "title": "Xush kelibsiz",

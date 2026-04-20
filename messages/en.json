@@ -122,6 +122,9 @@
       }
     }
   },
+  "Footer": {
+    "tagline": "Rentals, nearby."
+  },
   "Auth": {
     "login": {
       "title": "Welcome back",
