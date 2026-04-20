@@ -10,7 +10,7 @@ import { useBadgeCounts, NavBadgeIndicator } from "./nav-badge";
 
 const TAB_ITEMS = [
   { href: "/", labelKey: "home", icon: House, public: true },
-  { href: "/#categories", labelKey: "browse", icon: Search, public: true },
+  { href: "/#categories", labelKey: "browse", icon: Search, public: false },
   { href: "/favorites", labelKey: "favorites", icon: Heart, public: false },
   { href: "/listings/new", labelKey: "list", icon: PlusCircle, public: false },
   { href: "/rentals", labelKey: "rentals", icon: Calendar, public: false },

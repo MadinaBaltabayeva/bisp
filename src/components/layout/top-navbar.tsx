@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const NAV_LINKS = [
-  { href: "/browse", labelKey: "browse", public: true },
+  { href: "/browse", labelKey: "browse", public: false },
   { href: "/favorites", labelKey: "favorites", public: false },
   { href: "/dashboard", labelKey: "dashboard", public: false },
   { href: "/listings/new", labelKey: "listItem", public: false },
