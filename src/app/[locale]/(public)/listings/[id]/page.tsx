@@ -348,6 +348,55 @@ export default async function ListingDetailPage({ params }: PageProps) {
               url={shareUrl}
             />
           </div>
+
+          <div className="mt-6 border-t border-stone-200 pt-6">
+            <div className="text-[11px] font-medium uppercase tracking-[0.15em] text-stone-500">
+              {t("listedBy")}
+            </div>
+            <div className="mt-3 flex items-start gap-3">
+              <div className="relative size-10 overflow-hidden rounded-full bg-stone-200 shrink-0">
+                {listing.owner.image ? (
+                  <Image
+                    src={listing.owner.image}
+                    alt={listing.owner.name}
+                    fill
+                    className="object-cover"
+                    sizes="40px"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-[14px] font-medium text-stone-500">
+                    {listing.owner.name.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+              <div className="min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <Link
+                    href={`/profiles/${listing.owner.id}`}
+                    className="truncate text-[14px] font-medium text-stone-900 hover:underline underline-offset-4"
+                  >
+                    {listing.owner.name}
+                  </Link>
+                  {listing.owner.idVerified && <VerificationBadge />}
+                </div>
+                <div className="mt-0.5 text-[12px] text-stone-500">
+                  {t("memberSince", { date: memberSince })}
+                </div>
+                {listing.owner.reviewCount > 0 && (
+                  <div className="mt-0.5 inline-flex items-center gap-1 text-[12px] text-stone-500">
+                    <Star className="size-3 fill-stone-700 text-stone-700" />
+                    {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
+                    {listing.owner.reviewCount === 1 ? "review" : "reviews"})
+                  </div>
+                )}
+                {ownerBadges.length > 0 && (
+                  <div className="mt-1.5">
+                    <ReputationBadges badges={ownerBadges} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -379,57 +428,6 @@ export default async function ListingDetailPage({ params }: PageProps) {
             {tags.map((tag) => `#${tag}`).join("  ·  ")}
           </p>
         )}
-      </div>
-
-      {/* Owner */}
-      <div className="mt-10 max-w-3xl border-t border-stone-200 pt-7">
-        <SectionKicker>{t("listedBy")}</SectionKicker>
-        <div className="mt-4 flex items-center gap-4">
-          <div className="relative size-14 overflow-hidden rounded-full bg-stone-200 shrink-0">
-            {listing.owner.image ? (
-              <Image
-                src={listing.owner.image}
-                alt={listing.owner.name}
-                fill
-                className="object-cover"
-                sizes="56px"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-[18px] font-medium text-stone-500">
-                {listing.owner.name.charAt(0).toUpperCase()}
-              </div>
-            )}
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <Link
-                href={`/profiles/${listing.owner.id}`}
-                className="text-[16px] font-medium text-stone-900 hover:underline underline-offset-4"
-              >
-                {listing.owner.name}
-              </Link>
-              {listing.owner.idVerified && <VerificationBadge />}
-            </div>
-            <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-stone-500">
-              <span>{t("memberSince", { date: memberSince })}</span>
-              {listing.owner.reviewCount > 0 && (
-                <>
-                  <span aria-hidden>·</span>
-                  <span className="inline-flex items-center gap-1">
-                    <Star className="size-3 fill-stone-700 text-stone-700" />
-                    {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount}{" "}
-                    {listing.owner.reviewCount === 1 ? "review" : "reviews"})
-                  </span>
-                </>
-              )}
-            </div>
-            {ownerBadges.length > 0 && (
-              <div className="mt-2">
-                <ReputationBadges badges={ownerBadges} />
-              </div>
-            )}
-          </div>
-        </div>
       </div>
 
       {/* Reviews */}
