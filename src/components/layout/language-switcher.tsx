@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -28,9 +29,25 @@ export function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   function switchLocale(nextLocale: (typeof routing.locales)[number]) {
     router.replace({ pathname }, { locale: nextLocale });
+  }
+
+  const code = LOCALE_CODES[locale] ?? locale.toUpperCase();
+
+  if (!mounted) {
+    return (
+      <Button variant="ghost" size="sm" className="gap-1.5" disabled aria-hidden>
+        <Globe className="size-4" />
+        <span className="text-xs font-medium">{code}</span>
+      </Button>
+    );
   }
 
   return (
@@ -38,9 +55,7 @@ export function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="sm" className="gap-1.5">
           <Globe className="size-4" />
-          <span className="text-xs font-medium">
-            {LOCALE_CODES[locale] ?? locale.toUpperCase()}
-          </span>
+          <span className="text-xs font-medium">{code}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-44">

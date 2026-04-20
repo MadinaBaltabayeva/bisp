@@ -4,11 +4,6 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
-  Search,
-  Heart,
-  PlusCircle,
-  Calendar,
-  MessageCircle,
   LogOut,
   User,
   Settings,
@@ -33,12 +28,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const NAV_LINKS = [
-  { href: "/", labelKey: "browse", icon: Search },
-  { href: "/favorites", labelKey: "favorites", icon: Heart },
-  { href: "/dashboard", labelKey: "dashboard", icon: BarChart3 },
-  { href: "/listings/new", labelKey: "listItem", icon: PlusCircle },
-  { href: "/rentals", labelKey: "myRentals", icon: Calendar },
-  { href: "/messages", labelKey: "messages", icon: MessageCircle },
+  { href: "/browse", labelKey: "browse" },
+  { href: "/favorites", labelKey: "favorites" },
+  { href: "/dashboard", labelKey: "dashboard" },
+  { href: "/listings/new", labelKey: "listItem" },
+  { href: "/rentals", labelKey: "myRentals", badgeKey: "rentals" as const },
+  { href: "/messages", labelKey: "messages", badgeKey: "messages" as const },
 ] as const;
 
 interface TopNavbarProps {
@@ -68,110 +63,106 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full border-b border-stone-200/60 bg-white/80 backdrop-blur-xl shadow-warm-sm">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo */}
+    <header className="sticky top-0 z-40 w-full border-b border-stone-200 bg-white">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
         <Logo />
 
-        {/* Desktop nav links */}
-        <nav className="hidden md:flex items-center gap-1">
-          <div className="flex items-center gap-0.5 rounded-full bg-stone-100/80 px-1.5 py-1">
-            {NAV_LINKS.map((link) => {
-              const badgeCount =
-                link.href === "/rentals"
-                  ? badgeCounts.rentals
-                  : link.href === "/messages"
-                    ? badgeCounts.messages
-                    : 0;
+        <nav className="hidden md:flex items-center gap-6 text-[13px] text-stone-600">
+          {NAV_LINKS.map((link) => {
+            const badgeCount =
+              "badgeKey" in link && link.badgeKey === "rentals"
+                ? badgeCounts.rentals
+                : "badgeKey" in link && link.badgeKey === "messages"
+                  ? badgeCounts.messages
+                  : 0;
 
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition-colors hover:bg-white hover:text-primary-700 hover:shadow-warm-xs"
-                >
-                  <span className="relative">
-                    <link.icon className="size-4" />
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="relative hover:text-stone-900 hover:underline underline-offset-4"
+              >
+                {t(link.labelKey)}
+                {badgeCount > 0 && (
+                  <span className="absolute -right-2 -top-1">
                     <NavBadgeIndicator count={badgeCount} />
                   </span>
-                  {t(link.labelKey)}
-                </Link>
-              );
-            })}
-            {mounted && session?.user?.role === "admin" && (
-              <Link
-                href="/admin/dashboard"
-                className="relative flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium text-stone-600 transition-colors hover:bg-white hover:text-primary-700 hover:shadow-warm-xs"
-              >
-                <Shield className="size-4" />
-                {t("admin")}
+                )}
               </Link>
-            )}
-          </div>
+            );
+          })}
+          {mounted && session?.user?.role === "admin" && (
+            <Link
+              href="/admin/dashboard"
+              className="flex items-center gap-1 hover:text-stone-900 hover:underline underline-offset-4"
+            >
+              <Shield className="size-3.5" />
+              {t("admin")}
+            </Link>
+          )}
         </nav>
 
-        {/* Right side: language + auth state */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <LanguageSwitcher />
           {!mounted ? (
-            <div className="h-8 w-8 animate-pulse rounded-full bg-stone-200" />
+            <div className="h-8 w-8 rounded-full bg-stone-100" />
           ) : session ? (
             <>
-            <NotificationBell />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-2 rounded-full outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2">
-                  <Avatar>
-                    <AvatarImage
-                      src={session.user.image || undefined}
-                      alt={session.user.name}
-                    />
-                    <AvatarFallback className="bg-primary-100 text-primary-700">
-                      {session.user.name?.charAt(0)?.toUpperCase() || "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col gap-1">
-                    <p className="text-sm font-medium">{session.user.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {session.user.email}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuGroup>
-                  <DropdownMenuItem asChild>
-                    <Link href={`/profiles/${session.user.id}`}>
-                      <User className="size-4" />
-                      {t("myProfile")}
-                    </Link>
+              <NotificationBell />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center rounded-full outline-none focus-visible:ring-2 focus-visible:ring-stone-400 focus-visible:ring-offset-2">
+                    <Avatar className="size-8">
+                      <AvatarImage
+                        src={session.user.image || undefined}
+                        alt={session.user.name}
+                      />
+                      <AvatarFallback className="bg-stone-200 text-stone-700">
+                        {session.user.name?.charAt(0)?.toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col gap-1">
+                      <p className="text-sm font-medium">{session.user.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {session.user.email}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuGroup>
+                    <DropdownMenuItem asChild>
+                      <Link href={`/profiles/${session.user.id}`}>
+                        <User className="size-4" />
+                        {t("myProfile")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard">
+                        <BarChart3 className="size-4" />
+                        {t("dashboard")}
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/settings">
+                        <Settings className="size-4" />
+                        {t("settings")}
+                      </Link>
+                    </DropdownMenuItem>
+                  </DropdownMenuGroup>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleSignOut} variant="destructive">
+                    <LogOut className="size-4" />
+                    {t("logOut")}
                   </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard">
-                      <BarChart3 className="size-4" />
-                      {t("dashboard")}
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings">
-                      <Settings className="size-4" />
-                      {t("settings")}
-                    </Link>
-                  </DropdownMenuItem>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={handleSignOut} variant="destructive">
-                  <LogOut className="size-4" />
-                  {t("logOut")}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </>
           ) : (
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
               <Button
                 variant="ghost"
                 size="sm"
@@ -180,6 +171,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
                 {t("logIn")}
               </Button>
               <Button
+                variant="default"
                 size="sm"
                 className="hidden sm:inline-flex"
                 onClick={() => onOpenAuthModal("signup")}
