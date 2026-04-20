@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { MapPin, ShieldCheck } from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { VerificationBadgeIcon } from "@/components/profile/verification-badge";
 import { ReputationBadgeIcon } from "@/components/profile/reputation-badge";
@@ -90,29 +90,24 @@ export function ListingCard({
   const priceLabel = formatPrice();
 
   return (
-    <div className={cn("rounded-2xl shadow-warm-sm hover:shadow-warm-md transition-shadow duration-300 bg-white overflow-hidden", isUnavailable && "opacity-60")}>
-      <Link href={`/listings/${listing.id}`} className="group block">
-        <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-stone-100 to-stone-200">
+    <div className={cn("group", isUnavailable && "opacity-60")}>
+      <Link href={`/listings/${listing.id}`} className="block">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-stone-100">
           {coverImage ? (
             <Image
               src={coverImage.url}
               alt={listing.title}
               fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
               sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-stone-400">
+            <div className="flex h-full items-center justify-center bg-stone-100 text-stone-400">
               {t("noPhoto")}
             </div>
           )}
-          {/* Price badge overlay (bottom-left) */}
-          <div className="absolute bottom-2.5 left-2.5 z-10 rounded-full bg-white/95 backdrop-blur-sm px-3 py-1 shadow-warm-xs">
-            <span className="text-sm font-bold text-stone-900">{priceLabel}</span>
-          </div>
-          {/* Favorite heart overlay (top-right) */}
           {showFavoriteButton && (
-            <div className="absolute right-2 top-2 z-10 rounded-full bg-white/80 shadow-warm-xs backdrop-blur-sm">
+            <div className="absolute right-2 top-2 z-10">
               <FavoriteButton
                 listingId={listing.id}
                 isFavorited={isFavorited}
@@ -120,7 +115,6 @@ export function ListingCard({
               />
             </div>
           )}
-          {/* Unavailable badge overlay */}
           {isUnavailable && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Badge variant="secondary" className="bg-gray-900/70 text-white text-sm px-3 py-1">
@@ -130,37 +124,28 @@ export function ListingCard({
           )}
         </div>
 
-        <div className="p-3 space-y-1.5">
+        <div className="mt-2.5">
           <div className="flex items-center gap-1.5">
-            <h3 className="truncate font-semibold text-stone-900 group-hover:text-primary-600 transition-colors">
+            <h3 className="truncate text-[13px] font-medium text-stone-900">
               {highlightText(listing.title, highlightTerms)}
             </h3>
             {listing.owner?.idVerified && <VerificationBadgeIcon className="shrink-0" />}
             {ownerBadges?.map((badge) => (
               <ReputationBadgeIcon key={badge.type} badge={badge} className="shrink-0" />
             ))}
-          </div>
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="inline-block rounded-full bg-primary-50 px-2 py-0.5 text-xs font-medium text-primary-700">
-              {listing.category.name}
-            </span>
             {listing.aiVerified && (
-              <span className="inline-flex items-center gap-0.5 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
-                <ShieldCheck className="size-3" />
-                {t("aiVerified")}
-              </span>
+              <ShieldCheck className="size-3.5 shrink-0 text-stone-500" aria-label={t("aiVerified")} />
             )}
           </div>
-          <div className="flex items-center gap-1 text-sm text-stone-500">
-            <MapPin className="size-3.5 shrink-0 text-stone-400" />
+          <div className="mt-1 flex items-center justify-between text-[12px] text-stone-500">
+            <span className="text-stone-900">{priceLabel}</span>
             <span className="truncate">{listing.location}</span>
           </div>
         </div>
       </Link>
 
-      {/* Availability toggle for owner's listings */}
       {showAvailabilityToggle && (
-        <div className="px-3 pb-3 mt-0">
+        <div className="mt-3">
           <AvailabilityToggle
             listingId={listing.id}
             isAvailable={!isUnavailable}
