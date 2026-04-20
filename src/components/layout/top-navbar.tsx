@@ -28,12 +28,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const NAV_LINKS = [
-  { href: "/browse", labelKey: "browse" },
-  { href: "/favorites", labelKey: "favorites" },
-  { href: "/dashboard", labelKey: "dashboard" },
-  { href: "/listings/new", labelKey: "listItem" },
-  { href: "/rentals", labelKey: "myRentals", badgeKey: "rentals" as const },
-  { href: "/messages", labelKey: "messages", badgeKey: "messages" as const },
+  { href: "/browse", labelKey: "browse", public: true },
+  { href: "/favorites", labelKey: "favorites", public: false },
+  { href: "/dashboard", labelKey: "dashboard", public: false },
+  { href: "/listings/new", labelKey: "listItem", public: false },
+  { href: "/rentals", labelKey: "myRentals", badgeKey: "rentals" as const, public: false },
+  { href: "/messages", labelKey: "messages", badgeKey: "messages" as const, public: false },
 ] as const;
 
 interface TopNavbarProps {
@@ -68,7 +68,7 @@ export function TopNavbar({ onOpenAuthModal }: TopNavbarProps) {
         <Logo />
 
         <nav className="hidden md:flex items-center gap-6 text-[13px] text-stone-600">
-          {NAV_LINKS.map((link) => {
+          {NAV_LINKS.filter((link) => link.public || (mounted && session)).map((link) => {
             const badgeCount =
               "badgeKey" in link && link.badgeKey === "rentals"
                 ? badgeCounts.rentals
