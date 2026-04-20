@@ -2,8 +2,10 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { listingSchema } from "@/lib/validations/listing";
+import { listingSchema, searchSchema } from "@/lib/validations/listing";
+import type { SearchParams } from "@/lib/validations/listing";
 import { getSession } from "@/features/auth/queries";
+import { searchListings } from "./queries";
 import { moderateListing, suggestCategoryAndTags, translateAndIndexListing, translateForLocale } from "./ai";
 import { deleteFtsEntry } from "@/lib/search";
 import { checkNotSuspended } from "@/features/admin/queries";
@@ -441,4 +443,53 @@ export async function translateListing(listingId: string, targetLocale: string) 
   });
 
   return result;
+}
+
+export async function loadMoreListings(
+  params: SearchParams,
+  offset: number
+): Promise<{
+  listings: Array<{
+    id: string;
+    title: string;
+    priceDaily: number | null;
+    priceHourly: number | null;
+    priceWeekly: number | null;
+    priceMonthly: number | null;
+    location: string;
+    aiVerified: boolean;
+    images: Array<{ id: string; url: string; isCover: boolean }>;
+    category: { id: string; name: string; slug: string };
+    owner?: { idVerified: boolean };
+  }>;
+  hasMore: boolean;
+  highlightTerms: string[];
+}> {
+  const parsed = searchSchema.parse(params);
+  const result = await searchListings(parsed, { offset });
+  return {
+    listings: result.listings.map((l) => ({
+      id: l.id,
+      title: l.title,
+      priceDaily: l.priceDaily,
+      priceHourly: l.priceHourly,
+      priceWeekly: l.priceWeekly,
+      priceMonthly: l.priceMonthly,
+      location: l.location,
+      aiVerified: l.aiVerified,
+      images: l.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+        isCover: img.isCover,
+      })),
+      category: {
+        id: l.category.id,
+        name: l.category.name,
+        slug: l.category.slug,
+      },
+      owner: l.owner ? { idVerified: l.owner.idVerified } : undefined,
+    })),
+    hasMore: result.hasMore,
+    highlightTerms: result.highlightTerms,
+  };
 }

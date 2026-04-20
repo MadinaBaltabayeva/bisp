@@ -10,7 +10,7 @@ import { getUserFavoriteIds } from "@/features/favorites/queries";
 import { SearchBar } from "@/components/browse/search-bar";
 import { SortSelect } from "@/components/browse/sort-select";
 import { FilterSidebar } from "@/components/browse/filter-sidebar";
-import { ListingGrid } from "@/components/browse/listing-grid";
+import { InfiniteListingGrid } from "@/components/browse/infinite-listing-grid";
 import { DidYouMean } from "@/components/browse/did-you-mean";
 import { LazyMapView } from "@/components/map/lazy-map-view";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -38,7 +38,7 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
   }
 
   const parsed = searchSchema.parse(flatParams);
-  const [{ listings, suggestion, highlightTerms }, categories, session] = await Promise.all([
+  const [{ listings, suggestion, highlightTerms, hasMore }, categories, session] = await Promise.all([
     searchListings(parsed),
     prisma.category.findMany({ orderBy: { sortOrder: "asc" } }),
     getSession(),
@@ -126,11 +126,13 @@ export default async function BrowsePage({ params, searchParams }: BrowsePagePro
             </TabsList>
 
             <TabsContent value="grid">
-              <ListingGrid
-                listings={listings}
+              <InfiniteListingGrid
+                initialListings={listings}
+                initialHasMore={hasMore}
                 highlightTerms={highlightTerms}
                 favoriteIds={favoriteIds}
                 isAuthenticated={!!session}
+                searchParams={parsed}
               />
             </TabsContent>
 

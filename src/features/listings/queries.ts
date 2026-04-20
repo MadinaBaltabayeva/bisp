@@ -7,6 +7,8 @@ import {
   extractHighlightTerms,
 } from "./search-utils";
 
+export const DEFAULT_PAGE_SIZE = 24;
+
 /**
  * Compute Haversine distance between two points in miles.
  */
@@ -56,6 +58,7 @@ export interface SearchListingsResult {
   listings: ListingWithRelations[];
   suggestion: string | null;
   highlightTerms: string[];
+  hasMore: boolean;
 }
 
 /**
@@ -68,8 +71,11 @@ export interface SearchListingsResult {
  * When no query, falls back to Prisma-only path.
  */
 export async function searchListings(
-  params: SearchParams
+  params: SearchParams,
+  pagination?: { offset?: number; limit?: number }
 ): Promise<SearchListingsResult> {
+  const offset = pagination?.offset ?? 0;
+  const limit = pagination?.limit ?? DEFAULT_PAGE_SIZE;
   // Build filter conditions (shared between FTS5 and Prisma-only paths)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const where: any = {
@@ -133,7 +139,7 @@ export async function searchListings(
       if (ftsResults.length === 0) {
         const dictionary = await getDictionary();
         const suggestion = suggestCorrection(params.q, dictionary);
-        return { listings: [], suggestion, highlightTerms: [] };
+        return { listings: [], suggestion, highlightTerms: [], hasMore: false };
       }
 
       // Combine FTS5 IDs with Prisma filters
@@ -188,10 +194,13 @@ export async function searchListings(
         );
       }
 
+      const page = filteredListings.slice(offset, offset + limit);
+      const hasMore = filteredListings.length > offset + limit;
       return {
-        listings: filteredListings,
+        listings: page,
         suggestion: null,
         highlightTerms: extractHighlightTerms(params.q),
+        hasMore,
       };
     }
   }
@@ -225,20 +234,26 @@ export async function searchListings(
     const lng = params.longitude!;
     const radiusMiles = params.radius!;
 
+    const filteredGeo = listings.filter((listing) => {
+      if (listing.latitude == null || listing.longitude == null) return false;
+      return (
+        haversineDistance(lat, lng, listing.latitude, listing.longitude) <=
+        radiusMiles
+      );
+    });
+    const geoPage = filteredGeo.slice(offset, offset + limit);
+    const geoHasMore = filteredGeo.length > offset + limit;
     return {
-      listings: listings.filter((listing) => {
-        if (listing.latitude == null || listing.longitude == null) return false;
-        return (
-          haversineDistance(lat, lng, listing.latitude, listing.longitude) <=
-          radiusMiles
-        );
-      }),
+      listings: geoPage,
       suggestion: null,
       highlightTerms: [],
+      hasMore: geoHasMore,
     };
   }
 
-  return { listings, suggestion: null, highlightTerms: [] };
+  const page = listings.slice(offset, offset + limit);
+  const hasMore = listings.length > offset + limit;
+  return { listings: page, suggestion: null, highlightTerms: [], hasMore };
 }
 
 /**
