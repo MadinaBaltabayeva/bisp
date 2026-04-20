@@ -369,22 +369,22 @@ export default async function ListingDetailPage({ params }: PageProps) {
       )}
 
       {/* Description */}
-      <div className="mt-16 max-w-3xl border-t border-stone-200 pt-10">
+      <div className="mt-10 max-w-3xl border-t border-stone-200 pt-7">
         <SectionKicker>{t("description")}</SectionKicker>
-        <p className="mt-5 whitespace-pre-line text-[17px] leading-relaxed text-stone-700 sm:text-[18px]">
+        <p className="mt-4 whitespace-pre-line text-[17px] leading-relaxed text-stone-700 sm:text-[18px]">
           {displayDescription}
         </p>
         {tags.length > 0 && (
-          <p className="mt-8 text-[13px] text-stone-500">
+          <p className="mt-6 text-[13px] text-stone-500">
             {tags.map((tag) => `#${tag}`).join("  ·  ")}
           </p>
         )}
       </div>
 
       {/* Owner */}
-      <div className="mt-16 max-w-3xl border-t border-stone-200 pt-10">
+      <div className="mt-10 max-w-3xl border-t border-stone-200 pt-7">
         <SectionKicker>{t("listedBy")}</SectionKicker>
-        <div className="mt-5 flex items-center gap-4">
+        <div className="mt-4 flex items-center gap-4">
           <div className="relative size-14 overflow-hidden rounded-full bg-stone-200 shrink-0">
             {listing.owner.image ? (
               <Image
@@ -434,12 +434,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       {/* Reviews */}
       {listingReviews.length > 0 && (
-        <div className="mt-12 max-w-3xl border-t border-stone-200 pt-10">
+        <div className="mt-10 max-w-3xl border-t border-stone-200 pt-7">
           <div className="flex items-baseline gap-3">
             <SectionKicker>{t("ownerReviews")}</SectionKicker>
             <span className="text-[12px] text-stone-400">{listingReviews.length}</span>
           </div>
-          <div className="mt-6 space-y-8">
+          <div className="mt-5 space-y-6">
             {listingReviews.slice(0, 5).map((review) => (
               <figure key={review.id}>
                 <blockquote className="font-serif text-[17px] leading-relaxed text-stone-900 sm:text-[18px]">
@@ -459,7 +459,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
       )}
 
       {/* Similar listings */}
-      <div className="mt-20">
+      <div className="mt-12">
         <SimilarListings
           listingId={listing.id}
           categoryId={listing.categoryId}
