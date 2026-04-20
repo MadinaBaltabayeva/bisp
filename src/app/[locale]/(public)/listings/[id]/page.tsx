@@ -347,33 +347,48 @@ export default async function ListingDetailPage({ params }: PageProps) {
                 </dd>
               </div>
             )}
-            <div className="flex justify-between gap-4">
-              <dt className="text-stone-500">{t("listedBy")}</dt>
-              <dd className="inline-flex items-center gap-1.5 text-stone-800">
-                <Link
-                  href={`/profiles/${listing.owner.id}`}
-                  className="font-medium text-stone-900 hover:underline underline-offset-4"
-                >
-                  {listing.owner.name}
-                </Link>
-                {listing.owner.idVerified && <VerificationBadge />}
-              </dd>
-            </div>
-            {listing.owner.reviewCount > 0 && (
-              <div className="flex justify-between gap-4">
-                <dt className="text-stone-500">{t("ownerRating")}</dt>
-                <dd className="inline-flex items-center gap-1 text-stone-800">
-                  <Star className="size-3 fill-stone-700 text-stone-700" />
-                  {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount})
-                </dd>
-              </div>
-            )}
           </dl>
-          <p className="mt-2 text-[13px] text-stone-500">
-            {t("memberSince", { date: memberSince })}
-          </p>
+
+          <Link
+            href={`/profiles/${listing.owner.id}`}
+            className="mt-6 flex items-center gap-3 border-t border-stone-200 pt-6 group"
+          >
+            <div className="relative size-11 overflow-hidden rounded-full bg-stone-200 shrink-0">
+              {listing.owner.image ? (
+                <Image
+                  src={listing.owner.image}
+                  alt={listing.owner.name}
+                  fill
+                  className="object-cover"
+                  sizes="44px"
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-[15px] font-medium text-stone-500">
+                  {listing.owner.name.charAt(0).toUpperCase()}
+                </div>
+              )}
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5">
+                <span className="truncate text-[14px] font-medium text-stone-900 group-hover:underline underline-offset-4">
+                  {listing.owner.name}
+                </span>
+                {listing.owner.idVerified && <VerificationBadge />}
+              </div>
+              <div className="mt-0.5 flex items-center gap-2 text-[12px] text-stone-500">
+                {listing.owner.reviewCount > 0 && (
+                  <span className="inline-flex items-center gap-1">
+                    <Star className="size-3 fill-stone-700 text-stone-700" />
+                    {listing.owner.averageRating.toFixed(1)} ({listing.owner.reviewCount})
+                  </span>
+                )}
+                {listing.owner.reviewCount > 0 && <span aria-hidden>·</span>}
+                <span>{t("memberSince", { date: memberSince })}</span>
+              </div>
+            </div>
+          </Link>
           {ownerBadges.length > 0 && (
-            <div className="mt-2">
+            <div className="mt-3">
               <ReputationBadges badges={ownerBadges} />
             </div>
           )}
