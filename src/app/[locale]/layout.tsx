@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -11,6 +11,13 @@ import "../globals.css";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin", "cyrillic"],
+});
+
+const fraunces = Fraunces({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  axes: ["opsz", "SOFT"],
+  display: "swap",
 });
 
 type Props = {
@@ -45,7 +52,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${fraunces.variable} font-sans antialiased`}>
         <NextIntlClientProvider>
           <AppShell>{children}</AppShell>
         </NextIntlClientProvider>
