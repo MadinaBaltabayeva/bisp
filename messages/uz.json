@@ -91,19 +91,36 @@
   },
   "HomePage": {
     "hero": {
-      "title": "Qoʻshnilaringizdan hamma narsani ijaraga oling",
-      "subtitle": "Nega sotib olasiz, qarzga olsangiz boʻladi? Jamoangiz ichidan asboblar, elektronika, sport jihozlari va boshqalarni toping.",
-      "browseItems": "Buyumlarni koʻrish",
+      "kicker": "RentHub",
+      "title": "Kerakli narsangizni — qoʻshningizdan ijaraga oling.",
+      "subtitle": "Drellardan barabanlargacha. Qoʻshningizdan olib turing, ishlatgach qaytaring.",
+      "searchPlaceholder": "Drel, kolonka, chodir qidiring…",
+      "browseItems": "Koʻrish",
       "listYourItem": "Buyumingizni joylashtiring"
     },
     "categories": {
-      "title": "Kategoriya boʻyicha koʻrish",
-      "subtitle": "Oʻsib borayotgan jamoamizdan kerakli narsani toping"
+      "title": "Kategoriya boʻyicha",
+      "meta": "{count, plural, =0 {8 kategoriya} other {8 kategoriya · # ta buyum}}"
     },
     "popular": {
-      "title": "Mashhur buyumlar",
-      "viewAll": "Barchasini koʻrish",
+      "title": "Yaqin atrofda mashhur",
+      "viewAll": "Barchasini koʻrish →",
       "comingSoon": "Mashhur buyumlar tez orada"
+    },
+    "howItWorks": {
+      "title": "Qanday ishlaydi",
+      "step1": {
+        "title": "Yaqin atrofdan toping",
+        "body": "Buyum yoki kategoriya boʻyicha qidiring. Hammasi piyoda masofada."
+      },
+      "step2": {
+        "title": "Kerakli sanalarga band qiling",
+        "body": "Egasi tasdiqlagach toʻlaysiz. Uzoq muddatli majburiyat yoʻq."
+      },
+      "step3": {
+        "title": "Olib keting, ishlatib, qaytaring",
+        "body": "Uchrashing, ijaraga oling, qaytaring. Oddiy."
+      }
     }
   },
   "Auth": {
