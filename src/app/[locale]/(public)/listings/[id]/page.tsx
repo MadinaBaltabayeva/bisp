@@ -361,7 +361,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
       )}
 
       {/* Description */}
-      <div className="mx-auto mt-16 max-w-2xl">
+      <div className="mt-16 max-w-2xl">
         <p className="whitespace-pre-line text-[17px] leading-relaxed text-stone-800 sm:text-[18px]">
           {displayDescription}
         </p>
@@ -373,7 +373,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
       </div>
 
       {/* Owner */}
-      <div className="mx-auto mt-16 flex max-w-2xl items-center gap-4 border-t border-stone-200 pt-10">
+      <div className="mt-16 flex max-w-2xl items-center gap-4 border-t border-stone-200 pt-10">
         <div className="relative size-10 overflow-hidden rounded-full bg-stone-200 shrink-0">
           {listing.owner.image ? (
             <Image
@@ -422,7 +422,7 @@ export default async function ListingDetailPage({ params }: PageProps) {
 
       {/* Reviews */}
       {listingReviews.length > 0 && (
-        <div className="mx-auto mt-12 max-w-2xl border-t border-stone-200 pt-10 space-y-8">
+        <div className="mt-12 max-w-2xl border-t border-stone-200 pt-10 space-y-8">
           {listingReviews.slice(0, 5).map((review) => (
             <figure key={review.id}>
               <blockquote className="font-serif text-[17px] leading-relaxed text-stone-900 sm:text-[18px]">
