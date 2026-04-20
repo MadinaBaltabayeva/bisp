@@ -10,6 +10,7 @@ import {
   Star,
   Pencil,
   XCircle,
+  ArrowLeft,
 } from "lucide-react";
 
 import { getListingById, getCachedTranslation } from "@/features/listings/queries";
@@ -219,6 +220,14 @@ export default async function ListingDetailPage({ params }: PageProps) {
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       {!isOwner && <TrackListingView listingId={listing.id} />}
+
+      <Link
+        href="/browse"
+        className="mb-6 inline-flex items-center gap-1.5 text-[13px] text-stone-600 hover:text-stone-900 hover:underline underline-offset-4"
+      >
+        <ArrowLeft className="size-4" />
+        {t("backToBrowse")}
+      </Link>
 
       {isRejected && isOwner && (
         <div className="mb-6 border-l-2 border-stone-900 bg-stone-100/80 px-4 py-3 text-[14px] text-stone-800">
