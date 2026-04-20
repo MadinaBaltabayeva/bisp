@@ -1,23 +1,14 @@
 import { describe, it, expect } from "vitest";
 import { LANDING_HERO, LANDING_CATEGORY_IMAGES } from "../assets";
+import { CATEGORIES } from "@/features/seed/categories";
 
 describe("landing assets", () => {
   it("LANDING_HERO is an https URL", () => {
     expect(LANDING_HERO).toMatch(/^https:\/\//);
   });
 
-  it("LANDING_CATEGORY_IMAGES contains all 8 category slugs", () => {
-    const expected = [
-      "tools",
-      "electronics",
-      "sports",
-      "outdoor",
-      "vehicles",
-      "clothing",
-      "music",
-      "home-garden",
-    ];
-    for (const slug of expected) {
+  it("every category slug in CATEGORIES has an image entry", () => {
+    for (const { slug } of CATEGORIES) {
       expect(LANDING_CATEGORY_IMAGES[slug]).toMatch(/^https:\/\//);
     }
   });

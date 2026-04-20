@@ -1,9 +1,13 @@
+import { CATEGORIES } from "@/features/seed/categories";
+
 const U = (id: string, w: number) =>
   `https://images.unsplash.com/photo-${id}?auto=format&fit=crop&w=${w}&q=70`;
 
+type CategorySlug = (typeof CATEGORIES)[number]["slug"];
+
 export const LANDING_HERO = U("1581092795360-fd1ca04f0952", 2000);
 
-export const LANDING_CATEGORY_IMAGES: Record<string, string> = {
+export const LANDING_CATEGORY_IMAGES: Record<CategorySlug, string> = {
   tools: U("1504148455328-c376907d081c", 800),
   electronics: U("1519389950473-47ba0277781c", 800),
   sports: U("1517649763962-0c623066013b", 800),
