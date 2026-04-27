@@ -1,10 +1,8 @@
 #!/bin/sh
 set -e
 
-echo "Linking uploads to volume..."
+echo "Preparing uploads dir on volume..."
 mkdir -p /data/uploads/listings /data/uploads/avatars
-rm -rf /app/public/uploads
-ln -s /data/uploads /app/public/uploads
 
 echo "Syncing database schema..."
 npx prisma db push --accept-data-loss

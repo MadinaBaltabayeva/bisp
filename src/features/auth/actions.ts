@@ -7,6 +7,7 @@ import { getSession } from "./queries";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { uploadPath } from "@/lib/uploads";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -78,7 +79,7 @@ export async function updateProfilePhoto(formData: FormData) {
   try {
     const ext = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
     const filename = `${randomUUID()}.${ext}`;
-    const uploadDir = join(process.cwd(), "public", "uploads", "avatars");
+    const uploadDir = uploadPath("avatars");
 
     await mkdir(uploadDir, { recursive: true });
 

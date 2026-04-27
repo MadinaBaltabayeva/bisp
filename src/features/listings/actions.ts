@@ -12,6 +12,7 @@ import { checkNotSuspended } from "@/features/admin/queries";
 import { randomUUID } from "crypto";
 import { writeFile, mkdir } from "fs/promises";
 import { join } from "path";
+import { uploadPath } from "@/lib/uploads";
 
 const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -56,12 +57,7 @@ export async function createListing(formData: FormData) {
     [];
 
   if (photos.length > 0) {
-    const uploadDir = join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "listings"
-    );
+    const uploadDir = uploadPath("listings");
     await mkdir(uploadDir, { recursive: true });
 
     for (let i = 0; i < photos.length; i++) {
@@ -199,12 +195,7 @@ export async function updateListing(listingId: string, formData: FormData) {
   }[] = [];
 
   if (photos.length > 0) {
-    const uploadDir = join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "listings"
-    );
+    const uploadDir = uploadPath("listings");
     await mkdir(uploadDir, { recursive: true });
 
     // Get current max sortOrder
