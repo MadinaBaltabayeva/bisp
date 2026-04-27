@@ -5,7 +5,8 @@ const U = (id: string, w: number) =>
 
 type CategorySlug = (typeof CATEGORIES)[number]["slug"];
 
-export const LANDING_HERO = U("1581092795360-fd1ca04f0952", 2000);
+export const LANDING_HERO =
+  "https://cdn.mos.cms.futurecdn.net/7W2n5T4Wki9YVHUnprVUaM-1920-80.jpg.webp";
 
 export const LANDING_CATEGORY_IMAGES: Record<CategorySlug, string> = {
   tools: U("1504148455328-c376907d081c", 800),

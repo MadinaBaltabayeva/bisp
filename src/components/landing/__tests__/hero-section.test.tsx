@@ -38,34 +38,24 @@ vi.mock("next/image", () => ({
 }));
 
 describe("HeroSection", () => {
-  it("renders the quiet headline", () => {
-    render(<HeroSection />);
-    expect(
-      screen.getByRole("heading", { level: 1, name: /rent what you need, nearby\./i }),
-    ).toBeInTheDocument();
-  });
-
-  it("does not render the old trust-badge strip", () => {
-    render(<HeroSection />);
-    expect(screen.queryByText(/verified users/i)).toBeNull();
-    expect(screen.queryByText(/active community/i)).toBeNull();
-    expect(screen.queryByText(/top rated/i)).toBeNull();
-  });
-
-  it("does not use a gradient background class", () => {
-    const { container } = render(<HeroSection />);
-    const section = container.querySelector("section");
-    expect(section?.className).not.toMatch(/bg-gradient/);
-    expect(section?.className).not.toMatch(/from-amber/);
-  });
-
-  it("applies the serif utility to the h1", () => {
+  it("renders the headline", () => {
     render(<HeroSection />);
     const h1 = screen.getByRole("heading", { level: 1 });
-    expect(h1.className).toMatch(/font-serif/);
+    expect(h1.textContent).toMatch(/Rent/);
+    expect(h1.textContent).toMatch(/Anything/);
+    expect(h1.textContent).toMatch(/Anytime/);
   });
 
-  it("submits search to /browse?q=... when user types and submits", async () => {
+  it("shows the trust badges and CTAs", () => {
+    render(<HeroSection />);
+    expect(screen.getByText(/10K\+ Users/)).toBeInTheDocument();
+    expect(screen.getByText(/50K\+/)).toBeInTheDocument();
+    expect(screen.getByText(/Verified Users/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /browse items/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /list your items/i })).toBeInTheDocument();
+  });
+
+  it("submits search to /browse?q=... when user types and submits", () => {
     pushMock.mockClear();
     render(<HeroSection />);
     const input = screen.getByRole("searchbox");
@@ -80,5 +70,19 @@ describe("HeroSection", () => {
     const form = screen.getByRole("search");
     form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }));
     expect(pushMock).toHaveBeenCalledWith("/browse");
+  });
+
+  it("Browse Items button navigates to /browse", () => {
+    pushMock.mockClear();
+    render(<HeroSection />);
+    fireEvent.click(screen.getByRole("button", { name: /browse items/i }));
+    expect(pushMock).toHaveBeenCalledWith("/browse");
+  });
+
+  it("List Your Items button navigates to new listing", () => {
+    pushMock.mockClear();
+    render(<HeroSection />);
+    fireEvent.click(screen.getByRole("button", { name: /list your items/i }));
+    expect(pushMock).toHaveBeenCalledWith("/listings/new");
   });
 });
