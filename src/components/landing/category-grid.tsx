@@ -1,12 +1,20 @@
 "use client";
 
-import Image from "next/image";
 import { useTranslations } from "next-intl";
+import {
+  Bike,
+  Car,
+  Camera,
+  Home,
+  Music as MusicIcon,
+  Shirt,
+  Tent,
+  Wrench,
+  type LucideIcon,
+} from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { CATEGORIES } from "@/features/seed/categories";
-import { LANDING_CATEGORY_IMAGES } from "./assets";
 
-// slugs are kebab-case, translation keys are camelCase
 const SLUG_TO_KEY: Record<string, string> = {
   tools: "tools",
   electronics: "electronics",
@@ -18,47 +26,89 @@ const SLUG_TO_KEY: Record<string, string> = {
   "home-garden": "homeGarden",
 };
 
+const STYLES: Record<
+  string,
+  { card: string; iconWrap: string; icon: string; Icon: LucideIcon }
+> = {
+  electronics: {
+    card: "bg-orange-50",
+    iconWrap: "bg-white",
+    icon: "text-orange-500",
+    Icon: Camera,
+  },
+  vehicles: {
+    card: "bg-blue-50",
+    iconWrap: "bg-white",
+    icon: "text-blue-500",
+    Icon: Car,
+  },
+  tools: {
+    card: "bg-emerald-50",
+    iconWrap: "bg-white",
+    icon: "text-emerald-500",
+    Icon: Wrench,
+  },
+  "home-garden": {
+    card: "bg-purple-50",
+    iconWrap: "bg-white",
+    icon: "text-purple-500",
+    Icon: Home,
+  },
+  music: {
+    card: "bg-pink-50",
+    iconWrap: "bg-white",
+    icon: "text-pink-500",
+    Icon: MusicIcon,
+  },
+  sports: {
+    card: "bg-cyan-50",
+    iconWrap: "bg-white",
+    icon: "text-cyan-500",
+    Icon: Bike,
+  },
+  outdoor: {
+    card: "bg-indigo-50",
+    iconWrap: "bg-white",
+    icon: "text-indigo-500",
+    Icon: Tent,
+  },
+  clothing: {
+    card: "bg-amber-50",
+    iconWrap: "bg-white",
+    icon: "text-amber-500",
+    Icon: Shirt,
+  },
+};
+
 export function CategoryGrid() {
-  const tHome = useTranslations("HomePage.categories");
   const tCat = useTranslations("Categories");
 
   return (
-    <section id="categories" className="mx-auto max-w-7xl px-4 pt-16 pb-10 sm:px-6 lg:px-8">
-      <div className="mb-7 flex items-baseline justify-between">
-        <h2 className="font-serif text-2xl font-medium tracking-tight text-stone-900 sm:text-[26px]">
-          {tHome("title")}
+    <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+      <div className="mb-10 text-center">
+        <h2 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
+          Browse by Category
         </h2>
-        <span className="text-[13px] text-stone-500">{tHome("meta")}</span>
+        <p className="mt-3 text-stone-600">Find exactly what you&apos;re looking for</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
         {CATEGORIES.map((category) => {
-          const src = LANDING_CATEGORY_IMAGES[category.slug];
+          const style = STYLES[category.slug];
+          if (!style) return null;
+          const { card, iconWrap, icon, Icon } = style;
           const translationKey = SLUG_TO_KEY[category.slug] ?? category.slug;
 
           return (
             <Link
               key={category.slug}
               href={`/browse?category=${category.slug}`}
-              className="group relative block overflow-hidden rounded-[4px]"
-              style={{ aspectRatio: "1 / 1.15" }}
+              className={`group flex flex-col items-center justify-center gap-4 rounded-2xl ${card} p-6 transition-transform hover:-translate-y-1 hover:shadow-lg`}
             >
-              <Image
-                src={src}
-                alt=""
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 h-20"
-                style={{
-                  background:
-                    "linear-gradient(to top, rgba(20,20,18,0.65) 0%, rgba(20,20,18,0) 100%)",
-                }}
-              />
-              <span className="absolute left-3 bottom-2.5 text-[15px] font-medium text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.45)]">
+              <div className={`flex size-14 items-center justify-center rounded-2xl ${iconWrap} shadow-sm`}>
+                <Icon className={`size-7 ${icon}`} />
+              </div>
+              <span className="text-base font-semibold text-stone-900">
                 {tCat(translationKey as Parameters<typeof tCat>[0])}
               </span>
             </Link>

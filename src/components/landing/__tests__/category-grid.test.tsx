@@ -3,11 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { CategoryGrid } from "../category-grid";
 
 vi.mock("next-intl", () => ({
-  useTranslations: (ns: string) => (key: string) => {
-    if (ns === "HomePage.categories" && key === "title") return "Browse by category";
-    if (ns === "HomePage.categories" && key === "meta") return "8 categories";
-    return key;
-  },
+  useTranslations: () => (key: string) => key,
 }));
 
 vi.mock("@/i18n/navigation", () => ({
@@ -18,37 +14,26 @@ vi.mock("@/i18n/navigation", () => ({
   ),
 }));
 
-vi.mock("next/image", () => ({
-  __esModule: true,
-  default: ({
-    fill: _fill,
-    priority: _priority,
-    ...props
-  }: React.ImgHTMLAttributes<HTMLImageElement> & { fill?: boolean; priority?: boolean }) => (
-    // eslint-disable-next-line jsx-a11y/alt-text, @next/next/no-img-element
-    <img {...props} />
-  ),
-}));
-
 describe("CategoryGrid", () => {
-  it("renders 8 tiles with images", () => {
+  it("renders 8 category links", () => {
     const { container } = render(<CategoryGrid />);
-    const imgs = container.querySelectorAll("img");
-    expect(imgs.length).toBe(8);
+    const links = container.querySelectorAll("a");
+    expect(links.length).toBe(8);
   });
 
-  it("does not use per-tile gradient classes", () => {
+  it("links each tile to /browse with the correct category slug", () => {
     const { container } = render(<CategoryGrid />);
-    const html = container.innerHTML;
-    expect(html).not.toMatch(/from-orange-500/);
-    expect(html).not.toMatch(/to-amber-600/);
-    expect(html).not.toMatch(/from-pink-500/);
-    expect(html).not.toMatch(/bg-gradient-to-br/);
+    const hrefs = Array.from(container.querySelectorAll("a")).map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("/browse?category=tools");
+    expect(hrefs).toContain("/browse?category=electronics");
+    expect(hrefs).toContain("/browse?category=home-garden");
   });
 
-  it("renders the serif section heading", () => {
+  it("renders the section heading and subtitle", () => {
     render(<CategoryGrid />);
-    const h2 = screen.getByRole("heading", { level: 2, name: /browse by category/i });
-    expect(h2.className).toMatch(/font-serif/);
+    expect(
+      screen.getByRole("heading", { level: 2, name: /browse by category/i })
+    ).toBeInTheDocument();
+    expect(screen.getByText(/find exactly what you/i)).toBeInTheDocument();
   });
 });
