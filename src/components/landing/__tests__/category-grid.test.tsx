@@ -3,7 +3,13 @@ import { render, screen } from "@testing-library/react";
 import { CategoryGrid } from "../category-grid";
 
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => key,
+  useTranslations: (ns: string) => (key: string) => {
+    if (ns === "HomePage.categories") {
+      if (key === "title") return "Browse by Category";
+      if (key === "subtitle") return "Find exactly what you're looking for";
+    }
+    return key;
+  },
 }));
 
 vi.mock("@/i18n/navigation", () => ({

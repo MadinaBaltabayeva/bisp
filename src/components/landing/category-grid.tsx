@@ -82,14 +82,15 @@ const STYLES: Record<
 
 export function CategoryGrid() {
   const tCat = useTranslations("Categories");
+  const tHome = useTranslations("HomePage.categories");
 
   return (
     <section id="categories" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
         <h2 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
-          Browse by Category
+          {tHome("title")}
         </h2>
-        <p className="mt-3 text-stone-600">Find exactly what you&apos;re looking for</p>
+        <p className="mt-3 text-stone-600">{tHome("subtitle")}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">

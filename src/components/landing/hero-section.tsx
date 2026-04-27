@@ -34,14 +34,21 @@ export function HeroSection() {
           {/* Left: content */}
           <div>
             <h1 className="text-5xl font-bold leading-[1.05] tracking-tight text-stone-900 sm:text-6xl lg:text-7xl">
-              Rent{" "}
-              <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
-                Anything,
-              </span>
+              {t.rich("titleLine1", {
+                accent1: (chunks) => (
+                  <span className="bg-gradient-to-r from-orange-500 to-pink-500 bg-clip-text text-transparent">
+                    {chunks}
+                  </span>
+                ),
+              })}
               <br />
-              <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
-                Anytime
-              </span>
+              {t.rich("titleLine2", {
+                accent2: (chunks) => (
+                  <span className="bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent">
+                    {chunks}
+                  </span>
+                ),
+              })}
             </h1>
 
             <p className="mt-6 max-w-md text-lg leading-relaxed text-stone-600">
@@ -66,7 +73,7 @@ export function HeroSection() {
                   type="submit"
                   className="flex shrink-0 items-center gap-2 rounded-xl bg-orange-500 px-5 py-3 text-sm font-medium text-white transition-colors hover:bg-orange-600"
                 >
-                  Search <ArrowRight className="size-4" />
+                  {t("searchAction")} <ArrowRight className="size-4" />
                 </button>
               </div>
             </form>
@@ -77,7 +84,7 @@ export function HeroSection() {
                 onClick={() => router.push("/browse")}
                 className="inline-flex items-center gap-2 rounded-xl bg-orange-500 px-6 py-3.5 font-medium text-white shadow-md transition-colors hover:bg-orange-600"
               >
-                Browse Items <ArrowRight className="size-4" />
+                {t("browseItems")} <ArrowRight className="size-4" />
               </button>
               <button
                 type="button"
@@ -85,7 +92,7 @@ export function HeroSection() {
                 className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-white px-6 py-3.5 font-medium text-stone-900 shadow-sm transition-colors hover:bg-stone-50"
               >
                 <TrendingUp className="size-4 text-emerald-500" />
-                List Your Items
+                {t("listItems")}
               </button>
             </div>
           </div>

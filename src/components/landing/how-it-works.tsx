@@ -19,7 +19,7 @@ export function HowItWorks() {
           <h2 className="text-3xl font-bold tracking-tight text-stone-900 sm:text-4xl">
             {t("title")}
           </h2>
-          <p className="mt-3 text-stone-600">Get started in three simple steps</p>
+          <p className="mt-3 text-stone-600">{t("subtitle")}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3 md:gap-4">

@@ -2,18 +2,23 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { HeroSection } from "../hero-section";
 
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string) => {
-    const map: Record<string, string> = {
-      kicker: "RentHub",
-      title: "Rent what you need, nearby.",
-      subtitle: "From drills to drum kits.",
-      searchPlaceholder: "Search drills, speakers, tents…",
-      browseItems: "Browse",
-    };
-    return map[key] ?? key;
-  },
-}));
+vi.mock("next-intl", () => {
+  const map: Record<string, string> = {
+    kicker: "RentHub",
+    title: "Rent what you need, nearby.",
+    titleLine1: "Rent Anything,",
+    titleLine2: "Anytime",
+    subtitle: "From drills to drum kits.",
+    searchPlaceholder: "Search drills, speakers, tents…",
+    searchAction: "Search",
+    browseItems: "Browse Items",
+    listItems: "List Your Items",
+  };
+  const t = Object.assign((key: string) => map[key] ?? key, {
+    rich: (key: string) => map[key] ?? key,
+  });
+  return { useTranslations: () => t };
+});
 
 const pushMock = vi.fn();
 vi.mock("@/i18n/navigation", () => ({

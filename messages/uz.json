@@ -93,12 +93,17 @@
     "hero": {
       "kicker": "RentHub",
       "title": "Kerakli narsangizni — qoʻshningizdan ijaraga oling.",
+      "titleLine1": "<accent1>Istalgan narsani,</accent1>",
+      "titleLine2": "<accent2>istalgan vaqtda</accent2> ijaraga oling",
       "subtitle": "Drellardan barabanlargacha. Qoʻshningizdan olib turing, ishlatgach qaytaring.",
       "searchPlaceholder": "Drel, kolonka, chodir qidiring…",
-      "browseItems": "Koʻrish"
+      "searchAction": "Qidirish",
+      "browseItems": "Buyumlarni koʻrish",
+      "listItems": "Eʼlon berish"
     },
     "categories": {
       "title": "Kategoriya boʻyicha",
+      "subtitle": "Aynan izlayotganingizni toping",
       "meta": "8 kategoriya"
     },
     "popular": {
@@ -108,6 +113,7 @@
     },
     "howItWorks": {
       "title": "Qanday ishlaydi",
+      "subtitle": "Uch oddiy qadam bilan boshlang",
       "step1": {
         "title": "Yaqin atrofdan toping",
         "body": "Buyum yoki kategoriya boʻyicha qidiring. Hammasi piyoda masofada."

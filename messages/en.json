@@ -93,12 +93,17 @@
     "hero": {
       "kicker": "RentHub",
       "title": "Rent what you need, nearby.",
+      "titleLine1": "Rent <accent1>Anything,</accent1>",
+      "titleLine2": "<accent2>Anytime</accent2>",
       "subtitle": "From drills to drum kits. Pick it up from someone on your street, return it when you're done.",
       "searchPlaceholder": "Search drills, speakers, tents…",
-      "browseItems": "Browse"
+      "searchAction": "Search",
+      "browseItems": "Browse Items",
+      "listItems": "List Your Items"
     },
     "categories": {
-      "title": "Browse by category",
+      "title": "Browse by Category",
+      "subtitle": "Find exactly what you're looking for",
       "meta": "8 categories"
     },
     "popular": {
@@ -107,7 +112,8 @@
       "comingSoon": "Popular items coming soon"
     },
     "howItWorks": {
-      "title": "How it works",
+      "title": "How It Works",
+      "subtitle": "Get started in three simple steps",
       "step1": {
         "title": "Find something nearby",
         "body": "Search by item or category. Everything is within walking distance."
