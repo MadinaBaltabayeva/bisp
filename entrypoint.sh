@@ -1,17 +1,13 @@
 #!/bin/sh
+set -e
 
-# Run migrations every startup (safe — skips if already applied)
-echo "Running migrations..."
-npx prisma migrate deploy
+echo "Syncing database schema..."
+npx prisma db push --accept-data-loss --skip-generate
 
-# Seed if not already seeded
-if [ ! -f /app/prisma/.seeded ]; then
+if [ ! -f /data/.seeded ]; then
   echo "Seeding database..."
-  NODE_OPTIONS="--max-old-space-size=512" npx tsx prisma/seed.ts && touch /app/prisma/.seeded
+  NODE_OPTIONS="--max-old-space-size=512" npx tsx prisma/seed.ts && touch /data/.seeded
 fi
-
-echo "Building app..."
-npm run build
 
 echo "Starting app..."
 exec npm start
