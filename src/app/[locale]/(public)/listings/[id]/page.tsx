@@ -209,7 +209,12 @@ export default async function ListingDetailPage({ params }: PageProps) {
     { month: "long", year: "numeric" }
   );
 
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.BETTER_AUTH_URL ||
+    (process.env.RAILWAY_PUBLIC_DOMAIN
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+      : "http://localhost:3000");
   const shareUrl = `${baseUrl}/${locale}/listings/${listing.id}`;
   const shareText = listing.priceDaily
     ? `$${listing.priceDaily}/day - ${listing.description.slice(0, 100)}`

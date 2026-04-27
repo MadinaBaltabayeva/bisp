@@ -443,7 +443,12 @@ export async function createCheckoutSession(rentalId: string, locale: string) {
   if (existingPayment) return { error: "Payment already exists." };
 
   const amount = Math.round((rental.totalPrice + rental.securityDeposit) * 100); // cents
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+  const baseUrl =
+    process.env.NEXT_PUBLIC_BASE_URL ||
+    process.env.BETTER_AUTH_URL ||
+    (process.env.RAILWAY_PUBLIC_DOMAIN
+      ? `https://${process.env.RAILWAY_PUBLIC_DOMAIN}`
+      : "http://localhost:3000");
 
   const checkoutSession = await stripe.checkout.sessions.create({
     mode: "payment",
