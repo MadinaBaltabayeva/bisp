@@ -358,7 +358,7 @@ async function main() {
   let bulkImagesCreated = 0;
   const categorySlugs = Object.keys(LISTING_TEMPLATES);
 
-  for (let i = 0; i < 1000; i++) {
+  for (let i = 0; i < 60; i++) {
     const slug = categorySlugs[i % categorySlugs.length];
     const templates = LISTING_TEMPLATES[slug];
     const category = categoryBySlug.get(slug)!;
