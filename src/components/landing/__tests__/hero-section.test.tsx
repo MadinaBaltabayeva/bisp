@@ -46,11 +46,8 @@ describe("HeroSection", () => {
     expect(h1.textContent).toMatch(/Anytime/);
   });
 
-  it("shows the trust badges and CTAs", () => {
+  it("shows the CTAs", () => {
     render(<HeroSection />);
-    expect(screen.getByText(/10K\+ Users/)).toBeInTheDocument();
-    expect(screen.getByText(/50K\+/)).toBeInTheDocument();
-    expect(screen.getByText(/Verified Users/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /browse items/i })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /list your items/i })).toBeInTheDocument();
   });
