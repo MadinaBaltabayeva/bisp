@@ -10,7 +10,9 @@ import {
 } from "../src/features/seed/rentals";
 import { auth } from "../src/lib/auth";
 
-const adapter = new PrismaBetterSqlite3({ url: "file:./prisma/dev.db" });
+const adapter = new PrismaBetterSqlite3({
+  url: process.env.DATABASE_URL || "file:./prisma/dev.db",
+});
 const prisma = new PrismaClient({ adapter });
 
 const DEMO_USERS = [
