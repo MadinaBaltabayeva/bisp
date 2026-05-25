@@ -33,48 +33,110 @@ A full-stack web application where university students and local communities can
 - **Testing:** Vitest + Testing Library
 - **Email:** Nodemailer
 
-## Getting Started
+## Running Locally (without Docker)
 
-### Prerequisites
+This is the recommended way to run the project for development.
 
-- Node.js 18+
-- npm
+### 1. Prerequisites
 
-### Installation
+- **Node.js 18 or newer** — check with `node -v`. If you don't have it, install from [nodejs.org](https://nodejs.org/) or use a version manager like `nvm`.
+- **npm** (comes bundled with Node.js)
+- **git**
+
+You don't need to install a database separately. The project uses SQLite, which is just a file on disk, and the `better-sqlite3` package ships the engine as part of `npm install`.
+
+### 2. Clone the repository
 
 ```bash
-# clone the repo
 git clone https://github.com/MadinaBaltabayeva/bisp.git
 cd bisp
-
-# install dependencies
-npm install
-
-# generate Prisma client
-npx prisma generate
 ```
 
-### Environment Variables
+### 3. Install dependencies
 
-Create a `.env` file in the root directory:
+```bash
+npm install
+```
+
+This also compiles `better-sqlite3` for your machine. On macOS you need Xcode Command Line Tools (`xcode-select --install`). On Linux you need `build-essential` and `python3`. On Windows the install usually works out of the box.
+
+### 4. Create the `.env` file
+
+In the project root, create a file called `.env` with the following content:
 
 ```env
 DATABASE_URL="file:./prisma/dev.db"
-OPENAI_API_KEY="your-openai-api-key"
 NEXT_PUBLIC_BASE_URL="http://localhost:3000"
+BETTER_AUTH_SECRET="any-long-random-string-here"
+BETTER_AUTH_URL="http://localhost:3000"
+
+# optional — only needed for AI features (smart descriptions, price suggestions, translation)
+OPENAI_API_KEY="sk-..."
+
+# optional — only needed for the checkout flow
+STRIPE_SECRET_KEY=""
+STRIPE_PUBLISHABLE_KEY=""
+STRIPE_WEBHOOK_SECRET=""
+
+# optional — only needed if you want email notifications to actually send
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASS=""
+SMTP_FROM=""
 ```
 
-> The `OPENAI_API_KEY` is only needed for AI features (description generation, price suggestions, translation). The app works without it.
+You can leave the optional variables empty — the app will start and work fine, the related features will just be disabled.
 
-### Database Setup
+### 5. Set up the database
+
+Generate the Prisma client and create the SQLite database file:
 
 ```bash
-# create the database and run migrations
+npx prisma generate
 npx prisma migrate dev
+```
 
-# seed with demo data
+The first command generates the typed Prisma client into `node_modules`. The second creates `prisma/dev.db` and applies all migrations in `prisma/migrations/`.
+
+### 6. Seed demo data
+
+```bash
 npx tsx prisma/seed.ts
 ```
+
+This creates the demo users, listings, categories, rentals and reviews described below. Re-running it resets the seeded content.
+
+### 7. Start the dev server
+
+```bash
+npm run dev
+```
+
+The app is now running at [http://localhost:3000](http://localhost:3000).
+
+### Useful local commands
+
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start the dev server with hot reload |
+| `npm run build` | Build for production |
+| `npm run start` | Run the production build |
+| `npm run lint` | Run ESLint |
+| `npx prisma studio` | Open a database GUI in the browser |
+| `npx prisma migrate dev` | Apply new migrations |
+| `npx prisma migrate reset` | Wipe the database and re-run all migrations + seed |
+| `npx tsx prisma/seed.ts` | Re-seed demo data |
+
+### Resetting the database
+
+If you want a clean slate, delete `prisma/dev.db` (and `prisma/dev.db-journal` if it exists), then re-run steps 5 and 6. Or use:
+
+```bash
+npx prisma migrate reset
+```
+
+which does the same thing in one command.
 
 ### Demo accounts
 
@@ -93,17 +155,9 @@ After running the seed script, you can log in with any of these accounts. All of
 
 > The seed script also creates additional random demo users with `@example.com` emails and the same `password123` password. These are used to populate the marketplace with listings, rentals and reviews.
 
-### Run the App
+## Run with Docker Compose (optional)
 
-```bash
-npm run dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Run with Docker Compose
-
-If you do not want to install Node.js and the database tooling on your machine, you can run the whole app with Docker Compose. This is the easiest way to try the project.
+If you do not want to install Node.js on your machine, you can run the whole app with Docker Compose instead.
 
 ### Prerequisites
 
